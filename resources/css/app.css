@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root{
+    --main1: #032a33;
+    --main2: #255965;
+    --main3: #4c6f7b;
+    --main4: #f1d18a;
+
+    --cblack: #212121;
+    --cgray: #757575;
+    --cgrey: #BDBDBD;
+    --cwhite: #ffffff;
+}
+
+/* Editor */
+
+.tox.tox-tinymce{
+    border: none;
+    border-radius: 0;
+}
+
+.tox:not(.tox-tinymce-inline) .tox-editor-header,
+.tox .tox-toolbar-overlord,
+.tox .tox-toolbar, .tox .tox-toolbar__overflow,
+.tox .tox-toolbar, .tox .tox-toolbar__overflow,
+.tox .tox-toolbar__primary,
+.tox .tox-statusbar,
+.tox .tox-edit-area{
+    background-color: var(--cblack) !important;
+
+    border: 0 !important;
+
+}

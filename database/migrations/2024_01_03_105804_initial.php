@@ -26,7 +26,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('notes_attachments', function(Blueprint){
+        Schema::create('notes_attachments', function(Blueprint $table){
             $table->id();
             $table->string('name');
             $table->string('path');

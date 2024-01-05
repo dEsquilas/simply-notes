@@ -1,11 +1,15 @@
-import './bootstrap';
-import '../css/app.css';
+import './bootstrap'
+import '../css/app.css'
 
-import { createApp, h } from 'vue';
-import { createInertiaApp } from '@inertiajs/vue3';
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m';
-import Notifications from '@kyvg/vue3-notification';
+import { createApp, h } from 'vue'
+import { createInertiaApp } from '@inertiajs/vue3'
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
+import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m'
+import ContextMenu from '@imengyu/vue3-context-menu'
+import Notifications from '@kyvg/vue3-notification'
+
+import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
+
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -17,9 +21,10 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue)
             .use(Notifications)
+            .use(ContextMenu)
             .mount(el);
     },
     progress: {
         color: '#4B5563',
     },
-});
+})

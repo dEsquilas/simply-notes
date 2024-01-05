@@ -1,8 +1,10 @@
 <script setup>
+import ContextMenu from '@imengyu/vue3-context-menu'
 import NoteExtract from '@/Components/NoteExtract.vue'
 import Note from "@/Components/Note.vue"
+import {notify} from "@kyvg/vue3-notification";
 
-defineEmits(['change-note'])
+const emit = defineEmits(['change-note', 'delete-note'])
 
 const props = defineProps({
     notes: {
@@ -15,11 +17,43 @@ const props = defineProps({
     },
 })
 
+const openMenu = (e, note) => {
+    e.preventDefault()
+
+    ContextMenu.showContextMenu({
+        x: e.x,
+        y: e.y,
+        theme: 'dark',
+        items: [
+            {
+                label: 'Eliminar',
+                onClick: () => {
+                    emit('delete-note', {note: note})
+                    axios
+                        .post('/notes/trash/' + note.id)
+                        .then((response) => {
+
+                            notify({
+                                type: 'success',
+                                text: 'Eliminado',
+                            })
+
+                        })
+                        .catch((error) => {
+                            console.log(error)
+                        })
+                },
+            },
+        ]
+    })
+
+}
+
 </script>
 <template>
     <div class="overflow-auto h-full note-list">
         <ul>
-            <li v-for="note in notes" :key="note.id" @click="$emit('change-note', note)">
+            <li v-for="note in notes" :key="note.id" @click="$emit('change-note', note)" @contextmenu="openMenu($event, note)">
                 <note-extract :current="note.id == currentNoteId" :note="note"></note-extract>
             </li>
         </ul>

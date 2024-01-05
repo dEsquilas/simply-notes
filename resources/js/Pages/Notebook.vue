@@ -1,10 +1,11 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
-import Note from '@/Components/Note.vue'
-import NoteList from '@/Components/NoteList.vue'
 import { NewspaperIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
 import { ref, computed } from 'vue'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import Note from '@/Components/Note.vue'
+import NoteList from '@/Components/NoteList.vue'
+
 
 const props = defineProps({
     inNotebook: {
@@ -43,6 +44,20 @@ const updateNote = (data) =>{
     const index = notes.value.findIndex((note) => note.id === newNoteId)
     notes.value[index] = data.note
 
+}
+
+const deleteNote = (data) => {
+
+    const newNoteId = data.note.id
+    const index = notes.value.findIndex((note) => note.id === newNoteId)
+
+    notes.value.splice(index, 1)
+
+    if (newNoteId == currentNote.value.id) {
+        currentNote.value = []
+        currentNote.value = notes.value[0]
+        console.log("changing")
+    }
 
 }
 
@@ -61,7 +76,7 @@ const updateNote = (data) =>{
                         <PlusCircleIcon class="w-10 ml-4 text-main4 cursor-pointer hover:opacity-80" @click="newNote()"></PlusCircleIcon>
                     </div>
                 </header>
-                <note-list @change-note="changeNote" :current-note-id="currentNote.id" :notes="notes"></note-list>
+                <note-list @delete-note="deleteNote" @change-note="changeNote" :current-note-id="currentNote.id" :notes="notes"></note-list>
             </aside>
             <article class="flex-grow">
                 <note @update-note="updateNote" :note="currentNote"></note>

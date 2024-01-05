@@ -4,7 +4,7 @@ import { Head, Link } from '@inertiajs/vue3'
 import Note from '@/Components/Note.vue'
 import NoteList from '@/Components/NoteList.vue'
 import { NewspaperIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
     inNotebook: {
@@ -18,7 +18,8 @@ const props = defineProps({
 })
 
 const notebook = ref(props.inNotebook)
-const notes = ref(props.inNotes)
+const notes = computed(() => props.inNotes)
+const currentNote = ref(notes.value[0])
 
 const newNote = () => {
     axios
@@ -31,10 +32,24 @@ const newNote = () => {
         })
 }
 
+const changeNote = (note) => {
+    currentNote.value = []
+    currentNote.value = note
+}
+
+const updateNote = (data) =>{
+
+    const newNoteId = data.note.id
+    const index = notes.value.findIndex((note) => note.id === newNoteId)
+    notes.value[index] = data.note
+
+
+}
+
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head title="Notebook" />
 
     <AuthenticatedLayout>
         <section class="flex flex-row w-full">
@@ -46,10 +61,10 @@ const newNote = () => {
                         <PlusCircleIcon class="w-10 ml-4 text-main4 cursor-pointer hover:opacity-80" @click="newNote()"></PlusCircleIcon>
                     </div>
                 </header>
-                <note-list :notes="notes"></note-list>
+                <note-list @change-note="changeNote" :current-note-id="currentNote.id" :notes="notes"></note-list>
             </aside>
             <article class="flex-grow">
-                <note></note>
+                <note @update-note="updateNote" :note="currentNote"></note>
             </article>
         </section>
     </AuthenticatedLayout>

@@ -17,7 +17,7 @@ class NoteController extends Controller
             return redirect()->route('notebooks');
         }
 
-        $notes = $notebook->notes()->orderBy('updated_at', 'ASC')->get();
+        $notes = $notebook->notes()->orderBy('updated_at', 'DESC')->get();
 
         return Inertia::render('Notebook', [
             'inNotebook' => $notebook,
@@ -37,6 +37,30 @@ class NoteController extends Controller
         $note->notebook_id = $notebookId;
         $note->title = "";
         $note->content = "";
+        $note->save();
+
+        return response()->json([
+            'note' => $note,
+        ], 200);
+
+    }
+
+    public function update($noteId){
+
+        $note = Note::find($noteId);
+
+        if(!$note){
+            return response()->json([
+                'message' => 'Note not found',
+            ], 404);
+        }
+
+        if($note->notebook->owner != auth()->id()){
+            return redirect()->route('notebooks');
+        }
+
+        $note->title = request()->title;
+        $note->content = request()->content;
         $note->save();
 
         return response()->json([

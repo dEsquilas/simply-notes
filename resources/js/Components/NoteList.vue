@@ -2,9 +2,15 @@
 import NoteExtract from '@/Components/NoteExtract.vue'
 import Note from "@/Components/Note.vue"
 
+defineEmits(['change-note'])
+
 const props = defineProps({
     notes: {
         type: Array,
+        required: true,
+    },
+    currentNoteId: {
+        type: Number,
         required: true,
     },
 })
@@ -13,8 +19,8 @@ const props = defineProps({
 <template>
     <div class="overflow-auto h-full note-list">
         <ul>
-            <li v-for="note in notes" :key="note.id">
-                <note-extract :note="note"></note-extract>
+            <li v-for="note in notes" :key="note.id" @click="$emit('change-note', note)">
+                <note-extract :current="note.id == currentNoteId" :note="note"></note-extract>
             </li>
         </ul>
     </div>

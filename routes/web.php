@@ -35,6 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/notebook/{notebookId}', [NoteController::class, 'index'])->name('notebooks.index');
 
     Route::post('/notes/create/{notebookId}', [NoteController::class, 'create'])->name('note.create');
+    Route::post('/notes/update/{noteId}', [NoteController::class, 'update'])->name('note.update');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

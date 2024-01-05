@@ -21,6 +21,7 @@ const props = defineProps({
 const notebook = ref(props.inNotebook)
 const notes = computed(() => props.inNotes)
 const currentNote = ref(notes.value[0])
+const filter = ref("")
 
 const newNote = () => {
     axios
@@ -72,11 +73,11 @@ const deleteNote = (data) => {
                 <header class="p-4  border-1 border-b border-cgray">
                     <h3 class="text-xl font-bold text-white mb-4"><NewspaperIcon class="w-6 inline-block mr-4" />Notas</h3>
                     <div class="flex flex-row">
-                        <input type="text" class="w-[250px] bg-transparent border-1 rounded-xl text-white focus:outline-none" placeholder="Buscar...">
+                        <input v-model="filter" type="text" class="w-[250px] bg-transparent border-1 rounded-xl text-white focus:outline-none" placeholder="Buscar...">
                         <PlusCircleIcon class="w-10 ml-4 text-main4 cursor-pointer hover:opacity-80" @click="newNote()"></PlusCircleIcon>
                     </div>
                 </header>
-                <note-list @delete-note="deleteNote" @change-note="changeNote" :current-note-id="currentNote.id" :notes="notes"></note-list>
+                <note-list @delete-note="deleteNote" @change-note="changeNote" :current-note-id="currentNote.id" :notes="notes" :filter="filter"></note-list>
             </aside>
             <article class="flex-grow">
                 <note @update-note="updateNote" :note="currentNote"></note>

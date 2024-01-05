@@ -15,6 +15,10 @@ const props = defineProps({
         type: Number,
         required: true,
     },
+    filter: {
+        type: String,
+        required: true,
+    },
 })
 
 const openMenu = (e, note) => {
@@ -49,11 +53,18 @@ const openMenu = (e, note) => {
 
 }
 
+const applyFilter = (filter, note) => {
+    if (filter === "")
+        return true
+    else
+        return note.title.toLowerCase().includes(filter.toLowerCase()) || note.content?.toLowerCase().includes(filter.toLowerCase())
+}
+
 </script>
 <template>
     <div class="overflow-auto h-full note-list">
         <ul>
-            <li v-for="note in notes" :key="note.id" @click="$emit('change-note', note)" @contextmenu="openMenu($event, note)">
+            <li v-for="note in notes" :key="note.id" v-show="applyFilter(filter, note)" @click="$emit('change-note', note)" @contextmenu="openMenu($event, note)">
                 <note-extract :current="note.id == currentNoteId" :note="note"></note-extract>
             </li>
         </ul>

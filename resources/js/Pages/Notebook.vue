@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
-import { NewspaperIcon, PlusCircleIcon } from '@heroicons/vue/24/outline'
+import { NewspaperIcon, PlusCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline'
 import { ref, computed } from 'vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import Note from '@/Components/Note.vue'
@@ -72,8 +72,9 @@ const deleteNote = (data) => {
             <aside class="bg-cblack w-[350px] overflow-hidden border-r border-1 border-cgray">
                 <header class="p-4  border-1 border-b border-cgray">
                     <h3 class="text-xl font-bold text-white mb-4"><NewspaperIcon class="w-6 inline-block mr-4" />Notas</h3>
-                    <div class="flex flex-row">
+                    <div class="flex flex-row relative">
                         <input v-model="filter" type="text" class="w-[250px] bg-transparent border-1 rounded-xl text-white focus:outline-none" placeholder="Buscar...">
+                        <XCircleIcon v-show="filter.length != 0" class="w-6 ml-4 text-main2 cursor-pointer hover:opacity-80 absolute right-[80px] top-[9px]" @click="filter = ''"></XCircleIcon>
                         <PlusCircleIcon class="w-10 ml-4 text-main4 cursor-pointer hover:opacity-80" @click="newNote()"></PlusCircleIcon>
                     </div>
                 </header>

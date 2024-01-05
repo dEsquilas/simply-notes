@@ -9,7 +9,7 @@
     --main4: #f1d18a;
 
     --cblack: #212121;
-    --cgray: #757575;
+    --cgray: #374151;
     --cgrey: #BDBDBD;
     --cwhite: #ffffff;
 }
@@ -31,5 +31,17 @@
     background-color: var(--cblack) !important;
 
     border: 0 !important;
+
+}
+
+.tox .tox-toolbar__primary{
+    border-top: 1px solid var(--cgray) !important;
+    border-bottom: 1px solid var(--cgray) !important;
+}
+
+
+.mce-content-body{
+
+
 
 }

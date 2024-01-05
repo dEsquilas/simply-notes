@@ -22,7 +22,7 @@ export default {
                 main4: '#f1d18a',
 
                 cblack: '#212121',
-                cgray: '#757575',
+                cgray: '#374151',
                 cgrey: '#BDBDBD',
                 cwhite: '#ffffff',
             },

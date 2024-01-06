@@ -17,22 +17,15 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return redirect()->route('notebooks.index');
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
 
     Route::get('/notebooks', [NotebookController::class, 'index'])->name('notebooks.index');
-    Route::get('/notebook/{notebookId}', [NoteController::class, 'index'])->name('notebooks.index');
+    Route::post('/notebooks/create', [NotebookController::class, 'create'])->name('notebooks.create');
+    Route::get('/notebook/{notebookId}', [NoteController::class, 'index'])->name('notebook.index');
 
     Route::post('/notes/create/{notebookId}', [NoteController::class, 'create'])->name('note.create');
     Route::post('/notes/update/{noteId}', [NoteController::class, 'update'])->name('note.update');

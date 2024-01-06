@@ -23,11 +23,15 @@ const notes = computed(() => props.inNotes)
 const currentNote = ref(notes.value[0])
 const filter = ref("")
 
+console.log(notes.value)
+
 const newNote = () => {
     axios
         .post('/notes/create/' + notebook.value.id)
         .then((response) => {
             notes.value.unshift(response.data.note)
+            currentNote.value = []
+            currentNote.value = response.data.note
         })
         .catch((error) => {
             console.log(error)
@@ -78,10 +82,11 @@ const deleteNote = (data) => {
                         <PlusCircleIcon class="w-10 ml-4 text-main4 cursor-pointer hover:opacity-80" @click="newNote()"></PlusCircleIcon>
                     </div>
                 </header>
-                <note-list @delete-note="deleteNote" @change-note="changeNote" :current-note-id="currentNote.id" :notes="notes" :filter="filter"></note-list>
+                <div v-if="!notes || notes.length == 0" class="text-white p-4">No hay notas</div>
+                <note-list v-if="notes && notes.length > 0" @delete-note="deleteNote" @change-note="changeNote" :current-note-id="currentNote.id" :notes="notes" :filter="filter"></note-list>
             </aside>
             <article class="flex-grow">
-                <note @update-note="updateNote" :note="currentNote"></note>
+                <note v-if="currentNote" @update-note="updateNote" :note="currentNote"></note>
             </article>
         </section>
     </AuthenticatedLayout>

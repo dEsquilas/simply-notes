@@ -14,8 +14,8 @@ const props = defineProps({
 })
 
 const h = ref(window.innerHeight - 65 - 103)
-const noteTitle = ref(props.note.title)
-const noteContent = ref(props.note.content)
+const noteTitle = ref(props.note?.title)
+const noteContent = ref(props.note?.content)
 
 let lastModified = -1
 const autosaveTime = 1500

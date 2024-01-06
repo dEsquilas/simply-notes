@@ -14,7 +14,11 @@ class NoteController extends Controller
         $notebook = Notebook::find($notebookId);
 
         if($notebook->owner != auth()->id()){
-            return redirect()->route('notebooks');
+            return redirect()->route('notebooks.index');
+        }
+
+        if($notebook->status == 1){
+            return redirect()->route('notebooks.index');
         }
 
         $notes = $notebook->notes()->where('status', 0)->orderBy('updated_at', 'DESC')->get();

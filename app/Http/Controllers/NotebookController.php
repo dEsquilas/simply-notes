@@ -10,7 +10,7 @@ class NotebookController extends Controller
 {
     public function index(){
 
-        $notebooks = Notebook::where('owner', auth()->id())->get();
+        $notebooks = Notebook::where('owner', auth()->id())->where('status', 0)->get();
 
         return Inertia::render('Notebooks', [
             'notebooks' => $notebooks
@@ -32,6 +32,31 @@ class NotebookController extends Controller
 
         return response()->json([
             'notebook' => $notebook
+        ], 200);
+
+    }
+
+    public function trash($notebookId){
+
+        $notebook = Notebook::find($notebookId);
+
+        if(!$notebook){
+            return response()->json([
+                'message' => 'Notebook not found'
+            ], 404);
+        }
+
+        if($notebook->owner != auth()->id()){
+            return response()->json([
+                'message' => 'Not allowed'
+            ], 403);
+        }
+
+        $notebook->status = 1;
+        $notebook->save();
+
+        return response()->json([
+            'message' => 'Notebook deleted successfully'
         ], 200);
 
     }

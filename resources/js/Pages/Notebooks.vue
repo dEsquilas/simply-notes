@@ -1,6 +1,7 @@
 <script setup>
 import axios from 'axios'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import ContextMenu from '@imengyu/vue3-context-menu'
 import { Head, Link } from '@inertiajs/vue3'
 import { notify } from "@kyvg/vue3-notification"
 import { PencilSquareIcon } from '@heroicons/vue/24/outline'
@@ -41,6 +42,46 @@ const createNotebook = () => {
     }
 }
 
+
+const openMenu = (e, notebook) => {
+    e.preventDefault()
+
+    ContextMenu.showContextMenu({
+        x: e.x,
+        y: e.y,
+        theme: 'dark',
+        items: [
+            {
+                label: 'Eliminar',
+                onClick: () => {
+
+                    const notebookId = notebook.id
+                    const index = notebooks.value.findIndex((n) => n.id == notebookId)
+                    notebooks.value.splice(index, 1)
+
+                    axios
+                        .post('/notebooks/trash/' + notebookId)
+                        .then((response) => {
+
+                            notify({
+                                type: 'success',
+                                text: 'Eliminado',
+                            })
+
+                        })
+                        .catch((error) => {
+                            notify({
+                                type: 'error',
+                                text: error.message,
+                            })
+                        })
+                },
+            },
+        ]
+    })
+
+}
+
 </script>
 
 <template>
@@ -60,7 +101,7 @@ const createNotebook = () => {
                 </header>
             </div>
             <div class="max-w-[1200px] w-full m-auto py-12 grid lg:grid-cols-3 sm:grid-cols-2 gap-4 p-4 mt-0">
-                <article v-for="notebook in notebooks" :key="notebook.id" class="w-full mx-auto gap-4">
+                <article @contextmenu="openMenu($event, notebook)" v-for="notebook in notebooks" :key="notebook.id" class="w-full mx-auto gap-4">
                     <Link :href="'/notebook/' + notebook.id">
                     <div class="bg-main1 overflow-hidden shadow-sm rounded-lg hover:bg-main2 transition-colors">
                         <div class="p-6 text-white">

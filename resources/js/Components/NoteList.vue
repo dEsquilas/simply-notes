@@ -2,7 +2,7 @@
 import ContextMenu from '@imengyu/vue3-context-menu'
 import NoteExtract from '@/Components/NoteExtract.vue'
 import Note from "@/Components/Note.vue"
-import {notify} from "@kyvg/vue3-notification";
+import { notify } from "@kyvg/vue3-notification"
 
 const emit = defineEmits(['change-note', 'delete-note'])
 
@@ -44,7 +44,10 @@ const openMenu = (e, note) => {
 
                         })
                         .catch((error) => {
-                            console.log(error)
+                            notify({
+                                type: 'error',
+                                text: error.message,
+                            })
                         })
                 },
             },

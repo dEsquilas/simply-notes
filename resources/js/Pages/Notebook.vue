@@ -23,8 +23,6 @@ const notes = computed(() => props.inNotes)
 const currentNote = ref(notes.value[0])
 const filter = ref("")
 
-console.log(notes.value)
-
 const newNote = () => {
     axios
         .post('/notes/create/' + notebook.value.id)

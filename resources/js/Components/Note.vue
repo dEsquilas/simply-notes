@@ -3,7 +3,6 @@ import editor from '@tinymce/tinymce-vue'
 import { ref, watch } from 'vue'
 import { notify } from "@kyvg/vue3-notification"
 
-
 const emit = defineEmits(['update-note'])
 
 const props = defineProps({
@@ -16,6 +15,7 @@ const props = defineProps({
 const h = ref(window.innerHeight - 65 - 103)
 const noteTitle = ref(props.note?.title)
 const noteContent = ref(props.note?.content)
+const tinyAPIKey = import.meta.env.VITE_TINY_API_KEY
 
 let lastModified = -1
 const autosaveTime = 1500
@@ -62,7 +62,7 @@ let autosave = setInterval(() => {
     <div class="h-full">
         <input @keydown="save()" v-model="noteTitle" placeholder="Nueva nota" type="text" class="w-full bg-cblack border-none focus:outline-none focus:border-none focus:ring-0 text-4xl text-white pl-8 py-8">
         <editor @keydown="save()" v-model="noteContent" class="h-full"
-                api-key="r6bx0hha096m9aiy2o6swag7h983ouzxxe3vkruxdoxdpo3k"
+                :api-key="tinyAPIKey"
                 :init="{
                     height: h,
                     menubar: false,

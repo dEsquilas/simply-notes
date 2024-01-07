@@ -69,13 +69,13 @@ let autosave = setInterval(() => {
                     skin: 'oxide-dark',
                     body_class: 'mceBlackBody',
                     plugins: [
-                        'advlist',  'autolink',  'lists',  'link', 'image', 'charmap', 'preview',  'anchor',
+                        'advlist',  'autolink',  'lists',  'link', 'image', 'charmap', 'preview',  'anchor', 'checklist', 'code',
                         'searchreplace', 'visualblocks', 'code', 'fullscreen', 'table',
                         'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount',
                     ],
                     toolbar: 'undo redo | fontfamily fontsize | formatselect | ' +
                         'bold italic backcolor | alignleft aligncenter ' +
-                        'alignright alignjustify | bullist numlist outdent indent | table | ' +
+                        'alignright alignjustify | bullist numlist checklist outdent indent | table | code |' +
                         'removeformat',
                     content_style: `
                                 body {

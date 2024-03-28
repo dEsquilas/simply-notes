@@ -17,7 +17,10 @@ const h = ref(window.innerHeight - 65 - 103)
 const noteTitle = ref(props.note?.title)
 const noteContent = ref(props.note?.content)
 
-console.log(noteContent.value)
+if (noteContent.value == null || noteContent.value.length == 0) {
+    noteContent.value = "<p>Start typing...</p>"
+}
+
 
 let lastModified = -1
 const autosaveTime = 1500
@@ -25,6 +28,9 @@ const autosaveTime = 1500
 watch(() => props.note, (newNote) => {
     noteTitle.value = newNote.title
     noteContent.value = newNote.content
+    if(newNote.content == null || newNote.content.length == 0){
+        newNote.content = "<p>Start typing...</p>"
+    }
 }, { deep: true })
 
 const save = () => {

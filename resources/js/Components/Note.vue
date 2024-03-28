@@ -24,6 +24,7 @@ if (noteContent.value == null || noteContent.value.length == 0) {
 
 let lastModified = -1
 const autosaveTime = 1500
+let autosaveInterval = null
 
 watch(() => props.note, (newNote) => {
     noteTitle.value = newNote.title
@@ -36,10 +37,13 @@ watch(() => props.note, (newNote) => {
 const save = () => {
 
     lastModified = Date.now()
+    if(!autosaveInterval)
+        autosaveInterval = setInterval(autosave, autosaveTime)
 
 }
 
-let autosave = setInterval(() => {
+let autosave = () => {
+    console.log("Saving...")
     if (lastModified != -1 && Date.now() - lastModified > autosaveTime) {
         //clearInterval(autosave)
         axios
@@ -54,6 +58,7 @@ let autosave = setInterval(() => {
                 })
 
                 emit('update-note', {note: response.data.note})
+                clearInterval(autosaveInterval);
 
             })
             .catch((error) => {
@@ -61,9 +66,8 @@ let autosave = setInterval(() => {
             })
 
         lastModified = -1
-        //clearInterval(autosave)
     }
-}, autosaveTime)
+}
 
 </script>
 <template>

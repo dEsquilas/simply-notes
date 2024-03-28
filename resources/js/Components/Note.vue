@@ -1,5 +1,6 @@
 <script setup>
-import editor from '@tinymce/tinymce-vue'
+import { QuillEditor, Delta } from '@vueup/vue-quill'
+import '../../css/vue-quill.snow.scss'
 import { ref, watch } from 'vue'
 import { notify } from "@kyvg/vue3-notification"
 
@@ -15,7 +16,8 @@ const props = defineProps({
 const h = ref(window.innerHeight - 65 - 103)
 const noteTitle = ref(props.note?.title)
 const noteContent = ref(props.note?.content)
-const tinyAPIKey = import.meta.env.VITE_TINY_API_KEY
+
+console.log(noteContent.value)
 
 let lastModified = -1
 const autosaveTime = 1500
@@ -61,70 +63,22 @@ let autosave = setInterval(() => {
 <template>
     <div class="h-full">
         <input @keydown="save()" v-model="noteTitle" placeholder="Nueva nota" type="text" class="w-full bg-cblack border-none focus:outline-none focus:border-none focus:ring-0 text-4xl text-white pl-8 py-8">
-        <editor @keydown="save()" v-model="noteContent" class="h-full"
-                :api-key="tinyAPIKey"
-                :init="{
-                    height: h,
-                    menubar: false,
-                    skin: 'oxide-dark',
-                    body_class: 'mceBlackBody',
-                    plugins: [
-                        'advlist',  'autolink',  'lists',  'link', 'image', 'charmap', 'preview',  'anchor', 'checklist', 'code',
-                        'searchreplace', 'visualblocks', 'code', 'fullscreen', 'table',
-                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount',
-                    ],
-                    toolbar: 'undo redo | fontfamily fontsize | formatselect | ' +
-                        'bold italic backcolor | alignleft aligncenter ' +
-                        'alignright alignjustify | bullist numlist checklist outdent indent | table | code |' +
-                        'removeformat',
-                    content_style: `
-                                body {
-                                    font-family:Helvetica,Arial,sans-serif;
-                                     font-size: 18px;
-                                     padding: 15px 25px;
-                                     background: #212121;
-                                     color: #ffffff;
-                                }
-                                p {
-                                    margin: 0px;
-                                }
-                                .mce-content-body::-webkit-scrollbar {
-                                    width: 10px;
-                                }
-                                .mce-content-body::-webkit-scrollbar-track {
-                                    background-color: #1a1a1a;
-                                }
-                                .mce-content-body::-webkit-scrollbar-thumb {
-                                    background-color: #2d2d2d;
-                                    border-radius: 10px;
-                                }
-                    `,
-                    lists_indent_on_tab: false,
-                    indentation: '40px',
-                    resize: false,
-                    setup: function(editor) {
-                                editor.on('keydown', function(e) {
-                                if (e.keyCode === 9) { // código de tecla para Tab
-                                    const node = editor.selection.getNode(); // Obtiene el nodo actual
-                                    if (editor.dom.is(node, 'li,li *')) { // Verifica si el nodo es parte de una lista
-                                        e.preventDefault(); // Previene el comportamiento predeterminado
-                                        if (e.shiftKey) {
-                                            editor.execCommand('Outdent'); // Si se presiona Shift + Tab, disminuye la indentación
-                                        } else {
-                                            console.log('detected')
-                                            editor.execCommand('Indent'); // Si solo se presiona Tab, aumenta la indentación
-                                        }
-                                    } else {
-                                        if (!e.shiftKey) {
-                                            e.preventDefault(); // Previene el comportamiento predeterminado
-                                            editor.execCommand('mceInsertContent', false, '&#x9;'); // Inserta un carácter de tabulación
-                                        }
-                                    }
-                                }
-                                });
-                    }
-
-                }"
+        <QuillEditor @keydown="save()" class="h-full"
+                     :toolbar="[
+                            [{ header: [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            ['blockquote', 'code-block'],
+                            [{ header: 1 }, { header: 2 }],
+                            [{ list: 'ordered' }, { list: 'bullet' }],
+                            [{ indent: '-1' }, { indent: '+1' }],
+                            [{ color: [] }, { background: [] }],
+                            [{ align: [] }],
+                            ['link', 'video', 'image'],
+                            ['clean'], // remove formatting button
+                    ]"
+                    v-model:content="noteContent"
+                    content-type="html"
+                    theme="snow"
         />
     </div>
 </template>

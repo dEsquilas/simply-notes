@@ -81,17 +81,42 @@ class NotebookController extends Controller
             ], 404);
         }
 
-//        if($notebook->owner != auth()->id()){
-//            return response()->json([
-//                'message' => 'Not allowed'
-//            ], 403);
-//        }
-        // delete on cascade
+        if($notebook->owner != auth()->id()){
+            return response()->json([
+                'message' => 'Not allowed'
+            ], 403);
+        }
+
         $notebook->notes()->delete();
         $notebook->delete();
 
         return response()->json([
             'message' => 'Notebook deleted permanently'
+        ], 200);
+
+    }
+
+    public function restore($notebookId){
+
+        $notebook = Notebook::find($notebookId);
+
+        if(!$notebook){
+            return response()->json([
+                'message' => 'Notebook not found'
+            ], 404);
+        }
+
+        if($notebook->owner != auth()->id()){
+            return response()->json([
+                'message' => 'Not allowed'
+            ], 403);
+        }
+
+        $notebook->status = 0;
+        $notebook->save();
+
+        return response()->json([
+            'message' => 'Notebook restored successfully'
         ], 200);
 
     }

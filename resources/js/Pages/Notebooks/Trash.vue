@@ -4,7 +4,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { notify } from "@kyvg/vue3-notification"
 import { defineProps, ref } from 'vue'
-import { TrashIcon } from '@heroicons/vue/24/outline'
+import { TrashIcon, ArrowUturnUpIcon } from '@heroicons/vue/24/outline'
 
 
 
@@ -18,7 +18,7 @@ const props = defineProps({
 const currentNotebooks = ref(props.notebooks)
 
 
-const deleteNotebook = async (notebookId) => {
+const deleteNotebook = (notebookId) => {
 
     let confirmDelete = confirm('Are you sure you want to delete this notebook?')
 
@@ -34,6 +34,25 @@ const deleteNotebook = async (notebookId) => {
     } catch (error) {
         notify({ title: 'Error', text: 'Failed to delete notebook', type: 'error' })
     }
+}
+
+const restoreNotebook = (notebookId) => {
+
+let confirmRestore = confirm('Are you sure you want to restore this notebook?')
+
+    if (!confirmRestore) {
+        return
+    }
+
+    try {
+        currentNotebooks.value = currentNotebooks.value.filter(notebook => notebook.id !== notebookId)
+        axios.post(`/notebooks/trash/restore/${notebookId}`).then(() => {
+            notify({ title: 'Success', text: 'Notebook restored successfully', type: 'success' })
+        })
+    } catch (error) {
+        notify({ title: 'Error', text: 'Failed to restore notebook', type: 'error' })
+    }
+
 }
 
 
@@ -52,7 +71,10 @@ const deleteNotebook = async (notebookId) => {
                         <div class="p-6 text-white flex justify-between">
                             <h3 class="text-lg font-semibold">{{ notebook.name }}</h3>
                             <p class="text-sm">{{ notebook.description }}</p>
-                            <TrashIcon @click=deleteNotebook(notebook.id) class="w-6 h-6 bg-blue" />
+                            <div class="flex">
+                                <ArrowUturnUpIcon @click=restoreNotebook(notebook.id) class="w-6 h-6 bg-blue mr-4 cursor-pointer" />
+                                <TrashIcon @click=deleteNotebook(notebook.id) class="w-6 h-6 text-red-500 cursor-pointer" />
+                            </div>
                         </div>
                     </div>
                 </article>

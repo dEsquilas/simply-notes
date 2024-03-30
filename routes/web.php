@@ -1,6 +1,11 @@
 <?php
 
-use App\Http\Controllers\{NoteController, NotebookController, ProfileController};
+use App\Http\Controllers\{
+    GoogleLoginController,
+    NoteController,
+    NotebookController,
+    ProfileController
+};
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,6 +24,9 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return redirect()->route('notebooks.index');
 });
+
+Route::get('/google/redirect', [GoogleLoginController::class, 'redirectToGoogle'])->name('google.redirect');
+Route::get('/google/callback', [GoogleLoginController::class, 'handleGoogleCallback'])->name('google.callback');
 
 
 Route::middleware('auth')->group(function () {

@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/notebooks', [NotebookController::class, 'index'])->name('notebooks.index');
     Route::post('/notebooks/create', [NotebookController::class, 'create'])->name('notebooks.create');
     Route::get('/notebooks/trash', [NotebookController::class, 'trashView'])->name('notebooks.trash.view');
+    Route::post('/notebooks/trash/delete/{notebookId}', [NotebookController::class, 'delete'])->name('notebooks.trash.delete');
     Route::post('/notebooks/trash/{notebookId}', [NotebookController::class, 'trash'])->name('notebooks.trash.send');
     Route::get('/notebook/{notebookId}', [NoteController::class, 'index'])->name('notebook.index');
 

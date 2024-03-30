@@ -65,9 +65,34 @@ class NotebookController extends Controller
 
         $notebooks = Notebook::where('owner', auth()->id())->where('status', 1)->get();
 
-        return Inertia::render('Trash', [
+        return Inertia::render('Notebooks/Trash', [
             'notebooks' => $notebooks
         ]);
+
+    }
+
+    public function delete($notebookId){
+
+        $notebook = Notebook::find($notebookId);
+
+        if(!$notebook){
+            return response()->json([
+                'message' => 'Notebook not found'
+            ], 404);
+        }
+
+//        if($notebook->owner != auth()->id()){
+//            return response()->json([
+//                'message' => 'Not allowed'
+//            ], 403);
+//        }
+        // delete on cascade
+        $notebook->notes()->delete();
+        $notebook->delete();
+
+        return response()->json([
+            'message' => 'Notebook deleted permanently'
+        ], 200);
 
     }
 

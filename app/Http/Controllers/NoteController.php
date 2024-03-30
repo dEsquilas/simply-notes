@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\{Note, Notebook};
 use Inertia\Inertia;
 
-class NoteController extends Controller
+class   NoteController extends Controller
 {
 
     public function index($notebookId){

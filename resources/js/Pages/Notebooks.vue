@@ -97,7 +97,7 @@ const openMenu = (e, notebook) => {
                             <PencilSquareIcon class="w-4" />
                         </div>
                     </div>
-                    <input v-model="newNotebookName" type="text" class="bg-transparent border-0 rounded-xl text-white focus:outline-none focus:ring-0" placeholder="Notebook name...">
+                    <input v-model="newNotebookName" type="text" class="bg-transparent border-0 rounded-xl text-white focus:outline-none focus:ring-0" placeholder="New notebook name...">
                 </header>
             </div>
             <div class="max-w-[1200px] w-full m-auto py-12 grid lg:grid-cols-3 sm:grid-cols-2 gap-4 p-4 mt-0">

@@ -61,4 +61,14 @@ class NotebookController extends Controller
 
     }
 
+    public function trashView(){
+
+        $notebooks = Notebook::where('owner', auth()->id())->where('status', 1)->get();
+
+        return Inertia::render('Trash', [
+            'notebooks' => $notebooks
+        ]);
+
+    }
+
 }

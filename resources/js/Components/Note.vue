@@ -1,9 +1,10 @@
 <script setup>
-import { QuillEditor } from '@vueup/vue-quill'
-import '../../css/vue-quill.snow.scss'
+import BlotFormatter from "quill-blot-formatter"
+import { ImageDrop } from "quill-image-drop-module"
 import { ref, watch } from 'vue'
 import { notify } from "@kyvg/vue3-notification"
-import BlotFormatter from "quill-blot-formatter";
+import { QuillEditor } from '@vueup/vue-quill'
+import '../../css/vue-quill.snow.scss'
 
 const emit = defineEmits(['update-note'])
 
@@ -18,6 +19,8 @@ const h = ref(window.innerHeight - 65 - 103)
 const noteTitle = ref(props.note?.title)
 const noteContent = ref(props.note?.content)
 
+console.log(noteContent)
+
 if (noteContent.value == null || noteContent.value.length === 0) {
     noteContent.value = "<p>Start typing...</p>"
 }
@@ -29,10 +32,16 @@ let autosaveInterval = null
 
 /* Quill modules */
 
-const modules = ref([{
-    name: 'blobFormatter',
-    module: BlotFormatter
-}])
+const modules = ref([
+    {
+        name: 'blobFormatter',
+        module: BlotFormatter
+    },
+    {
+        name: 'imageDrop',
+        module: ImageDrop
+    }
+])
 
 watch(() => props.note, (newNote) => {
     noteTitle.value = newNote.title

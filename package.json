@@ -28,6 +28,7 @@
         "@tiptap/vue-3": "^2.2.4",
         "@vueup/vue-quill": "^1.2.0",
         "quill-blot-formatter": "^1.0.5",
+        "quill-image-drop-module": "^1.0.3",
         "sass": "^1.69.7"
     }
 }

@@ -3,6 +3,7 @@ import { QuillEditor } from '@vueup/vue-quill'
 import '../../css/vue-quill.snow.scss'
 import { ref, watch } from 'vue'
 import { notify } from "@kyvg/vue3-notification"
+import BlotFormatter from "quill-blot-formatter";
 
 const emit = defineEmits(['update-note'])
 
@@ -25,6 +26,13 @@ if (noteContent.value == null || noteContent.value.length == 0) {
 let lastModified = -1
 const autosaveTime = 1500
 let autosaveInterval = null
+
+/* Quill modules */
+
+const modules = ref([{
+    name: 'blobFormatter',
+    module: BlotFormatter
+}])
 
 watch(() => props.note, (newNote) => {
     noteTitle.value = newNote.title
@@ -88,6 +96,7 @@ let autosave = () => {
                     v-model:content="noteContent"
                     content-type="html"
                     theme="snow"
+                    :modules="modules"
         />
     </div>
 </template>

@@ -1,6 +1,11 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
-import { NewspaperIcon, PlusCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline'
+import {
+    ArrowPathIcon,
+    NewspaperIcon,
+    PlusCircleIcon,
+    XCircleIcon
+} from '@heroicons/vue/24/outline'
 import { ref, computed } from 'vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import Note from '@/Components/Note.vue'
@@ -18,7 +23,7 @@ const props = defineProps({
     },
     currentNote: {
         type: Object,
-        required: true,
+        required: false,
     },
 })
 
@@ -26,17 +31,23 @@ const notebook = ref(props.inNotebook)
 const notes = computed(() => props.inNotes)
 const currentNote = ref(props.currentNote || notes.value[0])
 const filter = ref("")
+const isCreating = ref(false)
 
 const newNote = () => {
+
+    isCreating.value = true
+
     axios
         .post('/notes/create/' + notebook.value.id)
         .then((response) => {
             notes.value.unshift(response.data.note)
             currentNote.value = []
             currentNote.value = response.data.note
+            isCreating.value = false
         })
         .catch((error) => {
             console.log(error)
+            isCreating.value = true
         })
 }
 
@@ -81,7 +92,8 @@ const deleteNote = (data) => {
                     <div class="flex flex-row relative">
                         <input v-model="filter" type="text" class="w-[250px] bg-transparent border-1 rounded-xl text-white focus:outline-none" placeholder="Buscar...">
                         <XCircleIcon v-show="filter.length != 0" class="w-6 ml-4 text-main2 cursor-pointer hover:opacity-80 absolute right-[80px] top-[9px]" @click="filter = ''"></XCircleIcon>
-                        <PlusCircleIcon class="w-10 ml-4 text-main4 cursor-pointer hover:opacity-80" @click="newNote()"></PlusCircleIcon>
+                        <PlusCircleIcon v-show="!isCreating" class="w-10 ml-4 text-main4 cursor-pointer hover:opacity-80" @click="newNote()"></PlusCircleIcon>
+                        <ArrowPathIcon v-show="isCreating" class="animate-spin w-10 ml-4 text-main4 "></ArrowPathIcon>
                     </div>
                 </header>
                 <div v-if="!notes || notes.length == 0" class="text-white p-4">No hay notas</div>

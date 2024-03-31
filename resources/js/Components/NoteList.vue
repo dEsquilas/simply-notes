@@ -36,7 +36,7 @@ const openMenu = (e, note) => {
                         .post('/notes/trash/' + note.id)
                         .then((response) => {
 
-                            if(response.status != 200)
+                            if(response.status !== 200)
                                 throw new Error(response.data.message)
 
                             notify({

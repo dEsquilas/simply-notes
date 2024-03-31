@@ -80,7 +80,7 @@ let autosave = () => {
 <template>
     <div class="h-full">
         <input @keydown="save()" v-model="noteTitle" placeholder="Nueva nota" type="text" class="w-full bg-cblack border-none focus:outline-none focus:border-none focus:ring-0 text-4xl text-white pl-8 py-8">
-        <QuillEditor @keydown="save()" class="h-full"
+        <QuillEditor @keydown="save()" class="h-full overflow-auto"
                      :toolbar="[
                             [{ header: [1, 2, 3, false] }],
                             ['bold', 'italic', 'underline', 'strike'],

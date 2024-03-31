@@ -77,21 +77,6 @@ const applyFilter = (filter, note) => {
 .note-list{
 
     height: calc(100vh - 185px); // 65 + 120
-
-    &::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    &::-webkit-scrollbar-track {
-        background-color: #1a1a1a;
-        border-radius: 10px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background-color: #2d2d2d;
-        border-radius: 10px;
-    }
-
 }
 
 </style>

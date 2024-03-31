@@ -1,7 +1,6 @@
 <script setup>
 import ContextMenu from '@imengyu/vue3-context-menu'
 import NoteExtract from '@/Components/NoteExtract.vue'
-import Note from "@/Components/Note.vue"
 import { notify } from "@kyvg/vue3-notification"
 
 const emit = defineEmits(['change-note', 'delete-note'])
@@ -37,6 +36,9 @@ const openMenu = (e, note) => {
                         .post('/notes/trash/' + note.id)
                         .then((response) => {
 
+                            if(response.status != 200)
+                                throw new Error(response.data.message)
+
                             notify({
                                 type: 'success',
                                 text: 'Eliminado',
@@ -68,7 +70,7 @@ const applyFilter = (filter, note) => {
     <div class="overflow-auto h-full note-list">
         <ul>
             <li v-for="note in notes" :key="note.id" v-show="applyFilter(filter, note)" @click="$emit('change-note', note)" @contextmenu="openMenu($event, note)">
-                <note-extract :current="note.id == currentNoteId" :note="note"></note-extract>
+                <note-extract :current="note.id === currentNoteId" :note="note"></note-extract>
             </li>
         </ul>
     </div>

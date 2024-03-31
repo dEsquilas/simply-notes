@@ -9,13 +9,13 @@ use Inertia\Inertia;
 class   NoteController extends Controller
 {
 
-    public function index($notebookId){
+    public function index($noteId){
 
         $notebook = Notebook::find($notebookId);
 
-        if($notebook->owner != auth()->id()){
+        /*if($notebook->owner != auth()->id()){
             return redirect()->route('notebooks.index');
-        }
+        }*/
 
         if($notebook->status == 1){
             return redirect()->route('notebooks.index');
@@ -27,6 +27,15 @@ class   NoteController extends Controller
             'inNotebook' => $notebook,
             'inNotes' => $notes
         ]);
+    }
+
+    public function view($noteId){
+
+        // To Do
+
+        $note = Note::find($noteId);
+        dd($note);
+
     }
 
     public function create($notebookId){

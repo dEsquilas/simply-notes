@@ -6,6 +6,10 @@ use App\Http\Controllers\{
     NotebookController,
     ProfileController
 };
+
+use App\Http\Middleware\NotebookVerifyOwnership;
+use App\Http\Middleware\NoteVerifyOwnership;
+
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -34,14 +38,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/notebooks', [NotebookController::class, 'index'])->name('notebooks.index');
     Route::post('/notebooks/create', [NotebookController::class, 'create'])->name('notebooks.create');
     Route::get('/notebooks/trash', [NotebookController::class, 'trashView'])->name('notebooks.trash.view');
-    Route::post('/notebooks/trash/delete/{notebookId}', [NotebookController::class, 'delete'])->name('notebooks.trash.delete');
-    Route::post('/notebooks/trash/restore/{notebookId}', [NotebookController::class, 'restore'])->name('notebooks.trash.restore');
-    Route::post('/notebooks/trash/{notebookId}', [NotebookController::class, 'trash'])->name('notebooks.trash.send');
-    Route::get('/notebook/{notebookId}', [NoteController::class, 'index'])->name('notebook.index');
 
-    Route::post('/notes/create/{notebookId}', [NoteController::class, 'create'])->name('note.create');
-    Route::post('/notes/update/{noteId}', [NoteController::class, 'update'])->name('note.update');
-    Route::post('/notes/trash/{noteId}', [NoteController::class, 'trash'])->name('note.trash');
+    Route::group(['middleware' => [NotebookVerifyOwnership::class]], function () {
+        Route::post('/notebooks/trash/delete/{notebookId}', [NotebookController::class, 'delete'])->name('notebooks.trash.delete');
+        Route::post('/notebooks/trash/restore/{notebookId}', [NotebookController::class, 'restore'])->name('notebooks.trash.restore');
+        Route::post('/notebooks/trash/{notebookId}', [NotebookController::class, 'trash'])->name('notebooks.trash.send');
+        Route::post('/notes/create/{notebookId}', [NoteController::class, 'create'])->name('note.create');
+        Route::get('/notebook/{notebookId}', [NotebookController::class, 'view'])->name('notebook.view');
+    });
+
+    Route::group(['middleware' => [NoteVerifyOwnership::class]], function () {
+        Route::post('/notes/update/{noteId}', [NoteController::class, 'update'])->name('note.update');
+        Route::post('/notes/trash/{noteId}', [NoteController::class, 'trash'])->name('note.trash');
+        Route::get('/notes/{noteId}', [NoteController::class, 'view'])->name('note.view');
+    });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -17,6 +17,26 @@ class NotebookController extends Controller
         ]);
     }
 
+    public function view($notebookId){
+
+        $notebook = Notebook::find($notebookId);
+
+        /*if($notebook->owner != auth()->id()){
+            return redirect()->route('notebooks.index');
+        }*/
+
+        if($notebook->status == 1){
+            return redirect()->route('notebooks.index');
+        }
+
+        $notes = $notebook->notes()->where('status', 0)->orderBy('updated_at', 'DESC')->get();
+
+        return Inertia::render('Notebook', [
+            'inNotebook' => $notebook,
+            'inNotes' => $notes
+        ]);
+    }
+
     public function create(Request $request){
 
         if(!$request->name){

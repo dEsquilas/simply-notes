@@ -6,24 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\{Note, Notebook};
 use Inertia\Inertia;
 
-class   NoteController extends Controller
+class NoteController extends Controller
 {
-
-    public function index($noteId){
-
-        $notebook = Notebook::find($notebookId);
-
-        if($notebook->status == 1){
-            return redirect()->route('notebooks.index');
-        }
-
-        $notes = $notebook->notes()->where('status', 0)->orderBy('updated_at', 'DESC')->get();
-
-        return Inertia::render('Notebook', [
-            'inNotebook' => $notebook,
-            'inNotes' => $notes
-        ]);
-    }
 
     public function view($noteId){
 

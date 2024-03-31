@@ -16,11 +16,15 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    currentNote: {
+        type: Object,
+        required: true,
+    },
 })
 
 const notebook = ref(props.inNotebook)
 const notes = computed(() => props.inNotes)
-const currentNote = ref(notes.value[0])
+const currentNote = ref(props.currentNote || notes.value[0])
 const filter = ref("")
 
 const newNote = () => {

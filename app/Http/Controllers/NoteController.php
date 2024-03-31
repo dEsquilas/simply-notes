@@ -27,10 +27,17 @@ class   NoteController extends Controller
 
     public function view($noteId){
 
-        // To Do
-
         $note = Note::find($noteId);
-        dd($note);
+        $notebook = $note->notebook;
+
+        $notes = $notebook->notes()->where('status', 0)->orderBy('updated_at', 'DESC')->get();
+
+
+        return Inertia::render('Notebook', [
+            'inNotebook' => $notebook,
+            'inNotes' => $notes,
+            'currentNote' => $note,
+        ]);
 
     }
 

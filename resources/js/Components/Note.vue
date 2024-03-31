@@ -1,5 +1,5 @@
 <script setup>
-import { QuillEditor, Delta } from '@vueup/vue-quill'
+import { QuillEditor } from '@vueup/vue-quill'
 import '../../css/vue-quill.snow.scss'
 import { ref, watch } from 'vue'
 import { notify } from "@kyvg/vue3-notification"
@@ -43,9 +43,7 @@ const save = () => {
 }
 
 let autosave = () => {
-    console.log("Saving...")
     if (lastModified != -1 && Date.now() - lastModified > autosaveTime) {
-        //clearInterval(autosave)
         axios
             .post('/notes/update/' + props.note.id, {
                 title: noteTitle.value,
@@ -59,6 +57,7 @@ let autosave = () => {
 
                 emit('update-note', {note: response.data.note})
                 clearInterval(autosaveInterval);
+                autosaveInterval = null
 
             })
             .catch((error) => {

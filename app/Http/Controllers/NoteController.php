@@ -45,8 +45,8 @@ class NoteController extends Controller
 
         $note = Note::find($noteId);
 
-        $note->title = request()->title;
-        $note->content = request()->content;
+        $note->title = request()->get('title');
+        $note->content = request()->get('content');
         $note->save();
 
         return response()->json([
@@ -62,7 +62,7 @@ class NoteController extends Controller
         $note->status = 1;
         $note->save();
 
-        return response()->json([], 200);
+        return response()->json();
 
     }
 

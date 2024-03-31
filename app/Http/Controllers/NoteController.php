@@ -13,10 +13,6 @@ class   NoteController extends Controller
 
         $notebook = Notebook::find($notebookId);
 
-        /*if($notebook->owner != auth()->id()){
-            return redirect()->route('notebooks.index');
-        }*/
-
         if($notebook->status == 1){
             return redirect()->route('notebooks.index');
         }
@@ -42,10 +38,6 @@ class   NoteController extends Controller
 
         $notebook = Notebook::find($notebookId);
 
-        if($notebook->owner != auth()->id()){
-            return redirect()->route('notebooks');
-        }
-
         $note = new Note();
         $note->notebook_id = $notebookId;
         $note->title = "";
@@ -62,16 +54,6 @@ class   NoteController extends Controller
 
         $note = Note::find($noteId);
 
-        if(!$note){
-            return response()->json([
-                'message' => 'Note not found',
-            ], 404);
-        }
-
-        if($note->notebook->owner != auth()->id()){
-            return redirect()->route('notebooks');
-        }
-
         $note->title = request()->title;
         $note->content = request()->content;
         $note->save();
@@ -85,16 +67,6 @@ class   NoteController extends Controller
     public function trash($noteId){
 
         $note = Note::find($noteId);
-
-        if(!$note){
-            return response()->json([
-                'message' => 'Note not found',
-            ], 404);
-        }
-
-        if($note->notebook->owner != auth()->id()){
-            return redirect()->route('notebooks');
-        }
 
         $note->status = 1;
         $note->save();

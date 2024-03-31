@@ -21,10 +21,6 @@ class NotebookController extends Controller
 
         $notebook = Notebook::find($notebookId);
 
-        /*if($notebook->owner != auth()->id()){
-            return redirect()->route('notebooks.index');
-        }*/
-
         if($notebook->status == 1){
             return redirect()->route('notebooks.index');
         }
@@ -60,18 +56,6 @@ class NotebookController extends Controller
 
         $notebook = Notebook::find($notebookId);
 
-        if(!$notebook){
-            return response()->json([
-                'message' => 'Notebook not found'
-            ], 404);
-        }
-
-        if($notebook->owner != auth()->id()){
-            return response()->json([
-                'message' => 'Not allowed'
-            ], 403);
-        }
-
         $notebook->status = 1;
         $notebook->save();
 
@@ -95,18 +79,6 @@ class NotebookController extends Controller
 
         $notebook = Notebook::find($notebookId);
 
-        if(!$notebook){
-            return response()->json([
-                'message' => 'Notebook not found'
-            ], 404);
-        }
-
-        if($notebook->owner != auth()->id()){
-            return response()->json([
-                'message' => 'Not allowed'
-            ], 403);
-        }
-
         $notebook->notes()->delete();
         $notebook->delete();
 
@@ -119,18 +91,6 @@ class NotebookController extends Controller
     public function restore($notebookId){
 
         $notebook = Notebook::find($notebookId);
-
-        if(!$notebook){
-            return response()->json([
-                'message' => 'Notebook not found'
-            ], 404);
-        }
-
-        if($notebook->owner != auth()->id()){
-            return response()->json([
-                'message' => 'Not allowed'
-            ], 403);
-        }
 
         $notebook->status = 0;
         $notebook->save();

@@ -3,7 +3,8 @@ import BlotFormatter from "quill-blot-formatter"
 import { ImageDrop } from "quill-image-drop-module"
 import { ref, watch } from 'vue'
 import { notify } from "@kyvg/vue3-notification"
-import { QuillEditor } from '@vueup/vue-quill'
+import QuillEditor from '@/Components/Quill/QuillEditor.vue'
+import QuillBetterTable from 'quill-better-table'
 import '../../css/vue-quill.snow.scss'
 
 const emit = defineEmits(['update-note'])
@@ -20,7 +21,7 @@ const noteTitle = ref(props.note?.title)
 const noteContent = ref(props.note?.content)
 
 if (noteContent.value == null || noteContent.value.length === 0) {
-    noteContent.value = "<p>Start typing...</p>"
+    noteContent.value = ""
 }
 
 
@@ -38,7 +39,29 @@ const modules = ref([
     {
         name: 'imageDrop',
         module: ImageDrop
-    }
+    }/*,
+    {
+        name: 'better-table',
+        module: QuillBetterTable,
+        operationMenu: {
+            items: {
+                unmergeCells: {
+                    text: 'Unmerge Cells',
+                    icon: 'merge_type',
+                    visible: function (cells) {
+                        return cells.length > 1 || cells[0].colSpan > 1 || cells[0].rowSpan > 1
+                    },
+                    onClick: function (cells) {
+                        this.table.unmergeCells(cells)
+                    }
+                }
+            },
+            keyboard: {
+                bindings: QuillBetterTable.keyboardBindings
+            }
+        },
+
+    }*/
 ])
 
 watch(() => props.note, (newNote) => {
@@ -58,6 +81,7 @@ const save = () => {
 }
 
 let autosave = () => {
+
     if (lastModified !== -1 && Date.now() - lastModified > autosaveTime) {
         axios
             .post('/notes/update/' + props.note.id, {
@@ -88,6 +112,7 @@ let autosave = () => {
     <div class="h-full">
         <input @keydown="save()" v-model="noteTitle" placeholder="Nueva nota" type="text" class="w-full bg-cblack border-none focus:outline-none focus:border-none focus:ring-0 text-4xl text-white pl-8 py-8">
         <QuillEditor @keydown="save()" class="quill-editor overflow-x-auto"
+                     placeholder="Start typing..."
                      :toolbar="[
                             [{ header: [1, 2, 3, false] }],
                             ['bold', 'italic', 'underline', 'strike'],
@@ -98,9 +123,9 @@ let autosave = () => {
                             [{ color: [] }, { background: [] }],
                             [{ align: [] }],
                             ['link', 'video', 'image'],
-                            ['clean'], // remove formatting button
+                            [{table: 'TD'}]
                     ]"
-                    v-model:content="noteContent"
+                    v-model="noteContent"
                     content-type="html"
                     theme="snow"
                     :modules="modules"

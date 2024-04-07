@@ -9,6 +9,10 @@ class Note extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'title' => 'encrypted',
+        'content' => 'encrypted',
+    ];
     public function notebook(){
         return $this->belongsTo(Notebook::class);
     }

@@ -1,7 +1,5 @@
 <script setup>
-import BlotFormatter from "quill-blot-formatter"
-import { ImageDrop } from "quill-image-drop-module"
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { notify } from "@kyvg/vue3-notification"
 import QuillEditor from '@/Components/Quill/QuillEditor.vue'
 

@@ -1,9 +1,11 @@
 <script setup>
 import { defineModel, ref, onMounted, onUnmounted, watch } from 'vue'
 import Quill from 'quill'
-import './quill.snow.css'
 import ImageResize from 'quill-image-resize'
 import * as QuillTableUI from 'quill-table-ui'
+
+import './quill.snow.css'
+import './quill-table-ui.scss'
 
 const model = defineModel()
 
@@ -36,7 +38,7 @@ let editorModules = {
 onMounted(() => {
 
     // set the modules
-    Quill.register(editorModules)
+    Quill.register(editorModules, true)
 
     // define the editor
     editor = new Quill(editorRef.value, editorOptions)
@@ -50,6 +52,7 @@ onMounted(() => {
     editor.on('text-change', () => {
         model.value = editor.root.innerHTML
     })
+
 
 })
 
@@ -87,6 +90,20 @@ const imageUploadHandler = () => {
             const base64 = await fileToBase64(file)
             editor.insertEmbed(editor.getSelection().index, 'image', base64)
         }
+    }
+}
+
+const tbl = () => {
+    const table = editor.getModule('table');
+    table.insertTable(3, 3);
+    console.log('Inserted')
+}
+
+const findTableParent = (element) => {
+    if (element.tagName === 'TABLE') {
+        return element
+    } else {
+        return findTableParent(element.parentElement)
     }
 }
 

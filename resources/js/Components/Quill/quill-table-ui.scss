@@ -1,0 +1,71 @@
+.ql-table-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    background: var(--cgray);
+    //border: 2px solid var(--cgrey);
+    border-radius: 50%;
+    margin: 12px 0 0 -22px;
+    width: 18px;
+    height: 18px;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    fill: var(--cgrey);
+
+    &_hidden {
+        display: none;
+    }
+
+
+    &:hover {
+        border-color: #b9bec7;
+    }
+}
+
+.ql-table-menu {
+    top: 0;
+    left: 0;
+    position: absolute;
+    margin-left: 22px;
+    margin-top: -12px;
+    background: var(--cblack);
+    border: 1px solid var(--cgray);
+    z-index: 2100;
+    box-shadow: rgba(15, 15, 15, 0.05) 0 0 0 1px, rgba(15, 15, 15, 0.1) 0 3px 6px,
+    rgba(15, 15, 15, 0.2) 0 9px 24px;
+    border-radius: 4px;
+    padding: 5px;
+    animation: fadeIn 0.05s ease-in forwards;
+
+    &__item {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        min-height: 32px;
+        padding: 5px;
+
+        svg {
+            margin-right: 10px;
+            path{
+
+                fill: white;
+
+            }
+        }
+
+        &:hover {
+            background-color: var(--main2);
+        }
+
+        &-icon {
+            margin-right: 5px;
+        }
+
+        &-text {
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+    }
+}

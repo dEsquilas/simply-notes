@@ -73,12 +73,13 @@
 }
 
 .ql-editor table {
-    border-collapse: collapse
+    border-collapse: collapse;
+    margin-bottom: 15px;
 }
 
 .ql-editor td {
     border: 2px solid var(--cgray);
-    padding: 2px 5px
+    padding: 8px 10px
 }
 
 .ql-editor ol {

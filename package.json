@@ -29,7 +29,6 @@
         "@tiptap/starter-kit": "^2.2.4",
         "@tiptap/vue-3": "^2.2.4",
         "quill": "2.0.0-rc.4",
-        "quill-better-table": "^1.2.10",
         "quill-image-drop-module": "^1.0.3",
         "quill-table-ui": "^1.0.7",
         "sass": "^1.69.7"

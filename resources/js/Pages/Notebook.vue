@@ -71,7 +71,7 @@ const deleteNote = (data) => {
 
     notes.value.splice(index, 1)
 
-    if (newNoteId == currentNote.value.id) {
+    if (newNoteId === currentNote.value.id) {
         currentNote.value = []
         currentNote.value = notes.value[0]
         console.log("changing")
@@ -91,12 +91,12 @@ const deleteNote = (data) => {
                     <h3 class="text-xl font-bold text-white mb-4"><NewspaperIcon class="w-6 inline-block mr-4" />Notas</h3>
                     <div class="flex flex-row relative">
                         <input v-model="filter" type="text" class="w-[250px] bg-transparent border-1 rounded-xl text-white focus:outline-none" placeholder="Buscar...">
-                        <XCircleIcon v-show="filter.length != 0" class="w-6 ml-4 text-main2 cursor-pointer hover:opacity-80 absolute right-[80px] top-[9px]" @click="filter = ''"></XCircleIcon>
+                        <XCircleIcon v-show="filter.length !== 0" class="w-6 ml-4 text-main2 cursor-pointer hover:opacity-80 absolute right-[80px] top-[9px]" @click="filter = ''"></XCircleIcon>
                         <PlusCircleIcon v-show="!isCreating" class="w-10 ml-4 text-main4 cursor-pointer hover:opacity-80" @click="newNote()"></PlusCircleIcon>
                         <ArrowPathIcon v-show="isCreating" class="animate-spin w-10 ml-4 text-main4 "></ArrowPathIcon>
                     </div>
                 </header>
-                <div v-if="!notes || notes.length == 0" class="text-white p-4">No hay notas</div>
+                <div v-if="!notes || notes.length === 0" class="text-white p-4">No hay notas</div>
                 <note-list v-if="notes && notes.length > 0" @delete-note="deleteNote" @change-note="changeNote" :current-note-id="currentNote.id" :notes="notes" :filter="filter"></note-list>
             </aside>
             <article class="flex-grow max-w-[calc(100%-350px)]">

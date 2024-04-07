@@ -2,6 +2,7 @@
 import { defineModel, ref, onMounted, onUnmounted, watch } from 'vue'
 import Quill from 'quill'
 import './quill.snow.css'
+import ImageResize from 'quill-image-resize'
 
 const model = defineModel()
 
@@ -20,35 +21,28 @@ let editorOptions = {
                 {'indent': '-1'}, {'indent': '+1'}],
             ['link', 'image', 'video', 'clean']
         ],
-
+        imageResize: {}
     }
 }
 
-
+let editorModules = {
+     'modules/imageResize': ImageResize
+}
 
 onMounted(() => {
 
+    // set the modules
+    Quill.register(editorModules)
+
+    // define the editor
     editor = new Quill(editorRef.value, editorOptions)
 
-    editor.root.innerHTML = model.value
-
+    // set the default toolbar
     const toolbar = editor.getModule('toolbar')
-    toolbar.addHandler('image', () => {
-        const input = document.createElement('input')
-        input.setAttribute('type', 'file')
-        input.setAttribute('accept', 'image/*')
-        input.click()
+    toolbar.addHandler('image', imageUploadHandler)
 
-        input.onchange = async () => {
-            const file = input.files[0]
-
-            if (file) {
-                const base64 = await fileToBase64(file)
-                editor.insertEmbed(editor.getSelection().index, 'image', base64)
-            }
-        }
-    })
-
+    // set the default content and manage the changes
+    editor.root.innerHTML = model.value
     editor.on('text-change', () => {
         model.value = editor.root.innerHTML
     })
@@ -74,6 +68,22 @@ const fileToBase64 = (file) => {
         reader.onerror = error => reject(error);
         reader.readAsDataURL(file);
     });
+}
+
+const imageUploadHandler = () => {
+    const input = document.createElement('input')
+    input.setAttribute('type', 'file')
+    input.setAttribute('accept', 'image/*')
+    input.click()
+
+    input.onchange = async () => {
+        const file = input.files[0]
+
+        if (file) {
+            const base64 = await fileToBase64(file)
+            editor.insertEmbed(editor.getSelection().index, 'image', base64)
+        }
+    }
 }
 
 </script>

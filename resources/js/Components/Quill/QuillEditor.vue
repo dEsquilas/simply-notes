@@ -4,7 +4,7 @@ import Quill from 'quill'
 import ImageResize from 'quill-image-resize'
 import * as QuillTableUI from 'quill-table-ui'
 
-import './quill.snow.css'
+import './quill.snow.scss'
 import './quill-table-ui.scss'
 
 const model = defineModel()

@@ -58,7 +58,7 @@ const save = () => {
         })
         .then((response) => {
             notify({
-                type: 'success',
+                type: 'neutral',
                 text: 'Updated',
             })
 

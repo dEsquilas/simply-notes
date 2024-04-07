@@ -156,6 +156,6 @@ const showingNavigationDropdown = ref(false)
                 </div>
             </main>
         </div>
-        <notifications position="bottom right" />
+        <notifications position="bottom right" duration="1" />
     </div>
 </template>

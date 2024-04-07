@@ -27,3 +27,16 @@
     background-color: #2d2d2d;
     border-radius: 10px;
 }
+
+
+.vue-notification{
+
+    &.neutral{
+
+        background-color: var(--cgray);
+        color: var(--cwhite);
+        border-left: 1px solid var(--cgrey);
+
+    }
+
+}

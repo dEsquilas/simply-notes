@@ -77,7 +77,7 @@
 }
 
 .ql-editor td {
-    border: 1px solid #000;
+    border: 2px solid var(--cgray);
     padding: 2px 5px
 }
 

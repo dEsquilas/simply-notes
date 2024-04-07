@@ -10,7 +10,7 @@
     font-family: Figtree, Helvetica, Arial, sans-serif;
     letter-spacing: 0.5px;
     font-size: 16px;
-    height: 100%;
+    height: calc(100% - 42px); /* less toolbar */
     margin: 0;
     position: relative;
     color: #fff;

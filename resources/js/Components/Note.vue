@@ -33,7 +33,7 @@ watch(() => props.note, (newNote) => {
     if(newNote.content == null || newNote.content.length === 0){
         newNote.content = "<p>Start typing...</p>"
     }
-}, { deep: true })
+},{ deep: true })
 
 const dispatchAutosave = () => {
 
@@ -75,8 +75,6 @@ const save = () => {
 
 }
 
-
-
 let forceSave = (event) => {
     if(event.key === "s" && event.ctrlKey){
         event.preventDefault();
@@ -88,7 +86,7 @@ let forceSave = (event) => {
 <template>
     <div class="h-full">
         <input @keydown="dispatchAutosave()" v-model="noteTitle" placeholder="Nueva nota" type="text" class="w-full bg-cblack border-none focus:outline-none focus:border-none focus:ring-0 text-4xl text-white pl-8 py-8">
-        <QuillEditor @keydown="dispatchAutosave"
+        <QuillEditor @updated-content="dispatchAutosave"
                      @keydown.ctrl="forceSave"
                     v-model="noteContent"
         />

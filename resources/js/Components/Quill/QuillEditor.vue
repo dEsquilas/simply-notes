@@ -1,5 +1,5 @@
 <script setup>
-import { defineModel, ref, onMounted, onUnmounted, watch } from 'vue'
+import { defineModel, defineEmits, ref, onMounted, onUnmounted, watch } from 'vue'
 import Quill from 'quill'
 import ImageResize from 'quill-image-resize'
 import * as QuillTableUI from 'quill-table-ui'
@@ -8,6 +8,9 @@ import './quill.snow.css'
 import './quill-table-ui.scss'
 
 const model = defineModel()
+const emit = defineEmits([
+    'updated-content'
+])
 
 const editorRef = ref(null)
 
@@ -50,6 +53,7 @@ onMounted(() => {
     editor.root.innerHTML = model.value
     editor.on('text-change', () => {
         model.value = editor.root.innerHTML
+        emit('updated-content')
     })
 
 

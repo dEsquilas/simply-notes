@@ -99,7 +99,7 @@ const deleteNote = (data) => {
                 <div v-if="!notes || notes.length == 0" class="text-white p-4">No hay notas</div>
                 <note-list v-if="notes && notes.length > 0" @delete-note="deleteNote" @change-note="changeNote" :current-note-id="currentNote.id" :notes="notes" :filter="filter"></note-list>
             </aside>
-            <article class="flex-grow">
+            <article class="flex-grow max-w-[calc(100%-350px)]">
                 <note v-if="currentNote" @update-note="updateNote" :note="currentNote"></note>
             </article>
         </section>

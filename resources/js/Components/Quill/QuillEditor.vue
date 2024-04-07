@@ -3,6 +3,7 @@ import { defineModel, ref, onMounted, onUnmounted, watch } from 'vue'
 import Quill from 'quill'
 import './quill.snow.css'
 import ImageResize from 'quill-image-resize'
+import * as QuillTableUI from 'quill-table-ui'
 
 const model = defineModel()
 
@@ -19,14 +20,17 @@ let editorOptions = {
             ['bold', 'italic', 'underline', 'strike', 'blockquote'],
             [{'list': 'ordered'}, {'list': 'bullet'},
                 {'indent': '-1'}, {'indent': '+1'}],
-            ['link', 'image', 'video', 'clean']
+            ['link', 'image', 'video', 'clean', 'table']
         ],
-        imageResize: {}
+        imageResize: {},
+        table: true,
+        tableUI: true
     }
 }
 
 let editorModules = {
-     'modules/imageResize': ImageResize
+    'modules/imageResize': ImageResize,
+    'modules/tableUI': QuillTableUI.default
 }
 
 onMounted(() => {

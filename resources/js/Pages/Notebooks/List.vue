@@ -103,7 +103,7 @@ const openMenu = (e, notebook) => {
             <div class="max-w-[1200px] w-full m-auto py-12 grid lg:grid-cols-3 sm:grid-cols-2 gap-4 p-4 mt-0">
                 <article @contextmenu="openMenu($event, notebook)" v-for="notebook in notebooks" :key="notebook.id" class="w-full mx-auto gap-4">
                     <Link :href="'/notebook/' + notebook.id">
-                    <div class="bg-main1 overflow-hidden shadow-sm rounded-lg hover:bg-main2 transition-colors">
+                    <div class="border-2 border-main2 overflow-hidden shadow-sm rounded-lg hover:bg-main2 transition-colors">
                         <div class="p-6 text-white">
                             <h3 class="text-lg font-semibold">{{ notebook.name }}</h3>
                             <p class="text-sm">{{ notebook.description }}</p>

@@ -17,7 +17,7 @@ class NoteController extends Controller
         $notes = $notebook->notes()->where('status', 0)->orderBy('updated_at', 'DESC')->get();
 
 
-        return Inertia::render('Notebook', [
+        return Inertia::render('Notebooks/View', [
             'inNotebook' => $notebook,
             'inNotes' => $notes,
             'currentNote' => $note,

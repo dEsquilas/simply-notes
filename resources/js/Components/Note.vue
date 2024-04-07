@@ -4,8 +4,6 @@ import { ImageDrop } from "quill-image-drop-module"
 import { ref, watch } from 'vue'
 import { notify } from "@kyvg/vue3-notification"
 import QuillEditor from '@/Components/Quill/QuillEditor.vue'
-import QuillBetterTable from 'quill-better-table'
-import '../../css/vue-quill.snow.scss'
 
 const emit = defineEmits(['update-note'])
 
@@ -111,7 +109,7 @@ let autosave = () => {
 <template>
     <div class="h-full">
         <input @keydown="save()" v-model="noteTitle" placeholder="Nueva nota" type="text" class="w-full bg-cblack border-none focus:outline-none focus:border-none focus:ring-0 text-4xl text-white pl-8 py-8">
-        <QuillEditor @keydown="save()" class="quill-editor overflow-x-auto"
+        <QuillEditor @keydown="save()"
                      placeholder="Start typing..."
                      :toolbar="[
                             [{ header: [1, 2, 3, false] }],
@@ -132,8 +130,3 @@ let autosave = () => {
         />
     </div>
 </template>
-<style>
-    .quill-editor{
-        height: calc(100vh - 211px);
-    }
-</style>

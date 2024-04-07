@@ -1,7 +1,7 @@
 <script setup>
 import { defineModel, ref, onMounted, onUnmounted, watch } from 'vue';
 import Quill from 'quill';
-import 'quill/dist/quill.snow.css';
+import './quill.snow.css';
 
 const model = defineModel()
 
@@ -50,7 +50,12 @@ watch(() => model, (value) => {
 </script>
 
 <template>
-    <div>
+    <div class="quill-editor-container">
         <div ref="editorRef" class="quill-editor"></div>
     </div>
 </template>
+<style lang="scss">
+.quill-editor-container {
+    height: calc(100vh - 171px);
+}
+</style>

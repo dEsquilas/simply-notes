@@ -56,12 +56,12 @@ const openMenu = (e, notebook) => {
                 onClick: () => {
 
                     const notebookId = notebook.id
-                    const index = notebooks.value.findIndex((n) => n.id == notebookId)
+                    const index = notebooks.value.findIndex((n) => n.id === notebookId)
                     notebooks.value.splice(index, 1)
 
                     axios
                         .post('/notebooks/trash/' + notebookId)
-                        .then((response) => {
+                        .then(() => {
 
                             notify({
                                 type: 'success',
@@ -91,7 +91,7 @@ const openMenu = (e, notebook) => {
         <section class="flex flex-col max-w-[1200px] mx-auto w-full">
             <div class="w-full flex mt-8 mx-4">
                 <header class="flex flex-row gap-4">
-                    <div @click="createNotebook()" class="bg-main3 overflow-hidden shadow-sm rounded-lg text-white cursor-pointer hover:bg-main4 hover:text-cblack" :class="{'cursor-not-allowed': newNotebookName.length == 0}">
+                    <div @click="createNotebook()" class="bg-main3 overflow-hidden shadow-sm rounded-lg text-white cursor-pointer hover:bg-main4 hover:text-cblack" :class="{'cursor-not-allowed': newNotebookName.length === 0}">
                         <div class="p-3 flex flex-row gap-4 items-center justify-center">
                             <h3 class="text-sm font-semibold">Create a new notebook</h3>
                             <PencilSquareIcon class="w-4" />

@@ -1,6 +1,6 @@
 <script setup>
 import ContextMenu from '@imengyu/vue3-context-menu'
-import NoteExtract from '@/Components/NoteExtract.vue'
+import NoteExtract from '@/Components/Notes/NoteExtract.vue'
 import { notify } from "@kyvg/vue3-notification"
 
 const emit = defineEmits(['change-note', 'delete-note'])

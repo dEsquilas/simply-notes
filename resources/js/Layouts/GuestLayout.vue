@@ -1,20 +1,29 @@
 <script setup>
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import ApplicationLogo from '@/Components/Laravel/ApplicationLogo.vue';
 import { Link } from '@inertiajs/vue3';
 </script>
 
 <template>
-    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-        <div>
-            <Link href="/">
-                <ApplicationLogo class="w-20 h-20 fill-current text-gray-500" />
-            </Link>
+    <div class="flex h-screen">
+        <div class="w-1/2 flex">
+            <div class="w-[300px] m-auto">
+                <img src="/favicon.png" class="mb-8" width="80">
+                <h2 class="text-2xl mb-2 font-bold">Welcome to SimplyNotes</h2>
+                <p class="text-sm mb-8 text-gray-500">You can login via Google account</p>
+                <slot />
+            </div>
         </div>
+        <div class="w-1/2 login-image">
 
-        <div
-            class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg"
-        >
-            <slot />
         </div>
     </div>
 </template>
+<style>
+
+.login-image{
+
+    background: url('../../assets/login-bg.webp') no-repeat center center;
+
+}
+
+</style>

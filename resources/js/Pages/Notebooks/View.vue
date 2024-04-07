@@ -8,8 +8,8 @@ import {
 } from '@heroicons/vue/24/outline'
 import { ref, computed } from 'vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import Note from '@/Components/Note.vue'
-import NoteList from '@/Components/NoteList.vue'
+import Note from '@/Components/Notes/Note.vue'
+import NoteList from '@/Components/Notes/NoteList.vue'
 
 
 const props = defineProps({

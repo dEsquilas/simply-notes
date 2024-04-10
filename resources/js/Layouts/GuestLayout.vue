@@ -8,7 +8,7 @@
                 <slot />
             </div>
         </div>
-        <div class="w-1/2 login-image">
+        <div class="w-1/2 bg-cover bg-center login-image">
 
         </div>
     </div>
@@ -17,7 +17,7 @@
 
 .login-image{
 
-    background: url('../../assets/login-bg.webp') no-repeat center center;
+    background-image: url('../../assets/login-bg.webp');
 
 }
 

@@ -90,7 +90,8 @@
 .ql-editor li {
     list-style-type: none;
     padding-left: 1.5em;
-    position: relative
+    position: relative;
+    margin-bottom: 5px;
 }
 
 .ql-editor li > .ql-ui:before {

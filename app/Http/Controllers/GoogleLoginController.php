@@ -16,8 +16,14 @@ class GoogleLoginController extends Controller
     }
 
 
-    public function handleGoogleCallback()
+    public function handleGoogleCallback(Request $request)
     {
+
+        if($request->error)
+        {
+            return redirect(RouteServiceProvider::HOME);
+        }
+
         $googleUser = Socialite::driver('google')->stateless()->user();
         $user = User::where('email', $googleUser->email)->first();
         if(!$user)

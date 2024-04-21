@@ -5,6 +5,7 @@
 /public/hot
 /public/storage
 /storage/*.key
+/toImport/*
 /vendor
 .env
 .env.backup
@@ -18,3 +19,4 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+.pd

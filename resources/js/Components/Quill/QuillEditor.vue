@@ -73,11 +73,11 @@ watch(() => model, (value) => {
 
 const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-        reader.readAsDataURL(file);
-    });
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result)
+        reader.onerror = error => reject(error)
+        reader.readAsDataURL(file)
+    })
 }
 
 const imageUploadHandler = () => {
@@ -97,8 +97,8 @@ const imageUploadHandler = () => {
 }
 
 const tbl = () => {
-    const table = editor.getModule('table');
-    table.insertTable(3, 3);
+    const table = editor.getModule('table')
+    table.insertTable(3, 3)
     console.log('Inserted')
 }
 

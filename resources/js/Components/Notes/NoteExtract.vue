@@ -11,7 +11,7 @@ const props = defineProps({
 })
 
 const dateToString = (date) => {
-    const d = new Date(date);
+    const d = new Date(date)
     const months = [
         'Ene',
         'Feb',
@@ -25,7 +25,7 @@ const dateToString = (date) => {
         'Oct',
         'Nov',
         'Dic',
-    ];
+    ]
 
     return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
 }

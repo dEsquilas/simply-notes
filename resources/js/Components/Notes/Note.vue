@@ -44,7 +44,7 @@ const dispatchAutosave = () => {
 let autosave = () => {
 
     if (lastModified !== -1 && Date.now() - lastModified > autosaveTime)
-        save();
+        save()
 }
 
 const save = () => {
@@ -61,7 +61,7 @@ const save = () => {
             })
 
             emit('update-note', {note: response.data.note})
-            clearInterval(autosaveInterval);
+            clearInterval(autosaveInterval)
             autosaveInterval = null
 
         })
@@ -75,8 +75,8 @@ const save = () => {
 
 let forceSave = (event) => {
     if(event.key === "s" && event.ctrlKey){
-        event.preventDefault();
-        save();
+        event.preventDefault()
+        save()
     }
 }
 

@@ -585,7 +585,7 @@
 }
 
 .ql-editor.ql-blank::before {
-    color: rgba(0, 0, 0, 0.6);
+    color: rgba(255, 255, 255, 0.6);
     content: attr(data-placeholder);
     font-style: italic;
     left: 15px;

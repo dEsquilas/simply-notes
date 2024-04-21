@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\{
     GoogleLoginController,
+    ImportController,
     NoteController,
     NotebookController,
     ProfileController
@@ -52,6 +53,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/notes/trash/{noteId}', [NoteController::class, 'trash'])->name('note.trash');
         Route::get('/notes/{noteId}', [NoteController::class, 'view'])->name('note.view');
     });
+
+    Route::get('/import', [ImportController::class, 'import'])->name('import');
 
 });
 

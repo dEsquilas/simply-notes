@@ -39,6 +39,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/notebooks', [NotebookController::class, 'index'])->name('notebooks.index');
     Route::post('/notebooks/create', [NotebookController::class, 'create'])->name('notebooks.create');
     Route::get('/notebooks/trash', [NotebookController::class, 'trashView'])->name('notebooks.trash.view');
+    Route::get('/import', [ImportController::class, 'index'])->name('import');
+    Route::post('/import', [ImportController::class, 'store'])->name('import.store');
+    Route::get('/import/polling', [ImportController::class, 'polling'])->name('import.polling');
+
 
     Route::group(['middleware' => [NotebookVerifyOwnership::class]], function () {
         Route::post('/notebooks/trash/delete/{notebookId}', [NotebookController::class, 'delete'])->name('notebooks.trash.delete');
@@ -54,7 +58,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/notes/{noteId}', [NoteController::class, 'view'])->name('note.view');
     });
 
-    Route::get('/import', [ImportController::class, 'import'])->name('import');
+    //Route::get('/import', [ImportController::class, 'import'])->name('import');
 
 });
 

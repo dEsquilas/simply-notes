@@ -12,7 +12,7 @@ const showingNavigationDropdown = ref(false)
 
 <template>
     <div>
-        <div class="min-h-screen bg-cblack flex flex-col overflow-hidden text-white">
+        <div class="min-h-screen bg-cblack flex flex-col text-white">
             <nav class="bg-cblack border-cgray border-b">
                 <!-- Primary Navigation Menu -->
                 <div class="mx-auto px-4 sm:px-6 lg:px-8">
@@ -149,7 +149,7 @@ const showingNavigationDropdown = ref(false)
 
             <!-- Page Content -->
             <main class="flex-grow flex flex-col">
-                <div class="h-full flex-grow flex">
+                <div class="min-h-full flex-grow flex">
                     <slot />
                 </div>
             </main>

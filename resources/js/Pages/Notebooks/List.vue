@@ -2,7 +2,6 @@
 import axios from 'axios'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import ContextMenu from '@imengyu/vue3-context-menu'
-import { Head, Link } from '@inertiajs/vue3'
 import { notify } from "@kyvg/vue3-notification"
 import { PencilSquareIcon } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'

@@ -24,7 +24,7 @@ Follow these steps to set up and run SimpleNotes on your local machine:
    git clone https://github.com/dEsquilas/simply-notes.git
    cd simplenotes
    ```
-   
+
 2. **Create a new `.env` file:**
    ```bash
    cp .env.example .env
@@ -33,20 +33,23 @@ Follow these steps to set up and run SimpleNotes on your local machine:
 Simply notes uses a MySQL database by default. You can change the database settings in the `.env` file to match your local environment.
 
 For the login system, it's used the Google Authentication system. You should fill the values ([link](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid?hl=es-419)):
-
+```bash
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GOOGLE_REDIRECT_URL=
+```
 
 You can get these values by creating a new project in the Google Developer Console and enabling the Google+ API. You should add the redirect URL to the authorized redirect URIs in the Google Developer Console. Default redirect URL is `<your host>/google/callback`.
+<br>
+<br>
 
 3. **Install dependencies:**
    ```bash
    composer install
    pnpm install
    ```
-   
-At this point, if you're planning to use it in your local, you can use [Laravel Sail](https://laravel.com/docs/11.x/sail) for execute whole commands
+
+>At this point, if you're planning to use it in your local, you can use [Laravel Sail](https://laravel.com/docs/11.x/sail) for execute whole commands
    
 4. **Generate an application key:**
    ```bash
@@ -79,7 +82,7 @@ You can follow the development of the project in the [Trello board](https://trel
 🟩 Light task \
 🟫 Large task \
 🟪 Complex task \
-🟦 Code improvement \
+🟦 Code improvement
 
 
 

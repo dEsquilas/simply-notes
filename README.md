@@ -24,7 +24,7 @@ Follow these steps to set up and run SimpleNotes on your local machine:
    git clone https://github.com/dEsquilas/simply-notes.git
    cd simplenotes
    ```
-
+   
 2. **Create a new `.env` file:**
    ```bash
    cp .env.example .env

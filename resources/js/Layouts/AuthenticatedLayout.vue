@@ -38,6 +38,9 @@ const showingNavigationDropdown = ref(false)
                                 <NavLink :href="route('notebooks.trash.view')" :active="route().current('notebooks.trash.view')">
                                     Trash
                                 </NavLink>
+                                <NavLink :href="route('import')" :active="route().current('import')">
+                                    Import
+                                </NavLink>
                             </div>
                         </div>
 

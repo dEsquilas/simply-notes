@@ -1,21 +1,32 @@
 <template>
-    <article @contextmenu="openMenu($event, notebook)" class="w-full mx-auto gap-4">
+    <div @contextmenu="openMenu($event, notebook)" class="lg:w-1/5 md:w-1/3 sm: w-1/2">
         <Link :href="'/notebook/' + notebook.id">
-            <div class="border-2 border-main2 overflow-hidden shadow-sm rounded-lg hover:bg-main2 transition-colors">
-                <div class="p-6 text-white">
-                    <h3 class="text-lg font-semibold">{{ notebook.name }}</h3>
-                    <p class="text-sm">{{ notebook.description }}</p>
+            <article class="border border-main2 overflow-hidden transition shadow-lg rounded lg:hover:scale-110 lg:hover:shadow-main1">
+                <header class="bg-main2 p-2">
+                    <h3 class="text-sm font-semibold text-white flex items-center overflow-auto text-ellipsis whitespace-nowrap">
+                        <DocumentDuplicateIcon class="w-6 inline-block mr-2" />
+                        {{ notebook.name }}
+                    </h3>
+                </header>
+                <div class="px-4 py-2 text-white h-[150px] flex flex-col w-full">
+                    <p class="text-sm h-full items-center flex text-center w-full justify-center">
+                        <div>
+                            <span class="text-4xl mr-2 text-main4">{{ notebook.notes_count }}</span>  notes
+                        </div>
+                    </p>
+                    <p class="text-sm text-right italic">{{ DateHelper.formatDate(notebook.created_at) }}</p>
                 </div>
-            </div>
+            </article>
         </Link>
-    </article>
+    </div>
 </template>
 <script setup>
-import ContextMenu from "@imengyu/vue3-context-menu"
 import axios from "axios"
+import DateHelper from "@/Helpers/DateHelper"
+import ContextMenu from "@imengyu/vue3-context-menu"
 import { defineEmits } from "vue"
+import { DocumentDuplicateIcon } from "@heroicons/vue/24/outline/index.js"
 import { notify } from "@kyvg/vue3-notification"
-
 const props = defineProps({
     notebook: Object,
 })
@@ -23,7 +34,6 @@ const props = defineProps({
 const emit = defineEmits([
     'delete'
 ])
-
 
 const openMenu = (e, notebook) => {
     e.preventDefault()

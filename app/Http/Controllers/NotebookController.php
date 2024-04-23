@@ -10,7 +10,11 @@ class NotebookController extends Controller
 {
     public function index(){
 
-        $notebooks = Notebook::where('owner', auth()->id())->where('status', 0)->get();
+        $notebooks = Notebook::where('owner', auth()->id())
+            ->where('status', 0)
+            ->withCount('notes')
+            ->orderBy('created_at', 'DESC')
+            ->get();
 
         return Inertia::render('Notebooks/List', [
             'notebooks' => $notebooks

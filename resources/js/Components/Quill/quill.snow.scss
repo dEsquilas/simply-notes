@@ -5,6 +5,11 @@
  * Copyright (c) 2014, Jason Chen
  * Copyright (c) 2013, salesforce.com
  */
+
+.quill-editor{
+    overflow: hidden;
+}
+
 .ql-container {
     box-sizing: border-box;
     font-family: Figtree, Helvetica, Arial, sans-serif;

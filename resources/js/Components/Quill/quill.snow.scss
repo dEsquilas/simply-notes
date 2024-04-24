@@ -1161,3 +1161,10 @@
 .ql-snow a {
     color: var(--main4)
 }
+
+
+@media screen and (max-width: 768px) {
+    .ql-toolbar {
+        display: none;
+    }
+}

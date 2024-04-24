@@ -3,8 +3,11 @@
 
     <AuthenticatedLayout>
         <section class="flex flex-col max-w-[1200px] sm:px-4 md:px-8 mx-auto w-full">
-            <div class="w-full flex mt-8 mx-4">
-                <header class="flex flex-row gap-4">
+            <div class="flex mt-8 mx-4">
+                <header class="
+                            flex flex-col gap-4 jusitfy-center w-full
+                            md:flex-row
+                            ">
                     <div @click="createNotebook()" class="bg-main3 overflow-hidden shadow-sm rounded-lg text-white cursor-pointer hover:bg-main4 hover:text-cblack transition-colors" :class="{'cursor-not-allowed': newNotebookName.length === 0}">
                         <div class="p-3 flex flex-row gap-4 items-center justify-center">
                             <h3 class="text-sm font-semibold">Create a new notebook</h3>

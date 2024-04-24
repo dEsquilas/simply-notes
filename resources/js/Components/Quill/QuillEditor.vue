@@ -56,6 +56,9 @@ onMounted(() => {
         emit('updated-content')
     })
 
+    // add tabindex 2 to the editor
+    editorRef.value.getElementsByClassName('ql-editor')[0].setAttribute('tabindex', '2')
+
 
 })
 

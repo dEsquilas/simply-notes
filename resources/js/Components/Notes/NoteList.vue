@@ -67,7 +67,7 @@ const applyFilter = (filter, note) => {
 
 </script>
 <template>
-    <div class="overflow-auto h-full note-list">
+    <div class="overflow-auto note-list">
         <ul>
             <li v-for="note in notes" :key="note.id" v-show="applyFilter(filter, note)" @click="$emit('change-note', note)" @contextmenu="openMenu($event, note)">
                 <note-extract :current="note.id === currentNoteId" :note="note"></note-extract>

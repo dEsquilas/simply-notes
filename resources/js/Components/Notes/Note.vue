@@ -83,7 +83,16 @@ let forceSave = (event) => {
 </script>
 <template>
     <div class="h-full">
-        <input @keydown="dispatchAutosave()" v-model="noteTitle" placeholder="Nueva nota" type="text" class="w-full bg-cblack border-none focus:outline-none focus:border-none focus:ring-0 text-4xl text-white pl-8 py-8">
+        <input tabindex="1"
+               @keydown="dispatchAutosave()"
+               v-model="noteTitle"
+               placeholder="Nueva nota"
+               type="text"
+               class="w-full bg-cblack border-none focus:outline-none focus:border-none focus:ring-0 text-4xl text-white pl-8 py-8
+               text-2xl
+               md:text-4xl
+               "
+        >
         <QuillEditor @updated-content="dispatchAutosave"
                      @keydown.ctrl="forceSave"
                     v-model="noteContent"

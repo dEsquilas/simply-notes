@@ -29,7 +29,7 @@ watch(() => props.note, (newNote) => {
     noteTitle.value = newNote.title
     noteContent.value = newNote.content
     if(newNote.content == null || newNote.content.length === 0){
-        newNote.content = "<p>Start typing...</p>"
+        newNote.content = ""
     }
 },{ deep: true })
 

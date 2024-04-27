@@ -58,10 +58,8 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::group(['middleware' => [NoteVerifyOwnership::class, NotebookVerifyOwnership::class]], function () {
-        Route::get('/notebook/{notebookId}/{noteId}', [NoteController::class, 'view'])->name('note.view');
+        Route::get('/notebook/{notebookId}/note/{noteId}', [NoteController::class, 'view'])->name('note.view');
     });
-
-    //Route::get('/import', [ImportController::class, 'import'])->name('import');
 
 });
 

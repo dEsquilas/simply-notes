@@ -75,6 +75,7 @@ const changeNote = (note) => {
     currentNote.value = note
     if(isMobile.value)
         isSidebarVisible.value = false
+    window.history.replaceState({}, '', '/notebook/' + notebook.value.id + '/note/' + note.id)
 }
 
 const updateNote = (data) =>{

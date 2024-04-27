@@ -55,7 +55,10 @@ Route::middleware('auth')->group(function () {
     Route::group(['middleware' => [NoteVerifyOwnership::class]], function () {
         Route::post('/notes/update/{noteId}', [NoteController::class, 'update'])->name('note.update');
         Route::post('/notes/trash/{noteId}', [NoteController::class, 'trash'])->name('note.trash');
-        Route::get('/notes/{noteId}', [NoteController::class, 'view'])->name('note.view');
+    });
+
+    Route::group(['middleware' => [NoteVerifyOwnership::class, NotebookVerifyOwnership::class]], function () {
+        Route::get('/notebook/{notebookId}/{noteId}', [NoteController::class, 'view'])->name('note.view');
     });
 
     //Route::get('/import', [ImportController::class, 'import'])->name('import');

@@ -70,7 +70,12 @@ You can get these values by creating a new project in the Google Developer Conso
    ```bash
     pnpm run dev
     ```
-
+8. **Start the jobs queue:**
+   ```bash
+    php artisan queue:work
+    ```
+   
+This step is required if you need to use long-running tasks like import files. Else you can ignore it.
 
 ## ToDo List
 

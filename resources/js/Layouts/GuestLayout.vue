@@ -8,16 +8,31 @@
                 <slot />
             </div>
         </div>
-        <div class="w-1/2 bg-cover bg-center login-image">
-
+        <div class="w-1/2 bg-cover bg-center login-image overflow-hidden">
+            <img src="../../assets/login-bg.webp" alt="login-bg" class="">
         </div>
     </div>
 </template>
-<style>
+<style lang="scss">
 
 .login-image{
 
-    background-image: url('../../assets/login-bg.webp');
+    img {
+        animation: zoom 60s infinite;
+    }
+
+}
+
+@keyframes zoom{
+    0%{
+        transform: scale(1);
+    }
+    50%{
+        transform: scale(1.2);
+    }
+    100%{
+        transform: scale(1);
+    }
 
 }
 

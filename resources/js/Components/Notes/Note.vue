@@ -94,7 +94,7 @@ let forceSave = (event) => {
                v-model="noteTitle"
                placeholder="Nueva nota"
                type="text"
-               class="w-full bg-transparent border-none focus:outline-none focus:border-none focus:ring-0 text-4xl text-white pl-8 py-8
+               class="text-ellipsis w-full bg-transparent border-none focus:outline-none focus:border-none focus:ring-0 text-4xl text-white px-8 py-8
                text-2xl
                md:text-4xl
                "

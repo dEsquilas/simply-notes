@@ -21,19 +21,25 @@ if (noteContent.value == null || noteContent.value.length === 0) {
 }
 
 
+let autosaveInterval = null
+let recentNoteSwap = Date.now()
 let lastModified = -1
 const autosaveTime = 1500
-let autosaveInterval = null
+
 
 watch(() => props.note, (newNote) => {
+    recentNoteSwap = Date.now()
     noteTitle.value = newNote.title
     noteContent.value = newNote.content
     if(newNote.content == null || newNote.content.length === 0){
-        newNote.content = "<p>Start typing...</p>"
+        newNote.content = ""
     }
 },{ deep: true })
 
 const dispatchAutosave = () => {
+
+    if(recentNoteSwap !== -1 && Date.now() - recentNoteSwap < 1000)
+        return
 
     lastModified = Date.now()
     if(!autosaveInterval)

@@ -75,6 +75,7 @@ const changeNote = (note) => {
     currentNote.value = note
     if(isMobile.value)
         isSidebarVisible.value = false
+    window.history.replaceState({}, '', '/notebook/' + notebook.value.id + '/note/' + note.id)
 }
 
 const updateNote = (data) =>{
@@ -152,7 +153,7 @@ const deleteNote = (data) => {
                 </aside>
                 <article class="
                                 flex-grow
-                                mc:max-w-[calc(100%-350px)]
+                                md:max-w-[calc(100%-350px)]
                                 md:block
                                 "
                         :class="{

@@ -9,13 +9,18 @@ use Inertia\Inertia;
 class NoteController extends Controller
 {
 
-    public function view($noteId){
+    public function view($notebookId, $noteId){
 
         $note = Note::find($noteId);
         $notebook = $note->notebook;
 
-        $notes = $notebook->notes()->where('status', 0)->orderBy('updated_at', 'DESC')->get();
+        ray($notebook->id, $notebookId, $note->id, $noteId);
 
+        if($notebook->id != $notebookId){
+            return redirect()->route('notebooks.index');
+        }
+
+        $notes = $notebook->notes()->where('status', 0)->orderBy('updated_at', 'DESC')->get();
 
         return Inertia::render('Notebooks/View', [
             'inNotebook' => $notebook,

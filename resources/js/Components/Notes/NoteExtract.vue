@@ -31,6 +31,7 @@ const dateToString = (date) => {
 }
 
 const removeHtml = (text) => {
+    text = text.replace(/<\/?[^>]+(>|$)/g, '$&\n');
     text = text.replace(/<[^>]*>/g, '')
     text = text.replace(/&nbsp;/g, '')
     text = text.replace(/&lt;/g, '<')

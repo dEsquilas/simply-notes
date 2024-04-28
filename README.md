@@ -77,6 +77,18 @@ You can get these values by creating a new project in the Google Developer Conso
    
 This step is required if you need to use long-running tasks like import files. Else you can ignore it.
 
+## Add as System App with Chrome
+
+To add a webpage as an app on Google Chrome, follow these steps:
+
+1. Open Google Chrome and navigate to the webpage you want to add as an app.
+2. Click on the three-dot menu icon in the top-right corner of the browser.
+3. Hover over "Save and Share", then click on "Install <APP NAME>...".
+4. In the dialog box that appears, click on install.
+5. The app will be opened with the favicon as the app icon. You can also find the app in your computer's start menu.
+
+The webpage will now appear as an app in your Chrome Apps page and can also be found in your computer's start menu.
+
 ## ToDo List
 
 You can follow the development of the project in the [Trello board](https://trello.com/invite/b/1ET7BIm6/ATTI97a767d72a2d96090bc246ab77f04d28CD058C57/simplenotes). Feel free to contribute to the project by picking up a task from the board or suggesting new features.

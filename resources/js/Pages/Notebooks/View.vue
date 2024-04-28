@@ -107,7 +107,7 @@ const deleteNote = (data) => {
         <div class="w-full">
             <section class="flex flex-row w-full h-full">
                 <aside
-                    class="bg-cblack overflow-hidden border-r border-1 border-cgray
+                    class="overflow-hidden border-r border-1 border-cgray
                             w-full
                             md:w-[350px]
                             "

@@ -55,6 +55,10 @@
     text-align: left;
     white-space: pre-wrap;
     word-wrap: break-word;
+
+    background: linear-gradient(175deg, var(--cblack) 0%, var(--cblack) 70%, #493d24 100%);
+    //background: linear-gradient(175deg, var(--cblack) 0%, var(--cblack) 70%, var(--main3) 100%);
+
 }
 
 .ql-editor > * {

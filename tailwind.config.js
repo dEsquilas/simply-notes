@@ -21,9 +21,9 @@ export default {
                 main3: '#4c6f7b',
                 main4: '#f1d18a',
 
-                cblack: '#212121',
+                cblack: '#262727',
                 cgray: '#374151',
-                cgrey: '#BDBDBD',
+                clgray: '#BDBDBD',
                 cwhite: '#ffffff',
             },
         },

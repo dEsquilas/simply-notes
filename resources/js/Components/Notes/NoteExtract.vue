@@ -41,9 +41,16 @@ const removeHtml = (text) => {
 
 </script>
 <template>
-    <article class="p-4 border-1 border-b border-cgray max-h-[140px] hover:bg-main2 cursor-pointer" :class="{'bg-main1': current}">
+    <article class="p-4 border-1 border-b border-cgray max-h-[140px] hover:bg-cgray cursor-pointer transition-colors" :class="{'gradient-hover': current}">
         <h4 class="text-white text-[15px] w-full font-bold h-[25px] text-ellipsis overflow-hidden whitespace-nowrap">{{ (note.title) ? note.title : "Nueva nota" }}</h4>
-        <p class="text-cgrey text-[13px] h-[60px] line-clamp line-clamp-3 mb-2">{{ (note.content) ? removeHtml(note.content) : "" }}</p>
+        <p class="text-clgray text-[13px] h-[60px] line-clamp line-clamp-3 mb-2">{{ (note.content) ? removeHtml(note.content) : "" }}</p>
         <span class="text-[13px] text-cgrey italic">{{ dateToString(note.created_at) }}</span>
     </article>
 </template>
+<style>
+.gradient-hover{
+
+    background: #493d24;
+
+}
+</style>

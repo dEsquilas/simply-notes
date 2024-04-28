@@ -1088,12 +1088,12 @@
 }
 
 .ql-snow .ql-tooltip {
-    background-color: #fff;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 5px #ddd;
+    background-color: var(--cblack);
+    border: 1px solid var(--main4);
     color: var(--cwhite);
     padding: 5px 12px;
-    white-space: nowrap
+    white-space: nowrap;
+    margin-left: 100px;
 }
 
 .ql-snow .ql-tooltip::before {

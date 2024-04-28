@@ -2,6 +2,7 @@
 import ContextMenu from '@imengyu/vue3-context-menu'
 import NoteExtract from '@/Components/Notes/NoteExtract.vue'
 import { notify } from "@kyvg/vue3-notification"
+import { onMounted, ref } from 'vue'
 
 const emit = defineEmits(['change-note', 'delete-note'])
 
@@ -18,6 +19,14 @@ const props = defineProps({
         type: String,
         required: true,
     },
+})
+
+const scrollbar = ref(null)
+
+onMounted(() => {
+    const elementToMove = props.notes.findIndex((note) => note.id === props.currentNoteId)
+    const noteHeight = 140
+    scrollbar.value.scrollTop = noteHeight * elementToMove
 })
 
 const openMenu = (e, note) => {
@@ -67,7 +76,7 @@ const applyFilter = (filter, note) => {
 
 </script>
 <template>
-    <div class="overflow-auto note-list">
+    <div class="overflow-auto note-list" ref="scrollbar">
         <ul>
             <li v-for="note in notes" :key="note.id" v-show="applyFilter(filter, note)" @click="$emit('change-note', note)" @contextmenu="openMenu($event, note)">
                 <note-extract :current="note.id === currentNoteId" :note="note"></note-extract>

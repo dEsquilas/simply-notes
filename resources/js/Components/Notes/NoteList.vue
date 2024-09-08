@@ -71,7 +71,7 @@ const applyFilter = (filter, note) => {
     if (filter === "")
         return true
     else
-        return note.title.toLowerCase().includes(filter.toLowerCase()) || note.content?.toLowerCase().includes(filter.toLowerCase())
+        return note.title?.toLowerCase().includes(filter.toLowerCase()) || note.content?.toLowerCase().includes(filter.toLowerCase())
 }
 
 </script>

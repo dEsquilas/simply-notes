@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\{Note, Notebook};
+use App\Services\NoteHtmlSanitizer;
 use Inertia\Inertia;
 
 class NoteController extends Controller
@@ -46,12 +47,12 @@ class NoteController extends Controller
 
     }
 
-    public function update($noteId){
+    public function update($noteId, NoteHtmlSanitizer $sanitizer){
 
         $note = Note::find($noteId);
 
         $note->title = request()->get('title');
-        $note->content = request()->get('content');
+        $note->content = $sanitizer->sanitize(request()->get('content'));
         $note->save();
 
         return response()->json([

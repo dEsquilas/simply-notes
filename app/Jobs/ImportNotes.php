@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Note;
+use App\Services\NoteHtmlSanitizer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,6 +16,12 @@ class ImportNotes implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+
+    // Zip bomb guards
+    private const MAX_FILES = 20000;
+    private const MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024;
+
+    private const EMBEDDABLE_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
 
     public $importJob;
     public $timeout = 500;
@@ -35,14 +42,17 @@ class ImportNotes implements ShouldQueue
     public function handle(): void
     {
 
-        $basefile = basename($this->importJob->file_path);
-        $zipFile = storage_path("app/" . $this->importJob->file_path);
-        $outPath = storage_path('app/import/' . pathinfo($basefile, PATHINFO_FILENAME) . '/');
+        $zipFile = $this->zipFile();
+        $outPath = $this->outPath();
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zipFile) !== true) {
+            throw new \RuntimeException('The import file is not a valid zip');
+        }
+        $this->assertWithinLimits($zip);
 
         File::makeDirectory($outPath, 0777, true, true);
 
-        $zip = new \ZipArchive();
-        $zip->open($zipFile);
         $zip->extractTo($outPath);
         $zip->close();
 
@@ -63,9 +73,66 @@ class ImportNotes implements ShouldQueue
         $this->importJob->status = 'finished';
         $this->importJob->save();
 
-        File::deleteDirectory($outPath);
-        File::delete($zipFile);
+        $this->cleanUp();
 
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        $this->importJob->status = 'failed';
+        $this->importJob->save();
+
+        $this->cleanUp();
+    }
+
+    private function zipFile(): string
+    {
+        return storage_path('app/' . $this->importJob->file_path);
+    }
+
+    private function outPath(): string
+    {
+        return storage_path('app/import/' . pathinfo(basename($this->importJob->file_path), PATHINFO_FILENAME) . '/');
+    }
+
+    private function cleanUp(): void
+    {
+        File::deleteDirectory($this->outPath());
+        File::delete($this->zipFile());
+    }
+
+    private function assertWithinLimits(\ZipArchive $zip): void
+    {
+        if ($zip->numFiles > self::MAX_FILES) {
+            throw new \RuntimeException('The import zip has too many files');
+        }
+
+        $uncompressedBytes = 0;
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $uncompressedBytes += $zip->statIndex($i)['size'];
+        }
+
+        if ($uncompressedBytes > self::MAX_UNCOMPRESSED_BYTES) {
+            throw new \RuntimeException('The import zip is too large once extracted');
+        }
+    }
+
+    /**
+     * Returns [path, mime] only for real images inside the extracted export,
+     * so an src like "../../../../.env" can never leak server files into a note.
+     */
+    private function embeddableImage(string $dir, string $src): ?array
+    {
+        $root = realpath($dir);
+        $path = realpath($dir . $src);
+
+        if ($root === false || $path === false || !is_file($path) || !str_starts_with($path, $root . DIRECTORY_SEPARATOR)) {
+            return null;
+        }
+
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($path);
+
+        return in_array($mime, self::EMBEDDABLE_IMAGE_TYPES, true) ? [$path, $mime] : null;
     }
 
     private function parseFile($fileContent, $dir)
@@ -211,12 +278,13 @@ class ImportNotes implements ShouldQueue
             if (strpos($src, '://') !== false) { // if the src is a link, continue
                 continue;
             }
-            $type = pathinfo($src, PATHINFO_EXTENSION);
-            if(file_exists($dir . $src) === true){
-                $data = file_get_contents($dir . $src);
-                $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-                $img->setAttribute('src', $base64);
+            $image = $this->embeddableImage($dir, $src);
+            if ($image === null) {
+                $img->removeAttribute('src');
+                continue;
             }
+            [$path, $mime] = $image;
+            $img->setAttribute('src', 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path)));
         }
 
         // foreach td in tr, set the data-row value
@@ -325,7 +393,7 @@ class ImportNotes implements ShouldQueue
 
         $note = new Note();
         $note->title = $title;
-        $note->content = $bodyContent;
+        $note->content = app(NoteHtmlSanitizer::class)->sanitize($bodyContent);
         $note->created_at = $created;
         $note->updated_at = $updated;
         $note->notebook_id = $this->importJob->notebook_id;

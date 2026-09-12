@@ -32,7 +32,7 @@ class ImportController extends Controller
     {
 
         $request->validate([
-            'file' => 'required|file',
+            'file' => 'required|file|mimes:zip|max:1048576', // KB: 1 GB
             'notebook' => 'required'
         ]);
 
@@ -68,7 +68,13 @@ class ImportController extends Controller
         $importJob->file_path = $path;
         $importJob->save();
 
-        dispatch(new \App\Jobs\ImportNotes($importJob));
+        try {
+            dispatch(new \App\Jobs\ImportNotes($importJob));
+        } catch (\Throwable $e) {
+            // Only reached with the sync queue; the job has already marked itself as failed
+            report($e);
+            return response()->json(['error' => 'The file could not be imported'], 422);
+        }
 
         return response()->json(['status' => true, 'job' => ImportJob::where('id', $importJob->id)->with('notebook')->first()]);
     }

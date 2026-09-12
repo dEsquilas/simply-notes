@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use App\Providers\RouteServiceProvider;
 
 class GoogleLoginController extends Controller
@@ -28,7 +29,8 @@ class GoogleLoginController extends Controller
         $user = User::where('email', $googleUser->email)->first();
         if(!$user)
         {
-            $user = User::create(['name' => $googleUser->name, 'email' => $googleUser->email, 'password' => \Hash::make(rand(100000,999999))]);
+            // Unusable random password: accounts only log in through Google
+            $user = User::create(['name' => $googleUser->name, 'email' => $googleUser->email, 'password' => Str::random(64)]);
         }
 
         Auth::login($user);

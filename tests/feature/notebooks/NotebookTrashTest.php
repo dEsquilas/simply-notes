@@ -97,7 +97,7 @@ it('does not permanently delete a notebook that is not in the trash', function (
     $this->postJson("/notebooks/trash/delete/{$notebook->id}")->assertStatus(422);
 
     expect($notebook->fresh())->not->toBeNull();
-})->todo();
+});
 
 // BUG-09
 it('removes the import jobs of a permanently deleted notebook', function () {
@@ -107,4 +107,33 @@ it('removes the import jobs of a permanently deleted notebook', function () {
     $this->postJson("/notebooks/trash/delete/{$notebook->id}")->assertOk();
 
     expect(ImportJob::count())->toBe(0);
-})->todo();
+});
+
+it('lists the trashed notes of the user\'s active notebooks on the trash page', function () {
+    $notebook = Notebook::factory()->ownedBy($this->user)->create(['name' => 'Work']);
+    $trashed = Note::factory()->for($notebook)->trashed()->create(['title' => 'Old idea']);
+    Note::factory()->for($notebook)->create(['title' => 'Active']);
+    Note::factory()->for(Notebook::factory()->ownedBy($this->user)->trashed())->trashed()->create();
+    Note::factory()->for(Notebook::factory())->trashed()->create();
+
+    $this->get('/notebooks/trash')
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('notes', 1)
+            ->where('notes.0.id', $trashed->id)
+            ->where('notes.0.title', 'Old idea')
+            ->where('notes.0.notebook.name', 'Work')
+            ->missing('notes.0.content')
+        );
+});
+
+it('keeps the import jobs of other notebooks when deleting one permanently', function () {
+    $notebook = Notebook::factory()->ownedBy($this->user)->trashed()->create();
+    $kept = ImportJob::factory()->finished()->create([
+        'user_id' => $this->user->id,
+        'notebook_id' => Notebook::factory()->ownedBy($this->user)->create()->id,
+    ]);
+
+    $this->postJson("/notebooks/trash/delete/{$notebook->id}")->assertOk();
+
+    expect(ImportJob::sole()->id)->toBe($kept->id);
+});

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\{
     ImportJob,
-    Note,
     Notebook
 };
 use Illuminate\Http\Request;
@@ -15,15 +14,11 @@ class ImportController extends Controller
 
     public function index(){
 
-
-        $notebooks = Notebook::where('owner', \Auth::user()->id)->get();
-        $runningJobs = ImportJob::where('user_id', \Auth::user()->id)->whereIn('status', ['processing', 'pending'])->with('notebook')->get();
-        $finishedJobs = ImportJob::where('user_id', \Auth::user()->id)->where('status', 'finished')->with('notebook')->get();
+        $notebooks = Notebook::where('owner', \Auth::user()->id)->where('status', 0)->get();
 
         return Inertia::render('Import', [
             'notebooks' => $notebooks,
-            'runningJobs' => $runningJobs,
-            'finishedJobs' => $finishedJobs
+            ...$this->jobs(),
         ]);
 
     }
@@ -33,8 +28,14 @@ class ImportController extends Controller
 
         $request->validate([
             'file' => 'required|file|mimes:zip|max:1048576', // KB: 1 GB
-            'notebook' => 'required'
+            'notebook' => ['required', function (string $attribute, mixed $value, \Closure $fail) {
+                if (is_array($value)) {
+                    $fail('The notebook field is invalid.');
+                }
+            }],
         ]);
+
+        $createdNotebook = false;
 
         if($request->notebook != -1) {
             $notebook = Notebook::find($request->notebook);
@@ -44,17 +45,22 @@ class ImportController extends Controller
             }
 
             $this->authorize('update', $notebook);
+
+            if ($notebook->status == 1) {
+                return response()->json(['error' => 'Notes cannot be imported into a notebook in the trash'], 422);
+            }
         }
         else{
 
             $request->validate([
-                'notebookName' => 'required'
+                'notebookName' => 'required|string|max:255'
             ]);
 
             $notebook = new Notebook();
             $notebook->owner = \Auth::user()->id;
             $notebook->name = $request->notebookName;
             $notebook->save();
+            $createdNotebook = true;
         }
 
 
@@ -73,6 +79,14 @@ class ImportController extends Controller
         } catch (\Throwable $e) {
             // Only reached with the sync queue; the job has already marked itself as failed
             report($e);
+
+            // A notebook created only for this import would be left empty
+            if ($createdNotebook) {
+                $importJob->delete();
+                $notebook->notes()->delete();
+                $notebook->delete();
+            }
+
             return response()->json(['error' => 'The file could not be imported'], 422);
         }
 
@@ -81,10 +95,21 @@ class ImportController extends Controller
 
     public function polling(Request $request)
     {
-        $runningJobs = ImportJob::where('user_id', \Auth::user()->id)->whereIn('status', ['processing', 'pending'])->with('notebook')->get();
-        $finishedJobs = ImportJob::where('user_id', \Auth::user()->id)->where('status', 'finished')->with('notebook')->get();
+        return response()->json($this->jobs());
+    }
 
-        return response()->json(['runningJobs' => $runningJobs, 'finishedJobs' => $finishedJobs]);
+    private function jobs(): array
+    {
+        $jobs = fn (array $statuses) => ImportJob::where('user_id', \Auth::user()->id)
+            ->whereIn('status', $statuses)
+            ->with('notebook')
+            ->get();
+
+        return [
+            'runningJobs' => $jobs(['processing', 'pending']),
+            'finishedJobs' => $jobs(['finished']),
+            'failedJobs' => $jobs(['failed']),
+        ];
     }
 
 }

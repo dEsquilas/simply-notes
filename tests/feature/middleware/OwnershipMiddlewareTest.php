@@ -62,7 +62,7 @@ it('stops requests without a notebook id', function () {
     $this->actingAs(User::factory()->create());
 
     expect(statusOf(fn () => (new NotebookVerifyOwnership())->handle(requestWithRoute([]), fn () => response('passed'))))
-        ->toBe(403);
+        ->toBe(404);
 });
 
 it('stops requests without a note id', function () {

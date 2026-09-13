@@ -42,4 +42,27 @@ it('restores a trashed note', function () {
     $this->postJson("/notes/trash/restore/{$this->note->id}")->assertOk();
 
     expect($this->note->fresh()->status)->toBe(0);
-})->todo();
+});
+
+it('restores an active note without errors', function () {
+    $this->postJson("/notes/trash/restore/{$this->note->id}")->assertOk();
+
+    expect($this->note->fresh()->status)->toBe(0);
+});
+
+it('shows a restored note in its notebook again', function () {
+    $this->note->forceFill(['status' => 1])->save();
+
+    $this->postJson("/notes/trash/restore/{$this->note->id}")->assertOk();
+
+    $this->get("/notebook/{$this->notebook->id}")
+        ->assertInertia(fn (Assert $page) => $page->has('inNotes', 1)->where('inNotes.0.id', $this->note->id));
+});
+
+it('does not restore another user\'s trashed note', function () {
+    $foreign = Note::factory()->trashed()->create();
+
+    $this->postJson("/notes/trash/restore/{$foreign->id}")->assertForbidden();
+
+    expect($foreign->fresh()->status)->toBe(1);
+});

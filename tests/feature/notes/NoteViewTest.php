@@ -44,7 +44,7 @@ it('does not open a trashed note by URL', function () {
     $this->actingAs($this->user)
         ->get("/notebook/{$this->notebook->id}/note/{$this->note->id}")
         ->assertRedirect(route('notebook.view', $this->notebook->id));
-})->todo();
+});
 
 // BUG-03
 it('does not open a note of a trashed notebook by URL', function () {
@@ -53,4 +53,4 @@ it('does not open a note of a trashed notebook by URL', function () {
     $this->actingAs($this->user)
         ->get("/notebook/{$this->notebook->id}/note/{$this->note->id}")
         ->assertRedirect(route('notebooks.index'));
-})->todo();
+});

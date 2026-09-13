@@ -55,11 +55,25 @@ it('accepts a notebook called "0"', function () {
     $this->postJson('/notebooks/create', ['name' => '0'])->assertOk();
 
     expect(Notebook::sole()->name)->toBe('0');
-})->todo();
+});
 
 // BUG-29: no input validation, an array name currently returns a 500
 it('rejects a name that is not text', function () {
     $this->postJson('/notebooks/create', ['name' => ['not', 'text']])->assertStatus(422);
 
     expect(Notebook::count())->toBe(0);
-})->todo();
+});
+
+it('rejects names longer than 255 characters', function () {
+    $this->postJson('/notebooks/create', ['name' => str_repeat('n', 256)])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('name');
+
+    expect(Notebook::count())->toBe(0);
+});
+
+it('accepts names of exactly 255 characters', function () {
+    $this->postJson('/notebooks/create', ['name' => str_repeat('n', 255)])->assertOk();
+
+    expect(Notebook::sole()->name)->toBe(str_repeat('n', 255));
+});

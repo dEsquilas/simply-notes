@@ -37,4 +37,4 @@ it('does not create notes in a trashed notebook', function () {
     $this->postJson("/notes/create/{$this->notebook->id}")->assertStatus(422);
 
     expect(Note::count())->toBe(0);
-})->todo();
+});

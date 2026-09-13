@@ -21,7 +21,7 @@ class NotebookVerifyOwnership
         $notebookId = $request->route('notebookId');
         $notebook = Notebook::find($notebookId);
         if(!$notebook)
-            return abort(403, 'Notebook not found');
+            return abort(404, 'Notebook not found');
 
         if(Gate::allows('verifyOwnership', $notebook))
             return $next($request);

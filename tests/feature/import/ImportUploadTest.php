@@ -109,7 +109,7 @@ it('does not leave an empty new notebook when the import fails', function () {
         ->assertStatus(422);
 
     expect(Notebook::where('name', 'Should not stay')->exists())->toBeFalse();
-})->todo();
+});
 
 // BUG-26
 it('does not import into a trashed notebook', function () {
@@ -119,4 +119,34 @@ it('does not import into a trashed notebook', function () {
         ->assertStatus(422);
 
     expect(Note::count())->toBe(0);
-})->todo();
+});
+
+it('keeps the chosen notebook when the import fails', function () {
+    $this->postJson('/import', ['file' => EvernoteExport::corruptZip(), 'notebook' => $this->notebook->id])
+        ->assertStatus(422);
+
+    expect($this->notebook->fresh())->not->toBeNull();
+});
+
+it('does not leave a failed job pointing to the removed new notebook', function () {
+    $this->postJson('/import', ['file' => EvernoteExport::corruptZip(), 'notebook' => -1, 'notebookName' => 'Gone'])
+        ->assertStatus(422);
+
+    expect(ImportJob::count())->toBe(0);
+});
+
+it('rejects a notebook that is not a single value', function () {
+    $this->postJson('/import', ['file' => validExport(), 'notebook' => [$this->notebook->id]])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('notebook');
+
+    expect(ImportJob::count())->toBe(0);
+});
+
+it('rejects a new notebook name that is not text or is too long', function (mixed $name) {
+    $this->postJson('/import', ['file' => validExport(), 'notebook' => -1, 'notebookName' => $name])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('notebookName');
+
+    expect(Notebook::count())->toBe(1);
+})->with(['array' => [['a', 'b']], 'too long' => str_repeat('n', 256)]);

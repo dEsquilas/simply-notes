@@ -98,7 +98,7 @@ it('rejects content that is not text', function () {
         ->assertStatus(422);
 
     expect($this->note->fresh()->content)->toBe('<p>Old</p>');
-})->todo();
+});
 
 // BUG-29: no input validation, an array title currently returns a 500
 it('rejects a title that is not text', function () {
@@ -106,4 +106,4 @@ it('rejects a title that is not text', function () {
         ->assertStatus(422);
 
     expect($this->note->fresh()->title)->toBe('Old title');
-})->todo();
+});

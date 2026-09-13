@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ImportJob;
+use App\Models\Note;
 use App\Models\Notebook;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,7 +14,7 @@ class NotebookController extends Controller
 
         $notebooks = Notebook::where('owner', auth()->id())
             ->where('status', 0)
-            ->withCount('notes')
+            ->withCount(['notes' => fn ($query) => $query->where('status', 0)])
             ->orderBy('created_at', 'DESC')
             ->get();
 
@@ -39,7 +41,11 @@ class NotebookController extends Controller
 
     public function create(Request $request){
 
-        if(!$request->name){
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+        ]);
+
+        if(blank($request->name)){
             return response()->json([
                 'message' => 'Please provide a name for the notebook'
             ], 422);
@@ -73,8 +79,16 @@ class NotebookController extends Controller
 
         $notebooks = Notebook::where('owner', auth()->id())->where('status', 1)->get();
 
+        // Trashed notes can be restored while their notebook is active
+        $notes = Note::where('status', 1)
+            ->whereHas('notebook', fn ($query) => $query->where('owner', auth()->id())->where('status', 0))
+            ->with('notebook:id,name')
+            ->orderBy('updated_at', 'DESC')
+            ->get(['id', 'title', 'notebook_id', 'updated_at']);
+
         return Inertia::render('notebooks/Trash', [
-            'notebooks' => $notebooks
+            'notebooks' => $notebooks,
+            'notes' => $notes,
         ]);
 
     }
@@ -83,7 +97,14 @@ class NotebookController extends Controller
 
         $notebook = Notebook::find($notebookId);
 
+        if($notebook->status != 1){
+            return response()->json([
+                'message' => 'Only notebooks in the trash can be deleted permanently'
+            ], 422);
+        }
+
         $notebook->notes()->delete();
+        ImportJob::where('notebook_id', $notebook->id)->delete();
         $notebook->delete();
 
         return response()->json([

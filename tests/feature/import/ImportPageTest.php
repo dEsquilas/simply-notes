@@ -85,7 +85,7 @@ it('shows failed imports', function () {
     $this->get('/import')
         ->assertInertia(fn (Assert $page) => $page->has('failedJobs', 1));
     $this->getJson('/import/polling')->assertJsonCount(1, 'failedJobs');
-})->todo();
+});
 
 // BUG-26
 it('does not offer trashed notebooks as import destination', function () {
@@ -93,4 +93,14 @@ it('does not offer trashed notebooks as import destination', function () {
 
     $this->get('/import')
         ->assertInertia(fn (Assert $page) => $page->has('notebooks', 1));
-})->todo();
+});
+
+it('reports failed imports with their notebook when polling', function () {
+    $failed = importJobFor($this->user, $this->notebook, 'failed');
+
+    $this->getJson('/import/polling')
+        ->assertJsonPath('failedJobs.0.id', $failed->id)
+        ->assertJsonPath('failedJobs.0.notebook.name', 'Evernote')
+        ->assertJsonCount(0, 'runningJobs')
+        ->assertJsonCount(0, 'finishedJobs');
+});

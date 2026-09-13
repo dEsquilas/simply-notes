@@ -54,6 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::group(['middleware' => [NoteVerifyOwnership::class]], function () {
         Route::post('/notes/update/{noteId}', [NoteController::class, 'update'])->name('note.update');
         Route::post('/notes/trash/{noteId}', [NoteController::class, 'trash'])->name('note.trash');
+        Route::post('/notes/trash/restore/{noteId}', [NoteController::class, 'restore'])->name('note.trash.restore');
     });
 
     Route::group(['middleware' => [

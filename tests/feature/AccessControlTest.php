@@ -22,6 +22,7 @@ dataset('routes requiring login', [
     'create note' => ['post', '/notes/create/1'],
     'update note' => ['post', '/notes/update/1'],
     'trash note' => ['post', '/notes/trash/1'],
+    'restore note' => ['post', '/notes/trash/restore/1'],
     'trash notebook' => ['post', '/notebooks/trash/1'],
     'restore notebook' => ['post', '/notebooks/trash/restore/1'],
     'delete notebook' => ['post', '/notebooks/trash/delete/1'],
@@ -40,6 +41,7 @@ dataset('note routes', [
     'view note' => ['get', '/notebook/{notebook}/note/{note}'],
     'update note' => ['post', '/notes/update/{note}'],
     'trash note' => ['post', '/notes/trash/{note}'],
+    'restore note' => ['post', '/notes/trash/restore/{note}'],
 ]);
 
 function routeFor(string $uri, ?Notebook $notebook = null, ?Note $note = null): string
@@ -99,23 +101,17 @@ it('answers 404 for notes that do not exist', function (string $method, string $
         ->assertNotFound();
 })->with('note routes');
 
-it('answers 403 for notebooks that do not exist', function (string $method, string $uri) {
-    $this->actingAs(User::factory()->create())
-        ->{$method.'Json'}(routeFor($uri))
-        ->assertForbidden();
-})->with('notebook routes');
-
 // BUG-05
 it('answers 404 for notebooks that do not exist', function (string $method, string $uri) {
     $this->actingAs(User::factory()->create())
         ->{$method.'Json'}(routeFor($uri))
         ->assertNotFound();
-})->with('notebook routes')->todo();
+})->with('notebook routes');
 
 it('treats non-numeric ids as missing records', function () {
     $this->actingAs(User::factory()->create());
 
-    $this->getJson('/notebook/abc')->assertForbidden();
+    $this->getJson('/notebook/abc')->assertNotFound();
     $this->postJson('/notes/update/abc')->assertNotFound();
 });
 
@@ -131,5 +127,5 @@ it('never lists another user\'s data', function () {
     $this->get('/notebooks')->assertDontSee('Foreign active');
     $this->get('/notebooks/trash')->assertDontSee('Foreign trashed');
     $this->get('/import')->assertDontSee('Foreign active');
-    $this->getJson('/import/polling')->assertExactJson(['runningJobs' => [], 'finishedJobs' => []]);
+    $this->getJson('/import/polling')->assertExactJson(['runningJobs' => [], 'finishedJobs' => [], 'failedJobs' => []]);
 });

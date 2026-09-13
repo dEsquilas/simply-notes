@@ -49,4 +49,4 @@ it('does not count trashed notes', function () {
     $this->actingAs($this->user)
         ->get('/notebooks')
         ->assertInertia(fn (Assert $page) => $page->where('notebooks.0.notes_count', 2));
-})->todo();
+});

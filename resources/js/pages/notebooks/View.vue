@@ -1,6 +1,8 @@
 <script setup>
 import {
     ArrowPathIcon,
+    ChevronDoubleLeftIcon,
+    ChevronDoubleRightIcon,
     NewspaperIcon,
     PlusCircleIcon,
     XCircleIcon
@@ -35,6 +37,30 @@ const notebook = ref(props.inNotebook)
 const notes = computed(() => props.inNotes)
 const currentNote = ref(props.currentNote || notes.value[0])
 
+const desktopSidebarStorageKey = 'notebooks.desktopSidebarVisible'
+
+const readDesktopSidebarVisible = () => {
+    // The SSR bundle renders without window: fall back to the default there
+    if (typeof window === 'undefined')
+        return true
+    try {
+        const stored = window.localStorage.getItem(desktopSidebarStorageKey)
+        return stored === null ? true : stored === 'true'
+    } catch (e) {
+        return true
+    }
+}
+
+const isDesktopSidebarVisible = ref(readDesktopSidebarVisible())
+
+const toggleDesktopSidebar = () => {
+    isDesktopSidebarVisible.value = !isDesktopSidebarVisible.value
+    try {
+        window.localStorage.setItem(desktopSidebarStorageKey, isDesktopSidebarVisible.value ? 'true' : 'false')
+    } catch (e) {
+        // localStorage unavailable (e.g. private browsing): state just won't persist
+    }
+}
 
 const maxMobileWidth = 768
 
@@ -119,12 +145,23 @@ const deleteNote = (data) => {
                     :class="{
                         'hidden': !isSidebarVisible && isMobile,
                          'w-full': isSidebarVisible && isMobile,
+                         'md:hidden': !isDesktopSidebarVisible,
                     }"
                 >
                     <header class="p-4 border-b border-cgray">
-                        <h3 class="text-xl font-bold text-white mb-4">
-                            <NewspaperIcon class="w-6 inline-block mr-4" />
-                            Notas
+                        <h3 class="text-xl font-bold text-white mb-4 flex flex-row items-center justify-between">
+                            <span>
+                                <NewspaperIcon class="w-6 inline-block mr-4" />
+                                Notas
+                            </span>
+                            <button
+                                data-test="hide-notes-sidebar"
+                                @click="toggleDesktopSidebar()"
+                                title="Ocultar listado"
+                                class="hidden md:inline-block text-main2 cursor-pointer hover:opacity-80"
+                            >
+                                <ChevronDoubleLeftIcon class="test-hide-sidebar w-6" />
+                            </button>
                         </h3>
                         <div class="flex flex-row relative">
                             <input
@@ -160,13 +197,25 @@ const deleteNote = (data) => {
                 </aside>
                 <article data-test="editor-pane" class="
                                 grow
-                                md:max-w-[calc(100%-350px)]
+                                relative
                                 md:block
                                 "
-                        :class="{
-                            'hidden': isSidebarVisible && isMobile,
-                            'w-full': !isSidebarVisible && isMobile,
-                        }">
+                        :class="[
+                            isDesktopSidebarVisible ? 'md:max-w-[calc(100%-350px)]' : 'md:max-w-full',
+                            {
+                                'hidden': isSidebarVisible && isMobile,
+                                'w-full': !isSidebarVisible && isMobile,
+                            },
+                        ]">
+                    <button
+                        data-test="show-notes-sidebar"
+                        @click="toggleDesktopSidebar()"
+                        v-show="!isDesktopSidebarVisible"
+                        title="Ver listado"
+                        class="hidden md:inline-block absolute top-10 left-1 z-10 text-main2 cursor-pointer hover:opacity-80"
+                    >
+                        <ChevronDoubleRightIcon class="test-show-sidebar w-6" />
+                    </button>
                     <note
                         v-if="currentNote"
                         @update-note="updateNote"

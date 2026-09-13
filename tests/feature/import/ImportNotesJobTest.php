@@ -223,14 +223,14 @@ describe('HTML conversion', function () {
         $content = importNoteBody('<table><tbody><tr><td>a</td></tr></tbody></table><table><tbody><tr><td>b</td></tr></tbody></table>')->content;
 
         expect($content)->toContain('<td data-row="row-0">b</td>');
-    })->todo();
+    });
 
     // BUG-31
     it('imports the body when en-note has different attributes', function () {
         $job = runEvernoteImport(['note.html' => '<html><body><h1>t</h1><en-note class="peso"><div class="para">Body</div></en-note></body></html>']);
 
         expect(Note::where('notebook_id', $job->notebook_id)->sole()->content)->toBe('<p>Body</p>');
-    })->todo();
+    });
 
     it('imports tagged content that sits next to loose text', function () {
         expect(importNoteBody('loose text <div class="para">Kept</div>')->content)->toContain('<p>Kept</p>');
@@ -239,7 +239,15 @@ describe('HTML conversion', function () {
     // BUG-32
     it('imports bodies that are plain text', function () {
         expect(importNoteBody('Just text')->content)->toBe('Just text');
-    })->todo();
+    });
+
+    it('ignores the whitespace between paragraphs', function () {
+        expect(importNoteBody("<div class=\"para\">a</div>\n  <div class=\"para\">b</div>")->content)->toBe('<p>a</p><p>b</p>');
+    });
+
+    it('keeps text next to paragraphs', function () {
+        expect(importNoteBody('Intro <div class="para">Body</div>')->content)->toBe('Intro <p>Body</p>');
+    });
 });
 
 describe('images', function () {

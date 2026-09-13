@@ -284,12 +284,15 @@ class ImportNotes implements ShouldQueue
             $img->setAttribute('src', 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path)));
         }
 
-        // foreach td in tr, set the data-row value
-        $trs = $xpath->query('//tr');
-        foreach ($trs as $k => $tr) {
-            $tds = $xpath->query('.//td', $tr);
-            foreach ($tds as $td) {
-                $td->setAttribute('data-row', 'row-' . $k);
+        // set the data-row value of every td, numbering the rows of each table from 0
+        $tables = $xpath->query('//table');
+        foreach ($tables as $table) {
+            $trs = $xpath->query('.//tr', $table);
+            foreach ($trs as $k => $tr) {
+                $tds = $xpath->query('.//td', $tr);
+                foreach ($tds as $td) {
+                    $td->setAttribute('data-row', 'row-' . $k);
+                }
             }
         }
 
@@ -365,12 +368,12 @@ class ImportNotes implements ShouldQueue
         }
 
         // get the body content
-        $enNotes = $xpath->query('//en-note[@class="peso" and @style="white-space: inherit;"]');
+        $enNotes = $xpath->query('//en-note');
         foreach ($enNotes as $enNote) {
             foreach ($enNote->childNodes as $childNode) {
-                // Iterate over the child nodes of the en-note element
+                // Iterate over the child nodes of the en-note element, skipping the whitespace between them
                 $html = $doc->saveHTML($childNode);
-                if (strpos($html, '<') === false) {
+                if (trim($html) === '') {
                     continue;
                 }
                 $bodyContent .= $html;

@@ -15,8 +15,6 @@ class NoteController extends Controller
         $note = Note::find($noteId);
         $notebook = $note->notebook;
 
-        ray($notebook->id, $notebookId, $note->id, $noteId);
-
         if($notebook->id != $notebookId){
             return redirect()->route('notebooks.index');
         }

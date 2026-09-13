@@ -1,11 +1,9 @@
 <?php
 
+// ray() only exists with dev dependencies: in production it breaks the page with a 500 (BUG-01)
 arch('debugging helpers are not left in the app')
-    ->expect(['dd', 'dump', 'var_dump'])
+    ->expect(['dd', 'dump', 'var_dump', 'ray'])
     ->not->toBeUsed();
-
-// BUG-01: NoteController::view calls ray(), which does not exist in production (no dev dependencies) and returns a 500
-it('does not call ray() in app code')->todo();
 
 arch('controllers are suffixed with Controller')
     ->expect('App\Http\Controllers')

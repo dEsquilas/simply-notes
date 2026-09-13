@@ -32,4 +32,4 @@ it('rolls back every migration', function () {
     expect(config('database.connections.sqlite.database'))->toBe(':memory:');
 
     expect(Artisan::call('migrate:reset'))->toBe(0);
-})->todo();
+});

@@ -90,9 +90,7 @@ it('answers 404 when the notebook does not exist', function (string|int $noteboo
 
 it('answers 422 and marks the job failed when the zip cannot be opened', function () {
     // Starts like a zip so it passes validation, but is not a readable archive
-    $path = tempnam(sys_get_temp_dir(), 'corrupt').'.zip';
-    file_put_contents($path, "PK\x03\x04".str_repeat("\0", 64));
-    $file = new UploadedFile($path, 'export.zip', 'application/zip', null, true);
+    $file = EvernoteExport::corruptZip();
 
     $this->postJson('/import', ['file' => $file, 'notebook' => $this->notebook->id])
         ->assertStatus(422)
@@ -105,9 +103,7 @@ it('answers 422 and marks the job failed when the zip cannot be opened', functio
 
 // BUG-28
 it('does not leave an empty new notebook when the import fails', function () {
-    $path = tempnam(sys_get_temp_dir(), 'corrupt').'.zip';
-    file_put_contents($path, "PK\x03\x04".str_repeat("\0", 64));
-    $file = new UploadedFile($path, 'export.zip', 'application/zip', null, true);
+    $file = EvernoteExport::corruptZip();
 
     $this->postJson('/import', ['file' => $file, 'notebook' => -1, 'notebookName' => 'Should not stay'])
         ->assertStatus(422);

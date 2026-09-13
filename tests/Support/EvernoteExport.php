@@ -28,6 +28,19 @@ class EvernoteExport
         return base64_decode(self::PNG);
     }
 
+    /**
+     * A real zip whose end-of-central-directory signature is broken: file type detection still sees
+     * a zip (on macOS and Linux) so upload validation accepts it, but ZipArchive cannot open it.
+     */
+    public static function corruptZip(): UploadedFile
+    {
+        $bytes = file_get_contents(self::zip(['note.html' => self::html('t', 'x')])->getPathname());
+        $path = tempnam(sys_get_temp_dir(), 'corrupt').'.zip';
+        file_put_contents($path, substr_replace($bytes, 'XX', strrpos($bytes, "PK\x05\x06"), 2));
+
+        return new UploadedFile($path, 'export.zip', 'application/zip', null, true);
+    }
+
     /** @param array<string, string> $files path inside the zip => contents */
     public static function zip(array $files): UploadedFile
     {

@@ -176,8 +176,7 @@ it('keeps working when a job\'s notebook was deleted', function () {
 
 // BUG-10
 it('shows imports that failed', function () {
-    $zip = exportZipPath();
-    file_put_contents($zip, "PK\x03\x04".str_repeat("\0", 64));
+    $zip = EvernoteExport::corruptZip()->getPathname();
 
     $this->browse(fn (Browser $browser) => $browser
         ->loginAs($this->user)

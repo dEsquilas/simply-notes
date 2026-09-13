@@ -160,7 +160,11 @@ const imageUploadHandler = () => {
     </div>
 </template>
 <style lang="scss">
+// Takes the height the note title leaves (Note.vue is a full-height flex column)
 .quill-editor-container {
-    height: calc(100vh - 171px)
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 </style>

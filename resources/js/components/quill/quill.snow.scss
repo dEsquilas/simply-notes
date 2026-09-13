@@ -15,7 +15,9 @@
     font-family: Figtree, Helvetica, Arial, sans-serif;
     letter-spacing: 0.5px;
     font-size: 16px;
-    height: calc(100% - 42px); /* less toolbar */
+    /* fills what the toolbar leaves in the flex column, whether the toolbar is shown or not */
+    flex: 1 1 0;
+    min-height: 0;
     margin: 0;
     position: relative;
     color: #fff;
@@ -49,7 +51,8 @@
     height: 100%;
     outline: none;
     overflow-y: auto;
-    padding: 3% 8%;
+    // Fixed, aligned with the note title: a percentage pushes the text far from the edge on wide panes
+    padding: 1.5rem 2rem;
     tab-size: 4;
     -moz-tab-size: 4;
     text-align: left;
@@ -117,16 +120,50 @@
     color: #777
 }
 
+// Bullets are drawn with CSS instead of glyphs: every shape gets the same size and vertical centre
 .ql-editor li[data-list=bullet] > .ql-ui:before {
-    content: '\2022'
+    content: '';
+    box-sizing: border-box;
+    width: .42em;
+    height: .42em;
+    margin-left: -.87em;
+    margin-right: .45em;
+    vertical-align: .12em;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+// Nested bullets change marker per level, cycling filled circle → hollow circle → square
+.ql-editor li[data-list=bullet]:is(.ql-indent-1, .ql-indent-4, .ql-indent-7) > .ql-ui:before {
+    background: transparent;
+    border: 1.5px solid currentColor;
+}
+
+.ql-editor li[data-list=bullet]:is(.ql-indent-2, .ql-indent-5, .ql-indent-8) > .ql-ui:before {
+    border-radius: 1px;
+}
+
+// Real-looking checkboxes instead of the tiny grey ☐/☑ glyphs
+.ql-editor li[data-list=checked] > .ql-ui:before, .ql-editor li[data-list=unchecked] > .ql-ui:before {
+    content: '';
+    box-sizing: border-box;
+    width: 1.1em;
+    height: 1.1em;
+    margin-left: -1.6em;
+    margin-right: .5em;
+    vertical-align: -0.2em;
+    border: 2px solid var(--main4, #f2cd87);
+    border-radius: 4px;
+    transition: background-color .15s;
 }
 
 .ql-editor li[data-list=checked] > .ql-ui:before {
-    content: '\2611'
+    background: var(--main4, #f2cd87) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%23272a2a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 85% no-repeat;
 }
 
-.ql-editor li[data-list=unchecked] > .ql-ui:before {
-    content: '\2610'
+.ql-editor li[data-list=checked] {
+    color: #8a8f98;
+    text-decoration: line-through;
 }
 
 @supports (counter-set:none) {

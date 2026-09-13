@@ -246,27 +246,28 @@ const onRestored = ({ note }) => {
 
 </script>
 <template>
-    <div class="h-full">
-        <div class="flex items-center justify-end px-8 pt-4">
+    <!-- Fills the viewport below the 65px top bar, so the editor takes whatever height the title leaves -->
+    <div class="flex flex-col h-[calc(100vh-65px)]">
+        <div class="shrink-0 flex items-center gap-4 pr-8">
+            <input data-test="note-title" tabindex="1"
+                   @keydown="onTitleKeydown"
+                   v-model="noteTitle"
+                   placeholder="Nueva nota"
+                   type="text"
+                   class="text-ellipsis flex-1 min-w-0 bg-transparent border-none focus:outline-hidden focus:border-none focus:ring-0 text-4xl text-white px-8 py-6
+                   text-2xl
+                   md:text-4xl
+                   "
+            >
             <button
                 data-test="note-history-button"
                 @click="openHistory"
                 title="Historial de versiones"
-                class="cursor-pointer hover:opacity-80"
+                class="shrink-0 cursor-pointer hover:opacity-80"
             >
                 <ClockIcon class="w-7 text-main4" />
             </button>
         </div>
-        <input data-test="note-title" tabindex="1"
-               @keydown="onTitleKeydown"
-               v-model="noteTitle"
-               placeholder="Nueva nota"
-               type="text"
-               class="text-ellipsis w-full bg-transparent border-none focus:outline-hidden focus:border-none focus:ring-0 text-4xl text-white px-8 py-8
-               text-2xl
-               md:text-4xl
-               "
-        >
         <QuillEditor @updated-content="dispatchAutosave"
                      @keydown.ctrl="forceSave"
                     v-model="noteContent"

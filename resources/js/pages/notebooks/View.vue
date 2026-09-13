@@ -66,13 +66,13 @@ const maxMobileWidth = 768
 
 onMounted(() => {
 
-    if (window.innerWidth / window.devicePixelRatio < maxMobileWidth) {
+    // innerWidth is already in CSS pixels: dividing by devicePixelRatio put Retina screens in mobile mode
+    if (window.innerWidth < maxMobileWidth) {
         isMobile.value = true
-        console.log("Setted")
     }else
         isMobile.value = false
     window.addEventListener('resize', () => {
-        if (window.innerWidth / window.devicePixelRatio < maxMobileWidth)
+        if (window.innerWidth < maxMobileWidth)
             isMobile.value = true
         else
             isMobile.value = false
@@ -158,9 +158,9 @@ const deleteNote = (data) => {
                                 data-test="hide-notes-sidebar"
                                 @click="toggleDesktopSidebar()"
                                 title="Ocultar listado"
-                                class="hidden md:inline-block text-main2 cursor-pointer hover:opacity-80"
+                                class="hidden md:inline-block text-main4 cursor-pointer hover:opacity-80"
                             >
-                                <ChevronDoubleLeftIcon class="test-hide-sidebar w-6" />
+                                <ChevronDoubleLeftIcon class="test-hide-sidebar w-7" />
                             </button>
                         </h3>
                         <div class="flex flex-row relative">
@@ -195,13 +195,14 @@ const deleteNote = (data) => {
                         :current-note-id="currentNote.id"
                         :notes="notes" :filter="filter" />
                 </aside>
+                <!-- With the list hidden on desktop, the title makes room for the button that brings it back -->
                 <article data-test="editor-pane" class="
                                 grow
                                 relative
                                 md:block
                                 "
                         :class="[
-                            isDesktopSidebarVisible ? 'md:max-w-[calc(100%-350px)]' : 'md:max-w-full',
+                            isDesktopSidebarVisible ? 'md:max-w-[calc(100%-350px)]' : 'md:max-w-full md:[&_[data-test=note-title]]:pl-16',
                             {
                                 'hidden': isSidebarVisible && isMobile,
                                 'w-full': !isSidebarVisible && isMobile,
@@ -212,9 +213,9 @@ const deleteNote = (data) => {
                         @click="toggleDesktopSidebar()"
                         v-show="!isDesktopSidebarVisible"
                         title="Ver listado"
-                        class="hidden md:inline-block absolute top-10 left-1 z-10 text-main2 cursor-pointer hover:opacity-80"
+                        class="hidden md:inline-block absolute top-[30px] left-5 z-10 text-main4 cursor-pointer hover:opacity-80"
                     >
-                        <ChevronDoubleRightIcon class="test-show-sidebar w-6" />
+                        <ChevronDoubleRightIcon class="test-show-sidebar w-7" />
                     </button>
                     <note
                         v-if="currentNote"

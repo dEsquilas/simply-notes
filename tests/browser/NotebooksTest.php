@@ -102,7 +102,7 @@ it('sends a notebook to the trash from its context menu', function () {
     $page = visit('/notebooks')->assertVisible('@notebook-'.$notebook->id);
     deleteFromContextMenu($page, 'notebook-'.$notebook->id)->assertMissing('@notebook-'.$notebook->id);
 
-    waitForDatabase($page, fn () => $notebook->fresh()->status === 1);
+    waitForDatabase($page, fn () => $notebook->fresh()->trashed());
 
     $page->navigate('/notebooks/trash')->assertSee('Old stuff');
 });
@@ -112,7 +112,7 @@ it('keeps the notebook on screen when sending it to the trash fails', function (
     $notebook = Notebook::factory()->ownedBy($this->user)->create(['name' => 'Stays']);
 
     $page = visit('/notebooks')->assertVisible('@notebook-'.$notebook->id);
-    $notebook->delete();
+    $notebook->forceDelete();
 
     deleteFromContextMenu($page, 'notebook-'.$notebook->id)
         ->assertSee('The notebook could not be sent to the trash')

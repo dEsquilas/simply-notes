@@ -1,6 +1,7 @@
 <script setup>
 import axios from 'axios'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import DateHelper from '@/helpers/DateHelper'
 import { notify } from "@kyvg/vue3-notification"
 import { defineProps, ref } from 'vue'
 import { TrashIcon, ArrowUturnUpIcon } from '@heroicons/vue/24/outline'
@@ -16,11 +17,20 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    retentionDays: {
+        type: Number,
+        required: true,
+    },
 })
 
 const currentNotebooks = ref(props.notebooks)
 const currentNotes = ref(props.notes)
 
+const purgeDate = (deletedAt) => {
+    const date = new Date(deletedAt)
+    date.setDate(date.getDate() + props.retentionDays)
+    return date
+}
 
 const deleteNotebook = (notebookId) => {
 
@@ -67,6 +77,41 @@ const restoreNote = (noteId) => {
 
 }
 
+const deleteNote = (noteId) => {
+
+    let confirmDelete = confirm('Are you sure you want to permanently delete this note?')
+
+    if (!confirmDelete) {
+        return
+    }
+
+    axios.post(`/notes/trash/delete/${noteId}`).then(() => {
+        currentNotes.value = currentNotes.value.filter(note => note.id !== noteId)
+        notify({ title: 'Success', text: 'Note deleted permanently', type: 'success' })
+    }).catch(() => {
+        notify({ title: 'Error', text: 'Failed to delete note', type: 'error' })
+    })
+
+}
+
+const emptyTrash = () => {
+
+    let confirmEmpty = confirm('Are you sure you want to permanently delete everything in the trash?')
+
+    if (!confirmEmpty) {
+        return
+    }
+
+    axios.post('/notebooks/trash/empty').then(() => {
+        currentNotebooks.value = []
+        currentNotes.value = []
+        notify({ title: 'Success', text: 'Trash emptied successfully', type: 'success' })
+    }).catch(() => {
+        notify({ title: 'Error', text: 'Failed to empty the trash', type: 'error' })
+    })
+
+}
+
 
 </script>
 
@@ -75,15 +120,28 @@ const restoreNote = (noteId) => {
 
     <AuthenticatedLayout>
         <section class="flex flex-col max-w-[1200px] mx-auto w-full">
-            <h2 class="pt-8 px-4 text-4xl font-extrabold text-white mb-2">Trash</h2>
+            <div class="flex items-center justify-between pt-8 px-4 mb-2">
+                <h2 class="text-4xl font-extrabold text-white">Trash</h2>
+                <button
+                    data-test="empty-trash"
+                    @click="emptyTrash()"
+                    v-show="currentNotebooks.length > 0 || currentNotes.length > 0"
+                    class="bg-main3 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-main4 hover:text-cblack transition-colors cursor-pointer"
+                >
+                    Empty trash
+                </button>
+            </div>
 
             <div class="max-w-[1200px] w-full m-auto grid lg:grid-cols-3 sm:grid-cols-2 gap-4 p-4 mt-0">
                 <article v-for="notebook in currentNotebooks" :key="notebook.id" :data-test="'trashed-notebook-' + notebook.id" class="w-full mx-auto gap-4">
                     <div class="bg-main1 overflow-hidden shadow-xs rounded-lg hover:bg-main2 transition-colors">
                         <div class="p-6 text-white flex justify-between">
-                            <h3 data-test="trashed-notebook-name" class="text-lg font-semibold">{{ notebook.name }}</h3>
-                            <p class="text-sm">{{ notebook.description }}</p>
-                            <div class="flex">
+                            <div class="overflow-hidden">
+                                <h3 data-test="trashed-notebook-name" class="text-lg font-semibold truncate">{{ notebook.name }}</h3>
+                                <p data-test="trashed-notebook-deleted-at" class="text-xs italic">Deleted {{ DateHelper.formatDate(notebook.deleted_at) }}</p>
+                                <p data-test="trashed-notebook-purge-at" class="text-xs italic">Purges on {{ DateHelper.formatDate(purgeDate(notebook.deleted_at)) }}</p>
+                            </div>
+                            <div class="flex shrink-0">
                                 <!-- Icon components only pass class through, so their test hook is a test-* class -->
                                 <ArrowUturnUpIcon @click=restoreNotebook(notebook.id) class="test-restore-notebook w-6 h-6 bg-blue mr-4 cursor-pointer" />
                                 <TrashIcon @click=deleteNotebook(notebook.id) class="test-delete-notebook w-6 h-6 text-red-500 cursor-pointer" />
@@ -103,9 +161,14 @@ const restoreNote = (noteId) => {
                         <div class="overflow-hidden">
                             <h4 data-test="trashed-note-title" class="font-semibold truncate">{{ note.title || 'Nueva nota' }}</h4>
                             <p class="text-sm italic truncate">{{ note.notebook.name }}</p>
+                            <p data-test="trashed-note-deleted-at" class="text-xs italic">Deleted {{ DateHelper.formatDate(note.deleted_at) }}</p>
+                            <p data-test="trashed-note-purge-at" class="text-xs italic">Purges on {{ DateHelper.formatDate(purgeDate(note.deleted_at)) }}</p>
                         </div>
                         <!-- Icon components only pass class through, so their test hook is a test-* class -->
-                        <ArrowUturnUpIcon @click="restoreNote(note.id)" class="test-restore-note w-6 h-6 shrink-0 cursor-pointer" />
+                        <div class="flex shrink-0">
+                            <ArrowUturnUpIcon @click="restoreNote(note.id)" class="test-restore-note w-6 h-6 mr-4 cursor-pointer" />
+                            <TrashIcon @click="deleteNote(note.id)" class="test-delete-note w-6 h-6 text-red-500 cursor-pointer" />
+                        </div>
                     </li>
                 </ul>
             </section>

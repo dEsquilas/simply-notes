@@ -42,13 +42,13 @@ it('applies the same rules through the gate', function () {
 });
 
 it('denies a note whose notebook no longer exists', function () {
-    $this->notebook->delete();
+    $this->notebook->forceDelete();
 
     expect((new NotePolicy())->verifyOwnership($this->owner, $this->note->fresh()))->toBeFalse();
 });
 
 it('still treats a trashed notebook as owned', function () {
-    $this->notebook->forceFill(['status' => 1])->save();
+    $this->notebook->delete();
 
     expect((new NotebookPolicy())->update($this->owner, $this->notebook))->toBeTrue();
 });

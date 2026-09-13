@@ -18,7 +18,7 @@ it('sends a notebook to the trash', function () {
         ->assertOk()
         ->assertExactJson(['message' => 'Notebook deleted successfully']);
 
-    expect($notebook->fresh()->status)->toBe(1);
+    expect($notebook->fresh()->trashed())->toBeTrue();
 });
 
 it('keeps the notes of a trashed notebook', function () {
@@ -35,7 +35,7 @@ it('trashes an already trashed notebook without errors', function () {
 
     $this->postJson("/notebooks/trash/{$notebook->id}")->assertOk();
 
-    expect($notebook->fresh()->status)->toBe(1);
+    expect($notebook->fresh()->trashed())->toBeTrue();
 });
 
 it('lists only the user\'s trashed notebooks on the trash page', function () {
@@ -63,7 +63,7 @@ it('restores a trashed notebook', function () {
         ->assertOk()
         ->assertExactJson(['message' => 'Notebook restored successfully']);
 
-    expect($notebook->fresh()->status)->toBe(0);
+    expect($notebook->fresh()->trashed())->toBeFalse();
     $this->get('/notebooks')->assertInertia(fn (Assert $page) => $page->where('notebooks.0.id', $notebook->id));
 });
 
@@ -72,7 +72,7 @@ it('restores an active notebook without errors', function () {
 
     $this->postJson("/notebooks/trash/restore/{$notebook->id}")->assertOk();
 
-    expect($notebook->fresh()->status)->toBe(0);
+    expect($notebook->fresh()->trashed())->toBeFalse();
 });
 
 it('permanently deletes a trashed notebook and all its notes', function () {
@@ -136,4 +136,49 @@ it('keeps the import jobs of other notebooks when deleting one permanently', fun
     $this->postJson("/notebooks/trash/delete/{$notebook->id}")->assertOk();
 
     expect(ImportJob::sole()->id)->toBe($kept->id);
+});
+
+it('shows when each trashed item was deleted and the retention period', function () {
+    Notebook::factory()->ownedBy($this->user)->trashed()->create();
+    Note::factory()->for(Notebook::factory()->ownedBy($this->user))->trashed()->create();
+
+    $this->get('/notebooks/trash')
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('retentionDays', config('trash.retention_days'))
+            ->where('notebooks.0.deleted_at', fn ($value) => $value !== null)
+            ->where('notes.0.deleted_at', fn ($value) => $value !== null)
+        );
+});
+
+it('empties the trash: permanently deletes trashed notebooks with their notes and import jobs, and independently trashed notes', function () {
+    $notebook = Notebook::factory()->ownedBy($this->user)->trashed()->create();
+    $notebookNote = Note::factory()->for($notebook)->create();
+    ImportJob::factory()->finished()->create(['user_id' => $this->user->id, 'notebook_id' => $notebook->id]);
+
+    $activeNotebook = Notebook::factory()->ownedBy($this->user)->create();
+    $trashedNote = Note::factory()->for($activeNotebook)->trashed()->create();
+
+    $this->postJson('/notebooks/trash/empty')
+        ->assertOk()
+        ->assertExactJson(['message' => 'Trash emptied successfully']);
+
+    expect(Notebook::withTrashed()->find($notebook->id))->toBeNull()
+        ->and(Note::withTrashed()->find($notebookNote->id))->toBeNull()
+        ->and(ImportJob::where('notebook_id', $notebook->id)->count())->toBe(0)
+        ->and(Note::withTrashed()->find($trashedNote->id))->toBeNull()
+        ->and(Notebook::find($activeNotebook->id))->not->toBeNull();
+});
+
+it('does not empty another user\'s trash', function () {
+    $foreignNotebook = Notebook::factory()->trashed()->create();
+    $foreignNote = Note::factory()->for(Notebook::factory())->trashed()->create();
+
+    $this->postJson('/notebooks/trash/empty')->assertOk();
+
+    expect(Notebook::withTrashed()->find($foreignNotebook->id))->not->toBeNull()
+        ->and(Note::withTrashed()->find($foreignNote->id))->not->toBeNull();
+});
+
+it('does nothing when emptying an already empty trash', function () {
+    $this->postJson('/notebooks/trash/empty')->assertOk();
 });

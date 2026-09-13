@@ -23,9 +23,11 @@ dataset('routes requiring login', [
     'update note' => ['post', '/notes/update/1'],
     'trash note' => ['post', '/notes/trash/1'],
     'restore note' => ['post', '/notes/trash/restore/1'],
+    'delete note' => ['post', '/notes/trash/delete/1'],
     'trash notebook' => ['post', '/notebooks/trash/1'],
     'restore notebook' => ['post', '/notebooks/trash/restore/1'],
     'delete notebook' => ['post', '/notebooks/trash/delete/1'],
+    'empty trash' => ['post', '/notebooks/trash/empty'],
     'logout' => ['post', '/logout'],
 ]);
 
@@ -42,6 +44,7 @@ dataset('note routes', [
     'update note' => ['post', '/notes/update/{note}'],
     'trash note' => ['post', '/notes/trash/{note}'],
     'restore note' => ['post', '/notes/trash/restore/{note}'],
+    'delete note' => ['post', '/notes/trash/delete/{note}'],
 ]);
 
 function routeFor(string $uri, ?Notebook $notebook = null, ?Note $note = null): string
@@ -66,7 +69,7 @@ it('forbids notebook routes on another user\'s notebook', function (string $meth
         ->assertForbidden();
 
     expect($notebook->fresh())->not->toBeNull()
-        ->and($notebook->fresh()->status)->toBe(0)
+        ->and($notebook->fresh()->trashed())->toBeFalse()
         ->and($note->fresh())->not->toBeNull()
         ->and(Note::count())->toBe(1);
 })->with('notebook routes');
@@ -79,7 +82,7 @@ it('forbids note routes on another user\'s note', function (string $method, stri
         ->assertForbidden();
 
     expect($note->fresh()->title)->toBe('Original')
-        ->and($note->fresh()->status)->toBe(0);
+        ->and($note->fresh()->trashed())->toBeFalse();
 })->with('note routes');
 
 it('forbids opening another user\'s note through your own notebook', function () {

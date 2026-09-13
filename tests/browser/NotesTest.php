@@ -181,7 +181,7 @@ it('tells the user when a note could not be saved', function () {
 
     $page = visit($this->url);
     readyToEdit($page);
-    $note->delete();
+    $note->forceDelete();
 
     typeLikeAUser($page, '@note-title', 'Lost change')->assertSee('The note could not be saved');
 });
@@ -239,7 +239,7 @@ it('sends the open note to the trash and opens the next one', function () {
         ->assertMissing('@note-'.$open->id)
         ->assertValue('@note-title', 'Next');
 
-    waitForDatabase($page, fn () => $open->fresh()->status === 1);
+    waitForDatabase($page, fn () => $open->fresh()->trashed());
 });
 
 it('sends a note that is not open to the trash without changing the editor', function () {
@@ -251,7 +251,7 @@ it('sends a note that is not open to the trash without changing the editor', fun
         ->assertMissing('@note-'.$other->id)
         ->assertValue('@note-title', 'Open');
 
-    waitForDatabase($page, fn () => $other->fresh()->status === 1);
+    waitForDatabase($page, fn () => $other->fresh()->trashed());
 });
 
 it('shows the empty state after trashing the last note', function () {
@@ -269,7 +269,7 @@ it('keeps the note listed when sending it to the trash fails', function () {
     $note = Note::factory()->for($this->notebook)->create(['title' => 'Stays']);
 
     $page = visit($this->url)->assertVisible('@note-'.$note->id);
-    $note->delete();
+    $note->forceDelete();
 
     deleteFromContextMenu($page, 'note-'.$note->id)
         ->assertSee('The note could not be sent to the trash')
@@ -287,7 +287,7 @@ it('lets the user restore a trashed note', function () {
         ->click('[data-test="trashed-note-'.$note->id.'"] .test-restore-note')
         ->assertMissing('@trashed-note-'.$note->id);
 
-    waitForDatabase($page, fn () => $note->fresh()->status === 0);
+    waitForDatabase($page, fn () => ! $note->fresh()->trashed());
 
     $page->navigate("/notebook/{$this->notebook->id}")->assertVisible('@note-'.$note->id);
 });
@@ -296,7 +296,7 @@ it('keeps the note in the trash when restoring it fails', function () {
     $note = Note::factory()->for($this->notebook)->trashed()->create(['title' => 'Stuck']);
 
     $page = visit('/notebooks/trash')->assertVisible('@trashed-note-'.$note->id);
-    $note->delete();
+    $note->forceDelete();
 
     $page->click('[data-test="trashed-note-'.$note->id.'"] .test-restore-note')
         ->assertSee('Failed to restore note')

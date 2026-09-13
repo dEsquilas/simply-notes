@@ -15,7 +15,6 @@ class NotebookFactory extends Factory
         return [
             'name' => fake()->words(2, true),
             'owner' => User::factory(),
-            'status' => 0,
         ];
     }
 
@@ -26,6 +25,6 @@ class NotebookFactory extends Factory
 
     public function trashed(): static
     {
-        return $this->state(fn () => ['status' => 1]);
+        return $this->state(fn () => ['deleted_at' => now()]);
     }
 }

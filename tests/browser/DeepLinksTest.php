@@ -29,7 +29,7 @@ it('redirects to the notebooks list when the note belongs to another of the user
 });
 
 it('redirects to the notebooks list when opening a trashed notebook', function () {
-    $this->notebook->forceFill(['status' => 1])->save();
+    $this->notebook->delete();
 
     visit("/notebook/{$this->notebook->id}")->assertPathIs('/notebooks');
 });
@@ -57,7 +57,7 @@ it('does not open a trashed note from its URL', function () {
 // BUG-03
 it('does not open notes of a trashed notebook from their URL', function () {
     $note = Note::factory()->for($this->notebook)->create();
-    $this->notebook->forceFill(['status' => 1])->save();
+    $this->notebook->delete();
 
     visit("/notebook/{$this->notebook->id}/note/{$note->id}")->assertPathIs('/notebooks');
 });

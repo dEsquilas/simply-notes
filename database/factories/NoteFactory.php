@@ -16,12 +16,11 @@ class NoteFactory extends Factory
             'notebook_id' => Notebook::factory(),
             'title' => fake()->sentence(3),
             'content' => '<p>'.fake()->paragraph().'</p>',
-            'status' => 0,
         ];
     }
 
     public function trashed(): static
     {
-        return $this->state(fn () => ['status' => 1]);
+        return $this->state(fn () => ['deleted_at' => now()]);
     }
 }

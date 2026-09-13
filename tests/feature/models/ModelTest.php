@@ -45,7 +45,9 @@ it('links notes and notebooks', function () {
     $trashed = Note::factory()->for($notebook)->trashed()->create();
 
     expect($active->notebook->is($notebook))->toBeTrue()
-        ->and($notebook->notes->pluck('id')->sort()->values()->all())->toBe([$active->id, $trashed->id]);
+        // The default relation excludes trashed notes, same as everywhere else in the app
+        ->and($notebook->notes->pluck('id')->all())->toBe([$active->id])
+        ->and($notebook->notes()->withTrashed()->pluck('id')->sort()->values()->all())->toBe([$active->id, $trashed->id]);
 });
 
 it('returns no notebook for notes and jobs whose notebook was deleted', function () {

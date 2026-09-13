@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/notebooks', [NotebookController::class, 'index'])->name('notebooks.index');
     Route::post('/notebooks/create', [NotebookController::class, 'create'])->name('notebooks.create');
     Route::get('/notebooks/trash', [NotebookController::class, 'trashView'])->name('notebooks.trash.view');
+    Route::post('/notebooks/trash/empty', [NotebookController::class, 'emptyTrash'])->name('notebooks.trash.empty');
     Route::get('/import', [ImportController::class, 'index'])->name('import');
     Route::post('/import', [ImportController::class, 'store'])->name('import.store');
     Route::get('/import/polling', [ImportController::class, 'polling'])->name('import.polling');
@@ -55,6 +56,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/notes/update/{noteId}', [NoteController::class, 'update'])->name('note.update');
         Route::post('/notes/trash/{noteId}', [NoteController::class, 'trash'])->name('note.trash');
         Route::post('/notes/trash/restore/{noteId}', [NoteController::class, 'restore'])->name('note.trash.restore');
+        Route::post('/notes/trash/delete/{noteId}', [NoteController::class, 'delete'])->name('note.trash.delete');
     });
 
     Route::group(['middleware' => [

@@ -17,7 +17,7 @@ it('creates an empty active note in the notebook', function () {
     expect($note->notebook_id)->toBe($this->notebook->id)
         ->and($note->title)->toBe('')
         ->and($note->content)->toBe('')
-        ->and($note->fresh()->status)->toBe(0);
+        ->and($note->fresh()->trashed())->toBeFalse();
     $response->assertJsonPath('note.id', $note->id)
         ->assertJsonPath('note.title', '')
         ->assertJsonPath('note.content', '');
@@ -32,7 +32,7 @@ it('creates a new note every time', function () {
 
 // BUG-04
 it('does not create notes in a trashed notebook', function () {
-    $this->notebook->forceFill(['status' => 1])->save();
+    $this->notebook->delete();
 
     $this->postJson("/notes/create/{$this->notebook->id}")->assertStatus(422);
 

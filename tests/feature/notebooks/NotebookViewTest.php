@@ -47,7 +47,7 @@ it('shows an empty notebook', function () {
 });
 
 it('redirects to the notebooks list when the notebook is in the trash', function () {
-    $this->notebook->forceFill(['status' => 1])->save();
+    $this->notebook->delete();
 
     $this->actingAs($this->user)
         ->get("/notebook/{$this->notebook->id}")

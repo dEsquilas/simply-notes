@@ -19,7 +19,8 @@ class NotebookVerifyOwnership
     {
 
         $notebookId = $request->route('notebookId');
-        $notebook = Notebook::find($notebookId);
+        // Restore and permanent delete operate on trashed notebooks too; other actions decide for themselves what to do with a trashed one
+        $notebook = Notebook::withTrashed()->find($notebookId);
         if(!$notebook)
             return abort(404, 'Notebook not found');
 

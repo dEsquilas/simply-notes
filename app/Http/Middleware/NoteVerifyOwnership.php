@@ -19,7 +19,8 @@ class NoteVerifyOwnership
     {
 
         $noteId = $request->route('noteId');
-        $note = Note::find($noteId);
+        // Restore and permanent delete operate on trashed notes too; other actions decide for themselves what to do with a trashed one
+        $note = Note::withTrashed()->find($noteId);
         if(!$note)
             return abort(404, 'Note not found');
 

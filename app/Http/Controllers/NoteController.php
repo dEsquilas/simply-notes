@@ -12,18 +12,18 @@ class NoteController extends Controller
 
     public function view($notebookId, $noteId){
 
-        $note = Note::find($noteId);
-        $notebook = $note->notebook;
+        $note = Note::withTrashed()->find($noteId);
+        $notebook = $note->notebook()->withTrashed()->first();
 
-        if($notebook->id != $notebookId || $notebook->status == 1){
+        if($notebook->id != $notebookId || $notebook->trashed()){
             return redirect()->route('notebooks.index');
         }
 
-        if($note->status == 1){
+        if($note->trashed()){
             return redirect()->route('notebook.view', $notebook->id);
         }
 
-        $notes = $notebook->notes()->where('status', 0)->orderBy('updated_at', 'DESC')->get();
+        $notes = $notebook->notes()->orderBy('updated_at', 'DESC')->get();
 
         return Inertia::render('notebooks/View', [
             'inNotebook' => $notebook,
@@ -35,7 +35,7 @@ class NoteController extends Controller
 
     public function create($notebookId){
 
-        if(Notebook::find($notebookId)->status == 1){
+        if(Notebook::withTrashed()->find($notebookId)->trashed()){
             return response()->json([
                 'message' => 'Notes cannot be created in a notebook in the trash',
             ], 422);
@@ -60,7 +60,7 @@ class NoteController extends Controller
             'content' => 'nullable|string',
         ]);
 
-        $note = Note::find($noteId);
+        $note = Note::withTrashed()->find($noteId);
 
         $note->title = $request->get('title');
         $note->content = $sanitizer->sanitize($request->get('content'));
@@ -74,10 +74,11 @@ class NoteController extends Controller
 
     public function trash($noteId){
 
-        $note = Note::find($noteId);
+        $note = Note::withTrashed()->find($noteId);
 
-        $note->status = 1;
-        $note->save();
+        if(!$note->trashed()){
+            $note->delete();
+        }
 
         return response()->json();
 
@@ -85,12 +86,31 @@ class NoteController extends Controller
 
     public function restore($noteId){
 
-        $note = Note::find($noteId);
+        $note = Note::withTrashed()->find($noteId);
 
-        $note->status = 0;
-        $note->save();
+        if($note->trashed()){
+            $note->restore();
+        }
 
         return response()->json();
+
+    }
+
+    public function delete($noteId){
+
+        $note = Note::withTrashed()->find($noteId);
+
+        if(!$note->trashed()){
+            return response()->json([
+                'message' => 'Only notes in the trash can be deleted permanently',
+            ], 422);
+        }
+
+        $note->forceDelete();
+
+        return response()->json([
+            'message' => 'Note deleted permanently',
+        ], 200);
 
     }
 

@@ -39,7 +39,7 @@ it('redirects when the URL mixes a note with another of the user\'s notebooks', 
 
 // BUG-02
 it('does not open a trashed note by URL', function () {
-    $this->note->forceFill(['status' => 1])->save();
+    $this->note->delete();
 
     $this->actingAs($this->user)
         ->get("/notebook/{$this->notebook->id}/note/{$this->note->id}")
@@ -48,7 +48,7 @@ it('does not open a trashed note by URL', function () {
 
 // BUG-03
 it('does not open a note of a trashed notebook by URL', function () {
-    $this->notebook->forceFill(['status' => 1])->save();
+    $this->notebook->delete();
 
     $this->actingAs($this->user)
         ->get("/notebook/{$this->notebook->id}/note/{$this->note->id}")

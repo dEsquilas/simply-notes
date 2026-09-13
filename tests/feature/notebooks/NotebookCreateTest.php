@@ -14,7 +14,7 @@ it('creates an active notebook owned by the user', function () {
     $notebook = Notebook::sole();
     expect($notebook->name)->toBe('Recipes')
         ->and($notebook->owner)->toBe($this->user->id)
-        ->and($notebook->fresh()->status)->toBe(0);
+        ->and($notebook->fresh()->trashed())->toBeFalse();
     $response->assertJsonPath('notebook.id', $notebook->id)
         ->assertJsonPath('notebook.name', 'Recipes');
 });

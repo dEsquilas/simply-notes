@@ -7,7 +7,8 @@ class NotePolicy
 
     public function verifyOwnership($user, $note)
     {
-        $notebook = $note->notebook()->first();
+        // The notebook may be trashed while the note is not: ownership still applies
+        $notebook = $note->notebook()->withTrashed()->first();
 
         if(!$notebook || $notebook->owner != $user->id)
             return false;

@@ -113,7 +113,7 @@ it('does not leave an empty new notebook when the import fails', function () {
 
 // BUG-26
 it('does not import into a trashed notebook', function () {
-    $this->notebook->forceFill(['status' => 1])->save();
+    $this->notebook->delete();
 
     $this->postJson('/import', ['file' => validExport(), 'notebook' => $this->notebook->id])
         ->assertStatus(422);

@@ -14,7 +14,7 @@ class ImportController extends Controller
 
     public function index(){
 
-        $notebooks = Notebook::where('owner', \Auth::user()->id)->where('status', 0)->get();
+        $notebooks = Notebook::where('owner', \Auth::user()->id)->get();
 
         return Inertia::render('Import', [
             'notebooks' => $notebooks,
@@ -38,7 +38,7 @@ class ImportController extends Controller
         $createdNotebook = false;
 
         if($request->notebook != -1) {
-            $notebook = Notebook::find($request->notebook);
+            $notebook = Notebook::withTrashed()->find($request->notebook);
 
             if (!$notebook) {
                 return response()->json(['error' => 'Notebook not found'], 404);
@@ -46,7 +46,7 @@ class ImportController extends Controller
 
             $this->authorize('update', $notebook);
 
-            if ($notebook->status == 1) {
+            if ($notebook->trashed()) {
                 return response()->json(['error' => 'Notes cannot be imported into a notebook in the trash'], 422);
             }
         }
@@ -83,8 +83,8 @@ class ImportController extends Controller
             // A notebook created only for this import would be left empty
             if ($createdNotebook) {
                 $importJob->delete();
-                $notebook->notes()->delete();
-                $notebook->delete();
+                $notebook->notes()->forceDelete();
+                $notebook->forceDelete();
             }
 
             return response()->json(['error' => 'The file could not be imported'], 422);

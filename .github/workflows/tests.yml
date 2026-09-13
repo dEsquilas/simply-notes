@@ -27,18 +27,23 @@ jobs:
         run: composer install --no-interaction --no-progress --prefer-dist
 
       - name: Run tests with coverage gate
-        run: vendor/bin/pest --coverage --min=100
+        run: vendor/bin/pest --testsuite=Unit,Feature,Arch --parallel --coverage --min=100
 
   browser:
-    name: Browser (Dusk)
+    # Browser tests are the slow part: split them across 3 runners with Pest's sharding
+    name: Browser (Pest + Playwright, shard ${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     steps:
       - uses: actions/checkout@v4
 
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring, zip, gd, fileinfo, pdo_sqlite
+          extensions: mbstring, zip, gd, fileinfo, pdo_sqlite, sockets
           coverage: none
 
       - uses: pnpm/action-setup@v4
@@ -56,19 +61,34 @@ jobs:
       - name: Install JS dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install ChromeDriver for the runner's Chrome
-        run: php artisan dusk:chrome-driver --detect
+      # Playwright pins its browser build in the lockfile: reuse the download while it does not change
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright's Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Install Chromium's system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Build assets
+        run: pnpm run build
 
       - name: Run browser tests
-        run: scripts/dusk.sh
+        run: vendor/bin/pest --testsuite=Browser --ci --shard=${{ matrix.shard }}/3
 
       - name: Upload failure screenshots and logs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: dusk-failures
+          name: browser-failures-${{ matrix.shard }}
           path: |
-            tests/browser/screenshots
-            tests/browser/console
+            tests/Browser/Screenshots
             storage/logs
           if-no-files-found: ignore

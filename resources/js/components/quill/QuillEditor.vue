@@ -13,6 +13,21 @@ const emit = defineEmits([
 ])
 
 const Delta = Quill.import('delta')
+const Video = Quill.import('formats/video')
+
+/**
+ * YouTube refuses to be shown inside an iframe from its "watch", youtu.be or shorts URLs:
+ * the video button stores the embeddable URL instead.
+ */
+class EmbeddableVideo extends Video {
+    static sanitize(url) {
+        const match = url.match(/^(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/)|youtu\.be\/)([\w-]{11})/)
+
+        return super.sanitize(match ? `https://www.youtube.com/embed/${match[1]}` : url)
+    }
+}
+
+Quill.register('formats/video', EmbeddableVideo, true)
 
 const editorRef = ref(null)
 

@@ -27,7 +27,12 @@ let lastModified = -1
 const autosaveTime = 1500
 
 
-watch(() => props.note, (newNote) => {
+watch(() => props.note, (newNote, oldNote) => {
+    // Edits waiting for autosave belong to the note being left: save them before loading the new one
+    if (oldNote && newNote?.id !== oldNote.id && lastModified !== -1) {
+        save(oldNote, noteTitle.value, noteContent.value)
+    }
+
     recentNoteSwap = Date.now()
     noteTitle.value = newNote.title
     noteContent.value = newNote.content
@@ -53,12 +58,16 @@ let autosave = () => {
         save()
 }
 
-const save = () => {
+const save = (note = props.note, title = noteTitle.value, content = noteContent.value) => {
+
+    clearInterval(autosaveInterval)
+    autosaveInterval = null
+    lastModified = -1
 
     axios
-        .post('/notes/update/' + props.note.id, {
-            title: noteTitle.value,
-            content: noteContent.value,
+        .post('/notes/update/' + note.id, {
+            title: title,
+            content: content,
         })
         .then((response) => {
             notify({
@@ -67,30 +76,37 @@ const save = () => {
             })
 
             emit('update-note', {note: response.data.note})
-            clearInterval(autosaveInterval)
-            autosaveInterval = null
-
         })
         .catch((error) => {
-            console.log(error)
+            const expired = [401, 419].includes(error.response?.status)
+            notify({
+                type: 'error',
+                text: expired
+                    ? 'Your session has expired: log in again to keep your changes'
+                    : 'The note could not be saved',
+            })
         })
-
-    lastModified = -1
 
 }
 
 let forceSave = (event) => {
-    if(event.key === "s" && event.ctrlKey){
+    if(event.key === "s" && (event.ctrlKey || event.metaKey)){
         event.preventDefault()
         save()
     }
+}
+
+const onTitleKeydown = (event) => {
+    forceSave(event)
+    if (!event.defaultPrevented)
+        dispatchAutosave()
 }
 
 </script>
 <template>
     <div class="h-full">
         <input dusk="note-title" tabindex="1"
-               @keydown="dispatchAutosave()"
+               @keydown="onTitleKeydown"
                v-model="noteTitle"
                placeholder="Nueva nota"
                type="text"

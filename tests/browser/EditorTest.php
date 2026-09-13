@@ -88,30 +88,37 @@ it('embeds https videos', function () {
             ->click('@note-body .ql-editor')
             ->click('@note-body .ql-video')
             ->waitForDialog()
-            ->typeInDialog('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+            ->typeInDialog('https://player.vimeo.com/video/76979871')
             ->acceptDialog();
 
         waitForDatabase($browser, fn () => str_contains((string) $this->note->fresh()->content, '<iframe'));
     });
 
-    expect(html_entity_decode($this->note->fresh()->content))->toContain('src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"');
+    // Only YouTube links are rewritten: other embeddable URLs are stored as given
+    expect(html_entity_decode($this->note->fresh()->content))->toContain('src="https://player.vimeo.com/video/76979871"');
 });
 
 // BUG-36: the video prompt keeps YouTube "watch" URLs, which YouTube refuses to show inside an iframe
-it('turns YouTube links into embeddable videos', function () {
-    $this->browse(function (Browser $browser) {
+it('turns YouTube links into embeddable videos', function (string $url) {
+    $this->browse(function (Browser $browser) use ($url) {
         openEditor($browser, $this)
             ->click('@note-body .ql-editor')
             ->click('@note-body .ql-video')
             ->waitForDialog()
-            ->typeInDialog('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+            ->typeInDialog($url)
             ->acceptDialog();
 
         waitForDatabase($browser, fn () => str_contains((string) $this->note->fresh()->content, '<iframe'));
     });
 
-    expect(html_entity_decode($this->note->fresh()->content))->toContain('src="https://www.youtube.com/embed/dQw4w9WgXcQ');
-})->todo();
+    expect(html_entity_decode($this->note->fresh()->content))->toContain('src="https://www.youtube.com/embed/dQw4w9WgXcQ"');
+})->with([
+    'watch' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    'watch with other parameters' => 'https://www.youtube.com/watch?feature=share&v=dQw4w9WgXcQ&t=42',
+    'short link' => 'https://youtu.be/dQw4w9WgXcQ',
+    'shorts' => 'https://youtube.com/shorts/dQw4w9WgXcQ',
+    'mobile' => 'https://m.youtube.com/watch?v=dQw4w9WgXcQ',
+]);
 
 it('saves insecure http videos without a source', function () {
     $this->browse(function (Browser $browser) {

@@ -21,6 +21,6 @@ yarn-error.log
 /.vscode
 .pd
 
-# Pest Browser failure screenshots (the plugin hardcodes this capitalized path)
-/tests/Browser/
-/tests/browser/Screenshots/
+# Pest Browser failure screenshots (the plugin hardcodes this capitalized path).
+# Only the screenshots: with git's case-insensitive matching on macOS, /tests/Browser/ would ignore tests/browser too
+/tests/Browser/Screenshots/

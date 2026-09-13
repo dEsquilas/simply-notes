@@ -100,11 +100,24 @@ it('sends a notebook to the trash from its context menu', function () {
     $notebook = Notebook::factory()->ownedBy($this->user)->create(['name' => 'Old stuff']);
 
     $page = visit('/notebooks')->assertVisible('@notebook-'.$notebook->id);
-    deleteFromContextMenu($page, 'notebook-'.$notebook->id)->assertMissing('@notebook-'.$notebook->id);
+    deleteFromContextMenu(answerDialogs($page), 'notebook-'.$notebook->id)
+        ->assertScript('window.__dialogs[0]', 'Are you sure you want to send this notebook to the trash?')
+        ->assertMissing('@notebook-'.$notebook->id);
 
     waitForDatabase($page, fn () => $notebook->fresh()->trashed());
 
     $page->navigate('/notebooks/trash')->assertSee('Old stuff');
+});
+
+it('keeps the notebook when sending it to the trash is cancelled', function () {
+    $notebook = Notebook::factory()->ownedBy($this->user)->create(['name' => 'Not yet']);
+
+    $page = visit('/notebooks')->assertVisible('@notebook-'.$notebook->id);
+    deleteFromContextMenu(answerDialogs($page, confirm: false), 'notebook-'.$notebook->id)
+        ->wait(0.3)
+        ->assertVisible('@notebook-'.$notebook->id);
+
+    expect($notebook->fresh()->trashed())->toBeFalse();
 });
 
 // BUG-18
@@ -114,7 +127,7 @@ it('keeps the notebook on screen when sending it to the trash fails', function (
     $page = visit('/notebooks')->assertVisible('@notebook-'.$notebook->id);
     $notebook->forceDelete();
 
-    deleteFromContextMenu($page, 'notebook-'.$notebook->id)
+    deleteFromContextMenu(answerDialogs($page), 'notebook-'.$notebook->id)
         ->assertSee('The notebook could not be sent to the trash')
         ->assertVisible('@notebook-'.$notebook->id);
 });

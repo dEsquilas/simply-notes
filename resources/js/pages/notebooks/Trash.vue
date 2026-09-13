@@ -132,7 +132,7 @@ const emptyTrash = () => {
                 </button>
             </div>
 
-            <div class="max-w-[1200px] w-full m-auto grid lg:grid-cols-3 sm:grid-cols-2 gap-4 p-4 mt-0">
+            <div class="max-w-[1200px] w-full mx-auto grid lg:grid-cols-3 sm:grid-cols-2 gap-4 p-4 mt-0">
                 <article v-for="notebook in currentNotebooks" :key="notebook.id" :data-test="'trashed-notebook-' + notebook.id" class="w-full mx-auto gap-4">
                     <div class="bg-main1 overflow-hidden shadow-xs rounded-lg hover:bg-main2 transition-colors">
                         <div class="p-6 text-white flex justify-between">

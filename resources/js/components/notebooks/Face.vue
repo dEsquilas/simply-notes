@@ -3,9 +3,10 @@
         <Link :href="'/notebook/' + notebook.id">
             <article class="border border-main2 overflow-hidden transition shadow-lg rounded-sm lg:hover:scale-110 lg:hover:shadow-main1">
                 <header class="bg-main2 p-2">
-                    <h3 data-test="notebook-name" class="text-sm font-semibold text-white flex items-center overflow-auto text-ellipsis whitespace-nowrap">
-                        <DocumentDuplicateIcon class="w-6 inline-block mr-2" />
-                        {{ notebook.name }}
+                    <!-- Long names are cut with an ellipsis (full name on hover) instead of showing a scrollbar -->
+                    <h3 data-test="notebook-name" :title="notebook.name" class="text-sm font-semibold text-white flex items-center min-w-0">
+                        <DocumentDuplicateIcon class="w-6 shrink-0 mr-2" />
+                        <span class="truncate">{{ notebook.name }}</span>
                     </h3>
                 </header>
                 <div class="px-4 py-2 text-white h-[150px] flex flex-col w-full">
@@ -14,7 +15,7 @@
                             <span data-test="notes-count" class="text-4xl mr-2 text-main4">{{ notebook.notes_count }}</span>  notes
                         </div>
                     </p>
-                    <p data-test="notebook-date" class="text-sm text-right italic">{{ DateHelper.formatDate(notebook.created_at) }}</p>
+                    <p data-test="notebook-date" class="text-xs text-right italic whitespace-nowrap">{{ DateHelper.formatDate(notebook.created_at) }}</p>
                 </div>
             </article>
         </Link>
@@ -46,6 +47,10 @@ const openMenu = (e, notebook) => {
             {
                 label: 'Eliminar',
                 onClick: () => {
+
+                    if (!confirm('Are you sure you want to send this notebook to the trash?')) {
+                        return
+                    }
 
                     const notebookId = notebook.id
 

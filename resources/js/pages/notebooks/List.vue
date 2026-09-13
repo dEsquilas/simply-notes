@@ -17,7 +17,7 @@
                     <input data-test="new-notebook-name" v-model="newNotebookName" type="text" class="bg-transparent border-0 rounded-xl text-white focus:outline-hidden focus:ring-0" placeholder="New notebook name...">
                 </header>
             </div>
-            <div data-test="notebooks" class="max-w-[1200px] w-full m-auto py-12 flex flex-row flex-wrap gap-12 justify-around">
+            <div data-test="notebooks" class="max-w-[1200px] w-full mx-auto py-12 flex flex-row flex-wrap gap-12 justify-around">
                 <notebook-face @delete="deleteNotebook" v-for="notebook in notebooks" :key="notebook.id" :notebook="notebook"  />
             </div>
         </section>

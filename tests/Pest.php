@@ -28,9 +28,50 @@ function fakeGoogleUser(string $email, ?string $name = 'Jane Doe'): void
 }
 
 /**
- * Autosave fires between 1.5 and 3 seconds after the last keystroke.
+ * Waits until the database reflects what the browser did (autosave fires 1.5–3 s after the last keystroke).
  */
-function waitForAutosave(Browser $browser): Browser
+function waitForDatabase(Browser $browser, callable $condition, int $seconds = 6): Browser
 {
-    return $browser->pause(3200);
+    $browser->waitUsing($seconds, 100, fn () => (bool) $condition(), 'The database never reached the expected state');
+    expect((bool) $condition())->toBeTrue();
+
+    return $browser;
+}
+
+/**
+ * Right-clicks an element and chooses "Eliminar" in its context menu.
+ */
+function deleteFromContextMenu(Browser $browser, string $selector): Browser
+{
+    return $browser->rightClick($selector)
+        ->waitForText('Eliminar')
+        ->clickAtXPath("//*[contains(@class, 'mx-context-menu-item')][contains(., 'Eliminar')]");
+}
+
+/**
+ * Selects all the text in the note editor so a toolbar button applies to it.
+ */
+function selectAllInEditor(Browser $browser): Browser
+{
+    $browser->script(<<<'JS'
+        const editor = document.querySelector('[dusk="note-body"] .ql-editor');
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        document.dispatchEvent(new Event('selectionchange'));
+    JS);
+
+    return $browser->pause(200);
+}
+
+/**
+ * Opens a notebook as its owner and waits for the notes page.
+ */
+function openNotebookAs(Browser $browser, \App\Models\User $user, \App\Models\Notebook $notebook): Browser
+{
+    return $browser->loginAs($user)
+        ->visit("/notebook/{$notebook->id}")
+        ->waitFor('@notes-sidebar');
 }

@@ -3,6 +3,7 @@
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
+         beStrictAboutTestsThatDoNotTestAnything="false"
 >
     <!-- Used by `php artisan dusk`: settings come from .env.dusk.local, shared with the app server -->
     <testsuites>

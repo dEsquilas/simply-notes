@@ -1,0 +1,5 @@
+{
+    "private": true,
+    "type": "module",
+    "description": "Bundles the app's real Tiptap extensions for the validation harness. Not part of the shipped app."
+}

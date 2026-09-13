@@ -1,5 +1,6 @@
 /.phpunit.cache
 /bootstrap/ssr
+/data
 /node_modules
 /public/build
 /public/hot
@@ -7,6 +8,8 @@
 /storage/*.key
 /toImport/*
 /vendor
+scripts/tiptap-validation/harness/node_modules
+scripts/tiptap-validation/harness/dist
 .env
 .env.backup
 .env.production

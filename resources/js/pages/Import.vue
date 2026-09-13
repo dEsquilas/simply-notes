@@ -8,6 +8,7 @@
                     <fieldset>
                     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Upload the zip file:</label>
                         <input
+                            id="file_input"
                             dusk="import-file"
                             type="file"
                             @change="handleFile"
@@ -16,10 +17,10 @@
                     </fieldset>
                     <fieldset>
                         <label class="block mt-4 mb-2 text-sm font-medium text-gray-900 dark:text-white" for="notebook">Select the notebook:</label>
-                        <select dusk="import-notebook" v-model="notebook" id="countries" class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-0 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        <select dusk="import-notebook" v-model="notebook" id="notebook" class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-0 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             <option value=""></option>
                             <option value="-1">New Notebook</option>
-                            <option v-for="notebook in notebooks" :value="notebook.id">{{ notebook.name }} </option> // Add this line
+                            <option v-for="notebook in notebooks" :key="notebook.id" :value="notebook.id">{{ notebook.name }}</option>
                         </select>
                         <input dusk="import-new-notebook-name" v-model="newNotebookName" type="text" v-if="notebook == -1" placeholder="Enter the name of the new notebook" class="mt-4 border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-0" />
                     </fieldset>
@@ -47,15 +48,16 @@
                         </header>
                         <ul class="grid grid-cols-1 gap-4 px-4 w-full">
                             <li v-for="job in runningJobs" :key="job.id" :dusk="'running-job-' + job.id" class="flex flex-row justify-between items-center w-full hover:opacity-50">
-                                <Link :href="'/notebook/' + job.notebook.id" class="w-1/3 text-main3">
+                                <Link v-if="job.notebook" :href="'/notebook/' + job.notebook.id" class="w-1/3 text-main3">
                                     {{ job.notebook.name }}
                                 </Link>
+                                <span v-else class="w-1/3 italic">Deleted notebook</span>
                                 <div dusk="job-progress" class="w-1/3 text-center">
                                     {{ remainingFiles(job) }}
                                 </div>
                                 <div dusk="job-status" class="w-1/3 text-right">
                                     <span v-show="job.status === 'pending'" class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Pending</span>
-                                    <span v-show="job.status === 'running'" class="text-xs font-medium px-2.5 py-0.5 rounded bg-blue-900 text-blue-300">Running</span>
+                                    <span v-show="job.status === 'processing'" class="text-xs font-medium px-2.5 py-0.5 rounded bg-blue-900 text-blue-300">Processing</span>
                                 </div>
                             </li>
                         </ul>
@@ -78,18 +80,36 @@
                         </header>
                         <ul class="grid grid-cols-1 gap-4 px-4 w-full">
                             <li v-for="job in finishedJobs" :key="job.id" :dusk="'finished-job-' + job.id" class="flex flex-row justify-between items-center w-full hover:opacity-50">
-                                <Link :href="'/notebook/' + job.notebook.id" class="w-1/3 text-main3">
+                                <Link v-if="job.notebook" :href="'/notebook/' + job.notebook.id" class="w-1/3 text-main3">
                                     {{ job.notebook.name }}
                                 </Link>
+                                <span v-else class="w-1/3 italic">Deleted notebook</span>
                                 <div class="w-1/3 text-center">
                                     {{ job.processed_files }}
                                 </div>
-                                <div class="w-1/3 text-right text-sm">
-                                    {{ new Date(job.updated_at).toISOString().split('T')[0].replace(/-/g, '/') }}
+                                <div dusk="job-finished-at" class="w-1/3 text-right text-sm">
+                                    {{ DateHelper.formatDate(job.updated_at) }}
                                 </div>
                             </li>
                         </ul>
                     </article>
+                </section>
+                <section v-show="failedJobs.length > 0" class="w-full">
+                    <h2 class="text-2xl font-bold mb-8">Failed jobs</h2>
+                    <ul class="grid grid-cols-1 gap-4 px-4 w-full">
+                        <li v-for="job in failedJobs" :key="job.id" :dusk="'failed-job-' + job.id" class="flex flex-row justify-between items-center w-full">
+                            <Link v-if="job.notebook" :href="'/notebook/' + job.notebook.id" class="w-1/3 text-main3">
+                                {{ job.notebook.name }}
+                            </Link>
+                            <span v-else class="w-1/3 italic">Deleted notebook</span>
+                            <div class="w-1/3 text-center text-sm">
+                                {{ DateHelper.formatDate(job.updated_at) }}
+                            </div>
+                            <div class="w-1/3 text-right">
+                                <span class="text-xs font-medium px-2.5 py-0.5 rounded bg-red-900 text-red-300">Import failed</span>
+                            </div>
+                        </li>
+                    </ul>
                 </section>
             </section>
         </section>
@@ -100,11 +120,13 @@ import axios from 'axios'
 import { ArrowPathIcon } from "@heroicons/vue/24/outline"
 import { notify } from "@kyvg/vue3-notification"
 import { ref } from 'vue'
+import DateHelper from '@/helpers/DateHelper'
 
 const props = defineProps({
     notebooks: Array,
     runningJobs: Array,
-    finishedJobs: Array
+    finishedJobs: Array,
+    failedJobs: Array
 })
 
 const isUploading = ref(false)
@@ -112,6 +134,7 @@ const notebook = ref("")
 const newNotebookName = ref("")
 const runningJobs = ref(props.runningJobs)
 const finishedJobs = ref(props.finishedJobs)
+const failedJobs = ref(props.failedJobs ?? [])
 const file = ref("")
 
 let isPolling = false
@@ -152,7 +175,14 @@ const submit = () => {
             polling()
         }
     }).catch((error) => {
-        console.log(error)
+        // Validation errors explain what to fix; other errors come as { error }
+        notify({
+            type: 'error',
+            text: error.response?.data?.message ?? error.response?.data?.error ?? error.message,
+        })
+        if(!isPolling) {
+            polling()
+        }
     }).finally(() => {
         isUploading.value = false
     })
@@ -171,6 +201,7 @@ const polling = () => {
     axios.get('/import/polling').then((response) => {
         runningJobs.value = response.data.runningJobs
         finishedJobs.value = response.data.finishedJobs
+        failedJobs.value = response.data.failedJobs
         if(runningJobs.value.length === 0)
             isPolling = false
     }).catch((error) => {

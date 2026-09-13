@@ -61,7 +61,7 @@ it('tells the user to choose a file and a notebook', function () {
         ->pause(1500)
         ->assertSee('You should select a file and a notebook.')
     );
-})->todo();
+});
 
 it('imports an export into an existing notebook', function () {
     $zip = exportZipPath();
@@ -159,7 +159,7 @@ it('labels jobs that are being processed', function () {
         ->waitFor('@running-job-'.$job->id)
         ->assertSeeIn('@running-job-'.$job->id, 'Processing')
     );
-})->todo();
+});
 
 // BUG-09
 it('keeps working when a job\'s notebook was deleted', function () {
@@ -172,7 +172,7 @@ it('keeps working when a job\'s notebook was deleted', function () {
         ->waitFor('@import-submit', 5)
         ->assertSee('Finished jobs')
     );
-})->todo();
+});
 
 // BUG-10
 it('shows imports that failed', function () {
@@ -187,7 +187,7 @@ it('shows imports that failed', function () {
         ->click('@import-submit')
         ->waitForText('failed', 6)
     );
-})->todo();
+});
 
 // BUG-20
 it('explains why an import was rejected', function (string $case) {
@@ -204,7 +204,7 @@ it('explains why an import was rejected', function (string $case) {
 
         $browser->click('@import-submit')->waitForText('The', 6)->assertSee($case === 'not a zip' ? 'zip' : 'name');
     });
-})->with(['not a zip', 'new notebook without name'])->todo();
+})->with(['not a zip', 'new notebook without name']);
 
 // BUG-22
 it('focuses the fields when clicking their labels', function () {
@@ -215,7 +215,7 @@ it('focuses the fields when clicking their labels', function () {
         ->clickAtXPath("//label[contains(., 'Select the notebook')]")
         ->assertFocused('@import-notebook')
     );
-})->todo();
+});
 
 // BUG-26
 it('does not offer trashed notebooks as destination', function () {
@@ -227,7 +227,7 @@ it('does not offer trashed notebooks as destination', function () {
         ->waitFor('@import-notebook')
         ->assertSelectMissingOption('@import-notebook', (string) $trashed->id)
     );
-})->todo();
+});
 
 // BUG-34
 it('shows the finish date in the user\'s time zone and format', function () {
@@ -241,6 +241,10 @@ it('shows the finish date in the user\'s time zone and format', function () {
         ->loginAs($this->user)
         ->visit('/import')
         ->waitFor('@finished-job-'.$job->id)
-        ->assertSeeIn('@finished-job-'.$job->id, '3 de febrero de 2024')
+        ->assertScript(
+            'document.querySelector(\'[dusk="finished-job-'.$job->id.'"] [dusk="job-finished-at"]\').textContent.trim() === '
+            .'new Intl.DateTimeFormat("es-ES", {year: "numeric", month: "long", day: "numeric"}).format(new Date("'.$job->fresh()->updated_at->toIso8601String().'"))'
+        )
+        ->assertSeeIn('@finished-job-'.$job->id, 'de febrero de 2024')
     );
-})->todo();
+});

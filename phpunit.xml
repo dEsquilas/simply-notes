@@ -12,7 +12,7 @@
             <directory>tests/Feature</directory>
         </testsuite>
         <testsuite name="Arch">
-            <directory>tests/Arch</directory>
+            <directory>tests/arch</directory>
         </testsuite>
     </testsuites>
     <source>

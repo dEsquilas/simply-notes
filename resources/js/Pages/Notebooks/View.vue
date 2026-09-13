@@ -129,22 +129,20 @@ const deleteNote = (data) => {
                                 type="text"
                                 class="w-[250px] bg-transparent border-1 rounded-xl text-white focus:outline-none"
                                 placeholder="Buscar...">
+                            <!-- Icon components only pass class through, so their test hooks are dusk-* classes -->
                             <XCircleIcon
-                                dusk="clear-search"
                                 v-show="filter.length !== 0"
                                 @click="filter = ''"
-                                class="w-6 ml-4 text-main2 cursor-pointer hover:opacity-80 absolute right-[80px] top-[9px]"
+                                class="dusk-clear-search w-6 ml-4 text-main2 cursor-pointer hover:opacity-80 absolute right-[80px] top-[9px]"
                                 />
                             <PlusCircleIcon
-                                dusk="new-note"
                                 v-show="!isCreating"
                                 @click="newNote()"
-                                class="w-10 ml-4 text-main4 cursor-pointer hover:opacity-80"
+                                class="dusk-new-note w-10 ml-4 text-main4 cursor-pointer hover:opacity-80"
                             />
                             <ArrowPathIcon
-                                dusk="creating-note"
                                 v-show="isCreating"
-                                class="animate-spin w-10 ml-4 text-main4 "
+                                class="dusk-creating-note animate-spin w-10 ml-4 text-main4 "
                             />
                         </div>
                     </header>

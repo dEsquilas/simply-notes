@@ -71,8 +71,9 @@ let confirmRestore = confirm('Are you sure you want to restore this notebook?')
                             <h3 dusk="trashed-notebook-name" class="text-lg font-semibold">{{ notebook.name }}</h3>
                             <p class="text-sm">{{ notebook.description }}</p>
                             <div class="flex">
-                                <ArrowUturnUpIcon dusk="restore-notebook" @click=restoreNotebook(notebook.id) class="w-6 h-6 bg-blue mr-4 cursor-pointer" />
-                                <TrashIcon dusk="delete-notebook" @click=deleteNotebook(notebook.id) class="w-6 h-6 text-red-500 cursor-pointer" />
+                                <!-- Icon components only pass class through, so their test hook is a dusk-* class -->
+                                <ArrowUturnUpIcon @click=restoreNotebook(notebook.id) class="dusk-restore-notebook w-6 h-6 bg-blue mr-4 cursor-pointer" />
+                                <TrashIcon @click=deleteNotebook(notebook.id) class="dusk-delete-notebook w-6 h-6 text-red-500 cursor-pointer" />
                             </div>
                         </div>
                     </div>

@@ -25,7 +25,7 @@
                     </fieldset>
                     <fieldset>
                         <button dusk="import-submit" v-show="!isUploading" class="mt-4 bg-main3 text-white font-bold py-2 px-4 rounded-lg">Import</button>
-                        <ArrowPathIcon dusk="import-uploading" v-show="isUploading" class="w-6 h-6 text-main3 animate-spin" />
+                        <ArrowPathIcon v-show="isUploading" class="dusk-import-uploading w-6 h-6 text-main3 animate-spin" />
                     </fieldset>
                 </form>
             </section>

@@ -23,10 +23,8 @@ class NoteVerifyOwnership
         if(!$note)
             return abort(404, 'Note not found');
 
-        if(Gate::authorize('verifyOwnership', $note))
-            return $next($request);
-        else
-            return abort(403, 'Note not found');
+        // Throws a 403 AuthorizationException when the user does not own the note
+        Gate::authorize('verifyOwnership', $note);
 
         return $next($request);
     }

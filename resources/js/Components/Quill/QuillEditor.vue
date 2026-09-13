@@ -99,20 +99,6 @@ const imageUploadHandler = () => {
     }
 }
 
-const tbl = () => {
-    const table = editor.getModule('table')
-    table.insertTable(3, 3)
-    console.log('Inserted')
-}
-
-const findTableParent = (element) => {
-    if (element.tagName === 'TABLE') {
-        return element
-    } else {
-        return findTableParent(element.parentElement)
-    }
-}
-
 </script>
 
 <template>

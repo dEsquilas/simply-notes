@@ -33,8 +33,6 @@ class NoteController extends Controller
 
     public function create($notebookId){
 
-        $notebook = Notebook::find($notebookId);
-
         $note = new Note();
         $note->notebook_id = $notebookId;
         $note->title = "";

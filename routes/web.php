@@ -4,8 +4,7 @@ use App\Http\Controllers\{
     GoogleLoginController,
     ImportController,
     NoteController,
-    NotebookController,
-    ProfileController
+    NotebookController
 };
 
 use App\Http\Middleware\NotebookVerifyOwnership;

@@ -5,7 +5,7 @@ use App\Models\NoteVersion;
 use App\Models\Notebook;
 use App\Models\User;
 
-const VERSION_NOTE_EDITOR = '[data-test="note-body"] .ql-editor';
+const VERSION_NOTE_EDITOR = '[data-test="note-body"] .tiptap-content';
 
 beforeEach(function () {
     $this->user = User::factory()->create();

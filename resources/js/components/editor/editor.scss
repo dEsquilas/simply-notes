@@ -1,0 +1,398 @@
+// Takes the height the note title leaves (Note.vue is a full-height flex column)
+.tiptap-editor-container {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.tiptap-toolbar {
+    border-top: 1px solid var(--cgray);
+    border-bottom: 1px solid var(--cgray);
+    box-sizing: border-box;
+    font-family: Figtree, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    letter-spacing: 0.5px;
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+
+.tiptap-formats {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.tiptap-toolbar button {
+    background: none;
+    border: none;
+    color: var(--cwhite);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+    min-width: 26px;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.tiptap-toolbar button:hover,
+.tiptap-toolbar button.active {
+    color: var(--main4);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+// Quill's toolbar icons (icons.js), coloured like they were in the Quill toolbar
+.tiptap-toolbar button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.tiptap-toolbar .ql-stroke {
+    fill: none;
+    stroke: var(--cwhite);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+}
+
+.tiptap-toolbar .ql-fill,
+.tiptap-toolbar .ql-stroke.ql-fill {
+    fill: var(--cwhite);
+}
+
+.tiptap-toolbar .ql-even {
+    fill-rule: evenodd;
+}
+
+.tiptap-toolbar .ql-thin,
+.tiptap-toolbar .ql-stroke.ql-thin {
+    stroke-width: 1;
+}
+
+.tiptap-toolbar .ql-transparent {
+    opacity: .4;
+}
+
+.tiptap-toolbar button:hover .ql-stroke,
+.tiptap-toolbar button.active .ql-stroke {
+    stroke: var(--main4);
+}
+
+.tiptap-toolbar button:hover .ql-fill,
+.tiptap-toolbar button.active .ql-fill {
+    fill: var(--main4);
+}
+
+.tiptap-toolbar select {
+    background: var(--cblack);
+    color: var(--cwhite);
+    border: 1px solid transparent;
+    border-radius: 3px;
+    height: 26px;
+    padding: 0 4px;
+}
+
+.tiptap-hidden-input {
+    display: none;
+}
+
+.tiptap-popover {
+    position: absolute;
+    top: 100%;
+    left: 8px;
+    margin-top: 4px;
+    background-color: var(--cblack);
+    border: 1px solid var(--main4);
+    color: var(--cwhite);
+    padding: 6px 8px;
+    display: flex;
+    gap: 6px;
+    z-index: 20;
+}
+
+.tiptap-popover input[type="text"] {
+    border: 1px solid #ccc;
+    background: transparent;
+    color: var(--cwhite);
+    font-size: 13px;
+    height: 26px;
+    margin: 0;
+    padding: 3px 5px;
+    width: 220px;
+}
+
+@media screen and (max-width: 768px) {
+    .tiptap-toolbar {
+        display: none;
+    }
+}
+
+.tiptap-editor {
+    flex: 1;
+    overflow: hidden;
+}
+
+.tiptap-content {
+    box-sizing: border-box;
+    height: 100%;
+    outline: none;
+    overflow-y: auto;
+    // Fixed, aligned with the note title: a percentage pushes the text far from the edge on wide panes
+    padding: 1.5rem 2rem;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    text-align: left;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: Figtree, Helvetica, Arial, sans-serif;
+    letter-spacing: 0.5px;
+    font-size: 16px;
+    line-height: 1.42;
+    color: #fff;
+
+    background: linear-gradient(175deg, var(--cblack) 0%, var(--cblack) 70%, #493d24 100%);
+}
+
+.tiptap-content > * {
+    cursor: text;
+}
+
+.tiptap-content p,
+.tiptap-content h1,
+.tiptap-content h2,
+.tiptap-content h3,
+.tiptap-content h4,
+.tiptap-content h5,
+.tiptap-content h6,
+.tiptap-content blockquote {
+    margin: 0 0 5px;
+    line-height: 1.7rem;
+}
+
+.tiptap-content h1 { font-size: 2em; }
+.tiptap-content h2 { font-size: 1.5em; }
+.tiptap-content h3 { font-size: 1.17em; }
+.tiptap-content h4 { font-size: 1em; }
+.tiptap-content h5 { font-size: .83em; }
+.tiptap-content h6 { font-size: .67em; }
+
+.tiptap-content a {
+    color: var(--main4);
+    text-decoration: underline;
+}
+
+.tiptap-content blockquote {
+    border-left: 4px solid #ccc;
+    padding-left: 16px;
+}
+
+.tiptap-content ul,
+.tiptap-content ol {
+    padding-left: 1.5em;
+    margin: 0 0 5px;
+}
+
+.tiptap-content li {
+    margin-bottom: 5px;
+}
+
+// Bullets drawn with CSS so every level has the same size and vertical centre,
+// cycling filled circle, hollow circle and square as lists nest
+.tiptap-content ul:not([data-type="taskList"]) {
+    list-style: none;
+}
+
+.tiptap-content ul:not([data-type="taskList"]) > li {
+    position: relative;
+}
+
+.tiptap-content ul:not([data-type="taskList"]) > li::before {
+    content: '';
+    position: absolute;
+    left: -.95em;
+    top: calc(0.85rem - .21em);
+    box-sizing: border-box;
+    width: .42em;
+    height: .42em;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.tiptap-content ul:not([data-type="taskList"]) ul:not([data-type="taskList"]) > li::before {
+    background: transparent;
+    border: 1.5px solid currentColor;
+}
+
+.tiptap-content ul:not([data-type="taskList"]) ul:not([data-type="taskList"]) ul:not([data-type="taskList"]) > li::before {
+    background: currentColor;
+    border: none;
+    border-radius: 1px;
+}
+
+.tiptap-content ul:not([data-type="taskList"]) ul:not([data-type="taskList"]) ul:not([data-type="taskList"]) ul:not([data-type="taskList"]) > li::before {
+    border-radius: 50%;
+}
+
+.tiptap-content ul[data-type="taskList"] {
+    list-style: none;
+    padding-left: 0.5em;
+}
+
+.tiptap-content ul[data-type="taskList"] li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.tiptap-content ul[data-type="taskList"] li > label {
+    // As tall as a text line and centring the box in it, so it lines up with the first line of the item
+    display: flex;
+    align-items: center;
+    height: 1.7rem;
+    margin: 0;
+    user-select: none;
+}
+
+// Real-looking checkboxes
+.tiptap-content ul[data-type="taskList"] li > label input[type="checkbox"] {
+    appearance: none;
+    box-sizing: border-box;
+    width: 1.1em;
+    height: 1.1em;
+    margin: 0;
+    border: 2px solid var(--main4, #f2cd87);
+    border-radius: 4px;
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color .15s;
+}
+
+.tiptap-content ul[data-type="taskList"] li > label input[type="checkbox"]:checked {
+    background: var(--main4, #f2cd87) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%23272a2a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 85% no-repeat;
+}
+
+.tiptap-content ul[data-type="taskList"] li > div {
+    flex: 1;
+}
+
+.tiptap-content ul[data-type="taskList"] li[data-checked="true"] > div {
+    color: #777;
+    text-decoration: line-through;
+}
+
+.tiptap-content pre {
+    background-color: #23241f;
+    color: #f8f8f2;
+    border-radius: 3px;
+    padding: 5px 10px;
+    margin: 5px 0;
+    font-family: monospace;
+    overflow: auto;
+}
+
+.tiptap-content code {
+    background-color: #f0f0f0;
+    border-radius: 3px;
+    font-size: 85%;
+    padding: 2px 4px;
+}
+
+.tiptap-content pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+}
+
+.tiptap-content img {
+    max-width: 100%;
+}
+
+// Image resize (Tiptap's resizable node view renders its handles unstyled, i.e. 0x0 and invisible)
+.tiptap-content [data-resize-wrapper] {
+    display: inline-block;
+}
+
+.tiptap-content [data-resize-handle] {
+    width: 12px;
+    height: 12px;
+    background: var(--main4, #f2cd87);
+    border: 2px solid var(--cblack);
+    border-radius: 2px;
+    opacity: 0;
+    transition: opacity .15s;
+    z-index: 5;
+}
+
+.tiptap-content [data-resize-handle="top-left"],
+.tiptap-content [data-resize-handle="bottom-right"] {
+    cursor: nwse-resize;
+}
+
+.tiptap-content [data-resize-handle="top-right"],
+.tiptap-content [data-resize-handle="bottom-left"] {
+    cursor: nesw-resize;
+}
+
+.tiptap-content [data-resize-handle^="top"] { transform: translateY(-50%); }
+.tiptap-content [data-resize-handle^="bottom"] { transform: translateY(50%); }
+.tiptap-content [data-resize-handle$="left"] { margin-left: -6px; }
+.tiptap-content [data-resize-handle$="right"] { margin-right: -6px; }
+
+.tiptap-content [data-resize-wrapper]:hover [data-resize-handle],
+.tiptap-content .ProseMirror-selectednode [data-resize-handle] {
+    opacity: 1;
+}
+
+.tiptap-content .ProseMirror-selectednode img,
+.tiptap-content [data-resize-wrapper]:hover img {
+    outline: 2px solid var(--main4, #f2cd87);
+}
+
+.tiptap-content .note-video {
+    display: block;
+    max-width: 100%;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    border: none;
+}
+
+.tiptap-content table {
+    border-collapse: collapse;
+    table-layout: fixed;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.tiptap-content td,
+.tiptap-content th {
+    border: 2px solid var(--cgray);
+    padding: 8px 10px;
+    position: relative;
+    vertical-align: top;
+}
+
+.tiptap-content td > p,
+.tiptap-content th > p {
+    margin: 0;
+}
+
+.tiptap-content th {
+    background: rgba(255, 255, 255, 0.05);
+    font-weight: bold;
+    text-align: left;
+}
+
+.tiptap-content p.is-editor-empty:first-child::before {
+    color: rgba(255, 255, 255, 0.6);
+    content: attr(data-placeholder);
+    float: left;
+    font-style: italic;
+    height: 0;
+    pointer-events: none;
+}

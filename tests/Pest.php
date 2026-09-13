@@ -70,7 +70,7 @@ function selectAllInEditor($page)
 {
     $page->script(<<<'JS'
         () => {
-            const editor = document.querySelector('[data-test="note-body"] .ql-editor');
+            const editor = document.querySelector('[data-test="note-body"] .tiptap-content');
             const range = document.createRange();
             range.selectNodeContents(editor);
             const selection = window.getSelection();

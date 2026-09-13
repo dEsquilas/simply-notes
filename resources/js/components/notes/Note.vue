@@ -2,7 +2,7 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { notify } from "@kyvg/vue3-notification"
 import { ClockIcon } from '@heroicons/vue/24/outline'
-import QuillEditor from '@/components/quill/QuillEditor.vue'
+import TiptapEditor from '@/components/editor/TiptapEditor.vue'
 import NoteHistoryPanel from '@/components/notes/NoteHistoryPanel.vue'
 
 const emit = defineEmits(['update-note'])
@@ -278,7 +278,7 @@ const onRestored = ({ note }) => {
                 <ClockIcon class="w-7 text-main4" />
             </button>
         </div>
-        <QuillEditor @updated-content="dispatchAutosave"
+        <TiptapEditor @updated-content="dispatchAutosave"
                      @keydown.ctrl="forceSave"
                     v-model="noteContent"
         />

@@ -112,6 +112,16 @@ it('keeps the markup quill-table-better produces for a resized, bordered table',
     expect($this->sanitizer->sanitize($html))->toBe($html);
 });
 
+it('keeps the markup Tiptap produces', function () {
+    $html = '<h1>Title</h1>'
+        .'<ul data-type="taskList"><li data-type="taskItem" data-checked="true"><label><input type="checkbox" checked /><span></span></label><div><p>Buy milk</p></div></li></ul>'
+        .'<table><colgroup><col /><col /></colgroup><tbody><tr><th colwidth="120">head</th><td colwidth="80">cell</td></tr></tbody></table>'
+        .'<pre><code>echo 1;</code></pre>'
+        .'<iframe class="note-video" frameborder="0" allowfullscreen="true" src="https://www.youtube.com/embed/abc"></iframe>';
+
+    expect($this->sanitizer->sanitize($html))->toBe($html);
+});
+
 it('strips anything but the known-safe CSS properties and characters from table styles', function (string $style, string $expected) {
     $clean = $this->sanitizer->sanitize('<table style="'.$style.'"></table>');
 
@@ -127,4 +137,9 @@ it('strips anything but the known-safe CSS properties and characters from table 
 
 it('drops style on elements quill-table-better never puts it on', function () {
     expect($this->sanitizer->sanitize('<p style="width: 100%">x</p>'))->toBe('<p>x</p>');
+});
+
+it('drops interactive input attributes Tiptap never renders', function () {
+    expect($this->sanitizer->sanitize('<input type="text" name="password" onfocus="alert(1)">'))
+        ->toBe('<input type="text" />');
 });

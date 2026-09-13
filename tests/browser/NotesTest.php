@@ -4,7 +4,7 @@ use App\Models\Note;
 use App\Models\Notebook;
 use App\Models\User;
 
-const NOTE_EDITOR = '[data-test="note-body"] .ql-editor';
+const NOTE_EDITOR = '[data-test="note-body"] .tiptap-content';
 
 beforeEach(function () {
     $this->user = User::factory()->create();

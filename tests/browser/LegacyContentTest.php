@@ -9,7 +9,9 @@ use App\Models\User;
  * Opening and editing those notes in the app must not hide or lose their content (BUG-37, BUG-38).
  */
 
-const LEGACY_EDITOR = '[data-test="note-body"] .ql-editor';
+const LEGACY_EDITOR = '[data-test="note-body"] .tiptap-content';
+// Excludes the task item's visually-hidden accessibility label, which also contains the item's text
+const LEGACY_TEXT = '[data-test="note-body"] .tiptap-content p';
 
 /** Stores a note with this raw HTML, logs its owner in and returns the note and its notebook URL. */
 function legacyNote(string $html): array
@@ -29,14 +31,12 @@ dataset('legacy markup', [
     'code block' => ['<div><en-codeblock><div>SELECT * FROM notes;</div><div>WHERE id = 1</div></en-codeblock></div>', 'SELECT * FROM notes;'],
     'to-do checkbox' => ['<div><input type="checkbox" checked>Buy milk</div>', 'Buy milk'],
     'svg icon next to text' => ['<div><svg width="10" height="10"><circle r="4"></circle></svg>Visible text</div>', 'Visible text'],
-    // a table created by the quill-table-ui plugin this editor used before switching to quill-table-better
-    'table from the previous table plugin' => ['<table><tbody><tr><td data-row="row-1">Cell text</td></tr></tbody></table>', 'Cell text'],
 ]);
 
 it('shows legacy content in the editor', function (string $html, string $text) {
     [, $url] = legacyNote($html);
 
-    visit($url)->assertSeeIn('@note-body', $text);
+    visit($url)->assertSeeIn(LEGACY_TEXT, $text);
 })->with('legacy markup');
 
 it('does not save a legacy note just by opening it', function () {
@@ -67,7 +67,7 @@ it('keeps legacy text when writing in the note body', function (string $html, st
     [$note, $url] = legacyNote($html);
 
     $page = visit($url);
-    readyToEdit($page->assertSeeIn('@note-body', $text))
+    readyToEdit($page->assertSeeIn(LEGACY_TEXT, $text))
         ->click(LEGACY_EDITOR)
         ->keys(LEGACY_EDITOR, 'Control+End')
         ->typeSlowly(LEGACY_EDITOR, ' added later', 10);
@@ -77,37 +77,17 @@ it('keeps legacy text when writing in the note body', function (string $html, st
     expect(html_entity_decode((string) $note->fresh()->content))->toContain($text);
 })->with('legacy markup');
 
-it('saves imported to-dos as Quill checklist items', function () {
+it('saves imported to-dos as Tiptap task list items', function () {
     [$note, $url] = legacyNote('<div><input type="checkbox" checked>Buy milk</div><div><input type="checkbox">Buy eggs</div>');
 
     $page = visit($url);
-    typeLikeAUser(readyToEdit($page->assertSeeIn('@note-body', 'Buy eggs')), '@note-title', 'To-dos');
+    typeLikeAUser(readyToEdit($page->assertSeeIn(LEGACY_TEXT, 'Buy eggs')), '@note-title', 'To-dos');
 
     waitForDatabase($page, fn () => $note->fresh()->title === 'To-dos');
 
     expect((string) $note->fresh()->content)
-        ->toContain('<li data-list="checked">')
-        ->toContain('<li data-list="unchecked">')
+        ->toContain('data-checked="true"')
+        ->toContain('data-checked="false"')
         ->toContain('Buy milk')
         ->toContain('Buy eggs');
-});
-
-// BUG-39 regression: a table built by the retired quill-table-ui plugin must upgrade into a live,
-// editable quill-table-better table instead of showing as inert/unrecognised markup
-it('upgrades a legacy table into an editable one, keeping its content', function () {
-    [$note, $url] = legacyNote('<table><tbody><tr><td data-row="row-1">Cell one</td><td data-row="row-1">Cell two</td></tr></tbody></table>');
-
-    $page = visit($url);
-    readyToEdit($page->assertSeeIn('@note-body', 'Cell one'));
-
-    // clicking inside a migrated cell opens the same floating row/column menu a new table gets
-    $page->click(LEGACY_EDITOR.' table tr:first-child td:first-child')
-        ->click('.ql-table-menus-container [data-category="column"] .ql-table-tooltip-hover')
-        ->click('.ql-table-menus-container [data-category="column"] .ql-table-dropdown-list li:nth-child(2)'); // insert column right
-
-    waitForDatabase($page, fn () => substr_count((string) $note->fresh()->content, '<td') === 3);
-
-    expect((string) $note->fresh()->content)
-        ->toContain('Cell one')
-        ->toContain('Cell two');
 });

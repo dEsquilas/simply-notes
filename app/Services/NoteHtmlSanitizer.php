@@ -18,8 +18,10 @@ class NoteHtmlSanitizer
     {
         $config = (new HtmlSanitizerConfig())
             ->allowSafeElements()
-            // Quill video embeds
+            // Video embeds (Quill's legacy markup and Tiptap's own "video" node)
             ->allowElement('iframe', ['src', 'class', 'frameborder', 'allowfullscreen'])
+            // Tiptap task lists render a real checkbox input inside a label
+            ->allowElement('input', ['type', 'checked', 'disabled'])
             // Evernote and SVG elements are unwrapped instead of dropped, so notes never lose their text
             ->blockElement('en-codeblock')
             ->blockElement('en-note')
@@ -27,7 +29,7 @@ class NoteHtmlSanitizer
             ->blockElement('en-crypt')
             ->blockElement('en-todo')
             ->blockElement('svg')
-            // Quill markup: ql-* classes, list type, list UI spans and table rows
+            // Legacy Quill markup: ql-* classes, list type, list UI spans and table rows
             ->allowAttribute('class', '*')
             ->allowAttribute('data-list', 'li')
             ->allowAttribute('data-row', ['tr', 'td', 'th'])
@@ -37,6 +39,10 @@ class NoteHtmlSanitizer
             // quill-table-better cell/column/table sizing and borders/colors (width, height,
             // colspan and rowspan are already allowed globally by allowSafeElements())
             ->allowAttribute('style', ['table', 'td', 'th', 'col', 'colgroup'])
+            // Tiptap markup: task lists/items and resizable table columns
+            ->allowAttribute('data-type', ['ul', 'li'])
+            ->allowAttribute('data-checked', 'li')
+            ->allowAttribute('colwidth', ['td', 'th'])
             ->allowLinkSchemes(['http', 'https', 'mailto'])
             // Images are embedded as base64 data URIs
             ->allowMediaSchemes(['http', 'https', 'data'])

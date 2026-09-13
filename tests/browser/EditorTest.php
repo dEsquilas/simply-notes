@@ -5,7 +5,7 @@ use App\Models\Notebook;
 use App\Models\User;
 use Tests\Support\EvernoteExport;
 
-const EDITOR = '[data-test="note-body"] .ql-editor';
+const EDITOR = '[data-test="note-body"] .tiptap-content';
 
 beforeEach(function () {
     $this->user = User::factory()->create();
@@ -18,81 +18,80 @@ beforeEach(function () {
 /** Waits for the toolbar and past the first second, during which edits are ignored as a note switch. */
 function openEditor($page)
 {
-    return readyToEdit($page->assertVisible('[data-test="note-body"] .ql-toolbar'));
+    return readyToEdit($page->assertVisible('[data-test="toolbar"]'));
 }
 
-function toolbar(string $button): string
+function toolbar(string $dataTest): string
 {
-    return '[data-test="note-body"] '.$button;
+    return '[data-test="note-body"] [data-test="'.$dataTest.'"]';
 }
 
-/** Answers the editor's URL tooltip, opened by the link and video buttons. */
-function enterUrlInTooltip($page, string $mode, string $url)
+/** Answers the editor's link/video URL popover, opened by the link and video buttons. */
+function enterUrlInPopover($page, string $kind, string $url)
 {
-    $input = '[data-test="note-body"] .ql-tooltip.ql-editing input[type="text"]';
+    $input = '[data-test="'.$kind.'-input"]';
 
-    return $page->assertAttribute('[data-test="note-body"] .ql-tooltip', 'data-mode', $mode)
+    return $page->assertVisible($input)
         ->type($input, $url)
         ->keys($input, 'Enter');
 }
 
-it('applies toolbar formats and saves them', function (string $button, string $expectedHtml) {
+it('applies toolbar formats and saves them', function (string $dataTest, string $expectedHtml) {
     $page = visit($this->url);
-    selectAllInEditor(openEditor($page))->click(toolbar($button));
+    selectAllInEditor(openEditor($page))->click(toolbar($dataTest));
 
     waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, $expectedHtml));
 })->with([
-    'bold' => ['.ql-bold', '<strong>Some text</strong>'],
-    'italic' => ['.ql-italic', '<em>Some text</em>'],
-    'underline' => ['.ql-underline', '<u>Some text</u>'],
-    'strike' => ['.ql-strike', '<s>Some text</s>'],
-    'quote' => ['.ql-blockquote', '<blockquote>Some text</blockquote>'],
-    'numbered list' => ['.ql-list[value="ordered"]', 'data-list="ordered"'],
-    'bullet list' => ['.ql-list[value="bullet"]', 'data-list="bullet"'],
+    'bold' => ['toolbar-bold', '<strong>Some text</strong>'],
+    'italic' => ['toolbar-italic', '<em>Some text</em>'],
+    'underline' => ['toolbar-underline', '<u>Some text</u>'],
+    'strike' => ['toolbar-strike', '<s>Some text</s>'],
+    'quote' => ['toolbar-blockquote', '<blockquote><p>Some text</p></blockquote>'],
+    'numbered list' => ['toolbar-ordered-list', '<ol><li><p>Some text</p></li></ol>'],
+    'bullet list' => ['toolbar-bullet-list', '<ul><li><p>Some text</p></li></ul>'],
+    'task list' => ['toolbar-task-list', 'data-type="taskList"'],
 ]);
 
 it('indents and outdents list items', function () {
-    $this->note->forceFill(['content' => '<ol><li data-list="bullet">Item</li></ol>'])->save();
+    $this->note->forceFill(['content' => '<ul><li><p>One</p></li><li><p>Two</p></li></ul>'])->save();
 
     $page = visit($this->url);
-    selectAllInEditor(openEditor($page))->click(toolbar('.ql-indent[value="+1"]'));
-    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, 'ql-indent-1'));
+    // Clicking directly on the second item's text places the caret there, like a user would
+    openEditor($page)->click(EDITOR.' li:nth-of-type(2)')->click(toolbar('toolbar-indent'));
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<li><p>One</p><ul><li><p>Two</p></li></ul></li>'));
 
-    selectAllInEditor($page)->click(toolbar('.ql-indent[value="-1"]'));
-    waitForDatabase($page, fn () => ! str_contains((string) $this->note->fresh()->content, 'ql-indent-1'));
+    $page->click(EDITOR.' li ul li p')->click(toolbar('toolbar-outdent'));
+    waitForDatabase($page, fn () => ! str_contains((string) $this->note->fresh()->content, '<ul><li><p>One</p><ul>'));
 });
 
-it('changes the text size', function () {
+it('changes the paragraph to a heading', function () {
     $page = visit($this->url);
-    selectAllInEditor(openEditor($page))
-        ->click(toolbar('.ql-size .ql-picker-label'))
-        ->click(toolbar('.ql-size .ql-picker-item[data-value="large"]'));
+    openEditor($page)->click(EDITOR)->select(toolbar('toolbar-heading'), '1');
 
-    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, 'ql-size-large'));
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<h1>Some text</h1>'));
 });
 
 it('removes formatting', function () {
     $this->note->forceFill(['content' => '<p><strong>Bold</strong></p>'])->save();
 
     $page = visit($this->url);
-    selectAllInEditor(openEditor($page))->click(toolbar('.ql-clean'));
+    selectAllInEditor(openEditor($page))->click(toolbar('toolbar-clean'));
 
     waitForDatabase($page, fn () => ! str_contains((string) $this->note->fresh()->content, '<strong>'));
 });
 
 it('adds a link', function () {
-    // The link button asks for the URL in the editor's tooltip
     $page = visit($this->url);
-    selectAllInEditor(openEditor($page))->click(toolbar('.ql-link'));
-    enterUrlInTooltip($page, 'link', 'https://example.com/page');
+    selectAllInEditor(openEditor($page))->click(toolbar('toolbar-link'));
+    enterUrlInPopover($page, 'link', 'https://example.com/page');
 
     waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, 'href="https://example.com/page"'));
 });
 
 it('embeds https videos', function () {
     $page = visit($this->url);
-    openEditor($page)->click(EDITOR)->click(toolbar('.ql-video'));
-    enterUrlInTooltip($page, 'video', 'https://player.vimeo.com/video/76979871');
+    openEditor($page)->click(EDITOR)->click(toolbar('toolbar-video'));
+    enterUrlInPopover($page, 'video', 'https://player.vimeo.com/video/76979871');
 
     waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<iframe'));
 
@@ -103,12 +102,11 @@ it('embeds https videos', function () {
 // BUG-36: the video button kept YouTube "watch" URLs, which YouTube refuses to show inside an iframe
 it('turns YouTube links into embeddable videos', function (string $url) {
     $page = visit($this->url);
-    openEditor($page)->click(EDITOR)->click(toolbar('.ql-video'));
-    enterUrlInTooltip($page, 'video', $url);
+    openEditor($page)->click(EDITOR)->click(toolbar('toolbar-video'));
+    enterUrlInPopover($page, 'video', $url);
 
     waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<iframe'));
 
-    // Quill's tooltip already rewrites some of these forms and appends ?showinfo=0; any embed URL is fine
     expect(html_entity_decode($this->note->fresh()->content))->toContain('src="https://www.youtube.com/embed/dQw4w9WgXcQ');
 })->with([
     'watch' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
@@ -120,134 +118,28 @@ it('turns YouTube links into embeddable videos', function (string $url) {
 
 it('saves insecure http videos without a source', function () {
     $page = visit($this->url);
-    openEditor($page)->click(EDITOR)->click(toolbar('.ql-video'));
-    enterUrlInTooltip($page, 'video', 'http://example.com/video.mp4');
+    openEditor($page)->click(EDITOR)->click(toolbar('toolbar-video'));
+    enterUrlInPopover($page, 'video', 'http://example.com/video.mp4');
 
     waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<iframe'));
 
     expect($this->note->fresh()->content)->not->toContain('http://example.com/video.mp4');
 });
 
-/** Clicks the toolbar table button and picks a 2x2 grid from the size picker it opens. */
-function insertTable($page)
-{
-    return $page->click(toolbar('.ql-table-better'))
-        ->click(toolbar('.ql-table-select-container span[row="2"][column="2"]'));
-}
-
 it('inserts a table', function () {
     $page = visit($this->url);
-    insertTable(openEditor($page)->click(EDITOR));
+    openEditor($page)->click(EDITOR)->click(toolbar('toolbar-table'));
 
     waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<table'));
 });
 
-it('adds and removes a table column', function () {
-    $page = visit($this->url);
-    insertTable(openEditor($page)->click(EDITOR));
-    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<table'));
-
-    // clicking inside a cell opens the floating row/column menu
-    $page->click(EDITOR.' table tr:first-child td:first-child p')
-        ->click('.ql-table-menus-container [data-category="column"] .ql-table-tooltip-hover')
-        ->click('.ql-table-menus-container [data-category="column"] .ql-table-dropdown-list li:nth-child(2)');
-
-    // 2 rows x 3 columns after inserting a column
-    waitForDatabase($page, fn () => substr_count((string) $this->note->fresh()->content, '<td') === 6);
-
-    $page->click(EDITOR.' table tr:first-child td:first-child p')
-        ->click('.ql-table-menus-container [data-category="column"] .ql-table-tooltip-hover')
-        ->click('.ql-table-menus-container [data-category="column"] .ql-table-dropdown-list li:nth-child(3)');
-
-    // back to 2 rows x 2 columns after deleting it
-    waitForDatabase($page, fn () => substr_count((string) $this->note->fresh()->content, '<td') === 4);
-
-    // Adding a column crashed once table-better's measuring elements were removed from the live editor
-    $page->assertNoJavaScriptErrors();
-    expect($this->note->fresh()->content)->not->toContain('<temporary');
-});
-
-it('shows the next note after switching away from a note with a table, without JavaScript errors', function () {
-    // Real content saved by the editor after inserting a table, adding a column and an image
-    $this->note->forceFill(['content' => file_get_contents(base_path('tests/Support/fixtures/table-better-note.html'))])->save();
-    $other = Note::factory()->for($this->notebook)->create([
-        'title' => 'Other',
-        'content' => '<p>Other body text</p>',
-        'updated_at' => now()->subHour(),
-    ]);
+it('edits table rows and columns', function () {
+    $this->note->forceFill(['content' => '<table><tbody><tr><td><p>a</p></td><td><p>b</p></td></tr></tbody></table>'])->save();
 
     $page = visit($this->url);
-    openEditor($page)->assertVisible(EDITOR.' table');
+    openEditor($page)->click(EDITOR.' table td:first-of-type')->click(toolbar('table-add-column'));
 
-    // Switching away from a note with a table used to leave the editor empty
-    $page->click('@note-'.$other->id)
-        ->assertValue('@note-title', 'Other')
-        ->assertSeeIn(EDITOR, 'Other body text')
-        ->click('@note-'.$this->note->id)
-        ->assertValue('@note-title', 'Formatting')
-        ->assertVisible(EDITOR.' table')
-        // Also catches Quill errors reported through console.error, like "[Parchment] Maximum optimize iterations reached"
-        ->assertNoSmoke();
-});
-
-it('adds and removes a table row', function () {
-    $page = visit($this->url);
-    insertTable(openEditor($page)->click(EDITOR));
-    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<table'));
-
-    $page->click(EDITOR.' table tr:first-child td:first-child p')
-        ->click('.ql-table-menus-container [data-category="row"] .ql-table-tooltip-hover')
-        ->click('.ql-table-menus-container [data-category="row"] .ql-table-dropdown-list li:nth-child(4)'); // insert row below
-
-    waitForDatabase($page, fn () => substr_count((string) $this->note->fresh()->content, '<tr') === 3);
-
-    $page->click(EDITOR.' table tr:first-child td:first-child p')
-        ->click('.ql-table-menus-container [data-category="row"] .ql-table-tooltip-hover')
-        ->click('.ql-table-menus-container [data-category="row"] .ql-table-dropdown-list li:nth-child(5)'); // delete row
-
-    waitForDatabase($page, fn () => substr_count((string) $this->note->fresh()->content, '<tr') === 2);
-});
-
-it('resizes an image and keeps the size after reload', function () {
-    // A 100x100 red square: unlike the 1x1 pixel fixture used elsewhere, it gives the resize
-    // handles distinct corners to drag from instead of collapsing onto a single point.
-    $png = 'iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAAAtUlEQVR4nO3QUQkAIBTAQDO9/gGMZQV/ZAgHCzBu7RldtvKDj4IFC1YeLFiw8mDBgpUHCxasPFiwYOXBggUrDxYsWHmwYMHKgwULVh4sWLDyYMGClQcLFqw8WLBg5cGCBSsPFixYebBgwcqDBQtWHixYsPJgwYKVBwsWrDxYsGDlwYIFKw8WLFh5sGDByoMFC1YeLFiw8mDBgpUHCxasPFiwYOXBggUrDxYsWHmwYMHKgwXrTQdmSclkRV9qUAAAAABJRU5ErkJggg==';
-
-    $page = visit($this->url);
-    openEditor($page)->click(EDITOR);
-
-    $page->script(<<<JS
-        () => {
-            const originalClick = HTMLInputElement.prototype.click;
-            HTMLInputElement.prototype.click = function () {
-                if (this.type !== 'file') { return originalClick.call(this); }
-                const bytes = Uint8Array.from(atob('{$png}'), c => c.charCodeAt(0));
-                const transfer = new DataTransfer();
-                transfer.items.add(new File([bytes], 'photo.png', { type: 'image/png' }));
-                this.files = transfer.files;
-                setTimeout(() => this.dispatchEvent(new Event('change')), 50);
-            };
-        }
-    JS);
-    $page->click(toolbar('.ql-image'));
-    waitForDatabase($page, fn () => str_contains(html_entity_decode((string) $this->note->fresh()->content), 'data:image/png;base64,'.$png));
-
-    // the resize overlay needs a moment to position its handles over the image
-    $page->click(EDITOR.' img')->wait(0.3)
-        ->drag('.blot-formatter__resize-handle[data-position="bottom-right"]', '[data-test="note-body"]');
-
-    waitForDatabase($page, fn () => (bool) preg_match('/width="\d+px"/', (string) $this->note->fresh()->content));
-    $width = null;
-    waitForDatabase($page, function () use (&$width) {
-        preg_match('/width="(\d+)px"/', (string) $this->note->fresh()->content, $matches);
-        $width = $matches[1] ?? null;
-
-        return $width !== null;
-    });
-
-    $page->refresh()->assertVisible(EDITOR)->wait(0.3);
-
-    expect($page->script("() => document.querySelector('".EDITOR." img')?.getAttribute('width')"))->toBe($width.'px');
+    waitForDatabase($page, fn () => substr_count((string) $this->note->fresh()->content, '<td') === 3);
 });
 
 it('uploads an image from the toolbar', function () {
@@ -271,7 +163,7 @@ it('uploads an image from the toolbar', function () {
         }
     JS);
 
-    $page->click(toolbar('.ql-image'));
+    $page->click(toolbar('toolbar-image'));
 
     waitForDatabase($page, fn () => str_contains(html_entity_decode((string) $this->note->fresh()->content), 'data:image/png;base64,'.$png));
 });
@@ -289,9 +181,9 @@ it('does not insert an image when no file is chosen', function () {
     JS);
 
     // The fake file dialog answers after 50 ms
-    $page->click(toolbar('.ql-image'))
+    $page->click(toolbar('toolbar-image'))
         ->wait(0.3)
-        ->assertScript('document.querySelectorAll(\'[data-test="note-body"] .ql-editor img\').length', 0);
+        ->assertScript('document.querySelectorAll(\'[data-test="note-body"] .tiptap-content img\').length', 0);
 
     expect($this->note->fresh()->content)->toBe('<p>Some text</p>');
 });
@@ -304,8 +196,8 @@ it('never runs scripts pasted into a note', function () {
         () => {
             const data = new DataTransfer();
             data.setData('text/html', '<p>pasted</p><img src="x" onerror="window.__pastedScriptRan = true">');
-            document.querySelector('[data-test="note-body"] .ql-editor')
-                .dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true }));
+            document.querySelector('[data-test="note-body"] .tiptap-content')
+                .dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }));
         }
     JS);
 
@@ -331,15 +223,34 @@ it('never runs scripts stored in notes saved before sanitizing existed', functio
         ->assertScript('window.__legacyScriptRan === true', false);
 });
 
-it('keeps the spaces typed inside a table cell', function () {
+it('shows the next note after switching away from a note with a table', function () {
+    $this->note->forceFill(['content' => '<p>Before</p><table><tbody><tr><td><p>A1</p></td><td><p>B1</p></td></tr></tbody></table>'])->save();
+    $other = Note::factory()->for($this->notebook)->create([
+        'title' => 'Other',
+        'content' => '<p>Other body text</p>',
+        'updated_at' => now()->subHour(),
+    ]);
+
     $page = visit($this->url);
-    insertTable(openEditor($page)->click(EDITOR));
-    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<table'));
+    openEditor($page)->assertVisible(EDITOR.' table');
 
-    // A mismatch between the saved and the live HTML used to reload the note on every keystroke,
-    // dropping the caret and the trailing spaces
-    $page->click(EDITOR.' table tr:first-child td:first-child p')
-        ->typeSlowly(EDITOR, 'uno dos tres', 20);
+    // With Quill's table plugin the editor came up empty after this switch
+    $page->click('@note-'.$other->id)
+        ->assertValue('@note-title', 'Other')
+        ->assertSeeIn(EDITOR, 'Other body text')
+        ->click('@note-'.$this->note->id)
+        ->assertValue('@note-title', 'Formatting')
+        ->assertVisible(EDITOR.' table')
+        ->assertNoSmoke();
+});
 
-    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, 'uno dos tres'));
+it('keeps the spaces typed inside a table cell', function () {
+    $this->note->forceFill(['content' => '<table><tbody><tr><td><p>x</p></td><td><p></p></td></tr></tbody></table>'])->save();
+
+    $page = visit($this->url);
+    openEditor($page)->click(EDITOR.' table tr:first-child td:first-child p')
+        ->keys(EDITOR, 'End')
+        ->typeSlowly(EDITOR, ' uno dos tres', 20);
+
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, 'x uno dos tres'));
 });

@@ -86,15 +86,17 @@ it('keeps null content as null', function () {
     expect($this->sanitizer->sanitize(null))->toBeNull();
 });
 
-// BUG-38: elements it does not know are dropped with their children, deleting text of imported notes
-it('keeps the text of Evernote elements it does not allow', function (string $html, string $text) {
-    expect(html_entity_decode($this->sanitizer->sanitize($html)))->toContain($text);
+// BUG-38 regression
+it('keeps the text of Evernote and SVG elements it does not allow', function (string $html, string $expected) {
+    expect($this->sanitizer->sanitize($html))->toBe($expected);
 })->with([
-    'code block' => ['<div><en-codeblock><div>SELECT * FROM notes;</div></en-codeblock></div>', 'SELECT * FROM notes;'],
-    'unknown wrapper' => ['<en-note><div>Body text</div></en-note>', 'Body text'],
-])->todo();
+    'code block' => ['<div><en-codeblock><div>SELECT * FROM notes;</div></en-codeblock></div>', '<div><div>SELECT * FROM notes;</div></div>'],
+    'note wrapper' => ['<en-note><div>Body text</div></en-note>', '<div>Body text</div>'],
+    'svg icon' => ['<div><svg width="10"><circle r="4"></circle></svg>Visible text</div>', '<div>Visible text</div>'],
+]);
 
-// BUG-38: imported to-do lists lose their checkboxes when saved
-it('keeps imported to-do checkboxes', function () {
-    expect($this->sanitizer->sanitize('<div><input type="checkbox" checked />Buy milk</div>'))->toContain('type="checkbox"');
-})->todo();
+it('keeps Quill checklists, which is how imported to-dos are saved', function () {
+    $html = '<ol><li data-list="checked">Buy milk</li><li data-list="unchecked">Eggs</li></ol>';
+
+    expect($this->sanitizer->sanitize($html))->toBe($html);
+});

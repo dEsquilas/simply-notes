@@ -20,6 +20,13 @@ class NoteHtmlSanitizer
             ->allowSafeElements()
             // Quill video embeds
             ->allowElement('iframe', ['src', 'class', 'frameborder', 'allowfullscreen'])
+            // Evernote and SVG elements are unwrapped instead of dropped, so notes never lose their text
+            ->blockElement('en-codeblock')
+            ->blockElement('en-note')
+            ->blockElement('en-media')
+            ->blockElement('en-crypt')
+            ->blockElement('en-todo')
+            ->blockElement('svg')
             // Quill markup: ql-* classes, list type, list UI spans and table rows
             ->allowAttribute('class', '*')
             ->allowAttribute('data-list', 'li')

@@ -194,6 +194,11 @@ describe('HTML conversion', function () {
             ->toContain('ql-indent-1');
     });
 
+    it('keeps the text of Evernote code blocks', function () {
+        expect(importNoteBody('<div><en-codeblock><div>SELECT 1;</div></en-codeblock></div>')->content)
+            ->toBe('<div><div>SELECT 1;</div></div>');
+    });
+
     it('collapses whitespace', function () {
         expect(importNoteBody("<div class=\"para\">a \n\n\t   b</div>")->content)->toBe('<p>a b</p>');
     });

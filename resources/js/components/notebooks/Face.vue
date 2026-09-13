@@ -1,7 +1,7 @@
 <template>
     <div :data-test="'notebook-' + notebook.id" @contextmenu="openMenu($event, notebook)" class="lg:w-1/5 md:w-1/3 sm: w-1/2">
         <Link :href="'/notebook/' + notebook.id">
-            <article class="border border-main2 overflow-hidden transition shadow-lg rounded lg:hover:scale-110 lg:hover:shadow-main1">
+            <article class="border border-main2 overflow-hidden transition shadow-lg rounded-sm lg:hover:scale-110 lg:hover:shadow-main1">
                 <header class="bg-main2 p-2">
                     <h3 data-test="notebook-name" class="text-sm font-semibold text-white flex items-center overflow-auto text-ellipsis whitespace-nowrap">
                         <DocumentDuplicateIcon class="w-6 inline-block mr-2" />

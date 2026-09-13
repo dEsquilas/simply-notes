@@ -112,7 +112,7 @@ const deleteNote = (data) => {
             <section class="flex flex-row w-full h-full">
                 <aside
                     data-test="notes-sidebar"
-                    class="overflow-hidden border-r border-1 border-cgray
+                    class="overflow-hidden border-r border-cgray
                             w-full
                             md:w-[350px]
                             "
@@ -121,7 +121,7 @@ const deleteNote = (data) => {
                          'w-full': isSidebarVisible && isMobile,
                     }"
                 >
-                    <header class="p-4  border-1 border-b border-cgray">
+                    <header class="p-4 border-b border-cgray">
                         <h3 class="text-xl font-bold text-white mb-4">
                             <NewspaperIcon class="w-6 inline-block mr-4" />
                             Notas
@@ -131,7 +131,7 @@ const deleteNote = (data) => {
                                 data-test="note-search"
                                 v-model="filter"
                                 type="text"
-                                class="w-[250px] bg-transparent border-1 rounded-xl text-white focus:outline-none"
+                                class="w-[250px] bg-transparent rounded-xl text-white focus:outline-hidden"
                                 placeholder="Buscar...">
                             <!-- Icon components only pass class through, so their test hooks are test-* classes -->
                             <XCircleIcon
@@ -159,7 +159,7 @@ const deleteNote = (data) => {
                         :notes="notes" :filter="filter" />
                 </aside>
                 <article data-test="editor-pane" class="
-                                flex-grow
+                                grow
                                 md:max-w-[calc(100%-350px)]
                                 md:block
                                 "

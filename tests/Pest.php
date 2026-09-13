@@ -84,15 +84,14 @@ function selectAllInEditor($page)
 }
 
 /**
- * Answers the page's confirm() and prompt() dialogs, which the browser would otherwise dismiss,
+ * Answers the page's confirm() dialogs, which the browser would otherwise dismiss,
  * and records their messages in window.__dialogs.
  */
-function answerDialogs($page, bool $confirm = true, ?string $prompt = null)
+function answerDialogs($page, bool $confirm = true)
 {
     $page->script('() => {
         window.__dialogs = [];
         window.confirm = (message) => { window.__dialogs.push(message); return '.json_encode($confirm).'; };
-        window.prompt = (message) => { window.__dialogs.push(message); return '.json_encode($prompt).'; };
     }');
 
     return $page;

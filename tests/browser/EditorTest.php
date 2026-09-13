@@ -26,6 +26,16 @@ function toolbar(string $button): string
     return '[data-test="note-body"] '.$button;
 }
 
+/** Answers the editor's URL tooltip, opened by the link and video buttons. */
+function enterUrlInTooltip($page, string $mode, string $url)
+{
+    $input = '[data-test="note-body"] .ql-tooltip.ql-editing input[type="text"]';
+
+    return $page->assertAttribute('[data-test="note-body"] .ql-tooltip', 'data-mode', $mode)
+        ->type($input, $url)
+        ->keys($input, 'Enter');
+}
+
 it('applies toolbar formats and saves them', function (string $button, string $expectedHtml) {
     $page = visit($this->url);
     selectAllInEditor(openEditor($page))->click(toolbar($button));
@@ -71,19 +81,18 @@ it('removes formatting', function () {
 });
 
 it('adds a link', function () {
-    // The link button asks for the URL with the browser's prompt dialog
+    // The link button asks for the URL in the editor's tooltip
     $page = visit($this->url);
-    answerDialogs(selectAllInEditor(openEditor($page)), prompt: 'https://example.com/page')
-        ->click(toolbar('.ql-link'))
-        ->assertScript('window.__dialogs[0]', 'Enter link URL:');
+    selectAllInEditor(openEditor($page))->click(toolbar('.ql-link'));
+    enterUrlInTooltip($page, 'link', 'https://example.com/page');
 
     waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, 'href="https://example.com/page"'));
 });
 
 it('embeds https videos', function () {
     $page = visit($this->url);
-    answerDialogs(openEditor($page)->click(EDITOR), prompt: 'https://player.vimeo.com/video/76979871')
-        ->click(toolbar('.ql-video'));
+    openEditor($page)->click(EDITOR)->click(toolbar('.ql-video'));
+    enterUrlInTooltip($page, 'video', 'https://player.vimeo.com/video/76979871');
 
     waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<iframe'));
 
@@ -91,15 +100,16 @@ it('embeds https videos', function () {
     expect(html_entity_decode($this->note->fresh()->content))->toContain('src="https://player.vimeo.com/video/76979871"');
 });
 
-// BUG-36: the video prompt kept YouTube "watch" URLs, which YouTube refuses to show inside an iframe
+// BUG-36: the video button kept YouTube "watch" URLs, which YouTube refuses to show inside an iframe
 it('turns YouTube links into embeddable videos', function (string $url) {
     $page = visit($this->url);
-    answerDialogs(openEditor($page)->click(EDITOR), prompt: $url)
-        ->click(toolbar('.ql-video'));
+    openEditor($page)->click(EDITOR)->click(toolbar('.ql-video'));
+    enterUrlInTooltip($page, 'video', $url);
 
     waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<iframe'));
 
-    expect(html_entity_decode($this->note->fresh()->content))->toContain('src="https://www.youtube.com/embed/dQw4w9WgXcQ"');
+    // Quill's tooltip already rewrites some of these forms and appends ?showinfo=0; any embed URL is fine
+    expect(html_entity_decode($this->note->fresh()->content))->toContain('src="https://www.youtube.com/embed/dQw4w9WgXcQ');
 })->with([
     'watch' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     'watch with other parameters' => 'https://www.youtube.com/watch?feature=share&v=dQw4w9WgXcQ&t=42',
@@ -110,8 +120,8 @@ it('turns YouTube links into embeddable videos', function (string $url) {
 
 it('saves insecure http videos without a source', function () {
     $page = visit($this->url);
-    answerDialogs(openEditor($page)->click(EDITOR), prompt: 'http://example.com/video.mp4')
-        ->click(toolbar('.ql-video'));
+    openEditor($page)->click(EDITOR)->click(toolbar('.ql-video'));
+    enterUrlInTooltip($page, 'video', 'http://example.com/video.mp4');
 
     waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<iframe'));
 

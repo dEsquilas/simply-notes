@@ -56,8 +56,8 @@
                                     {{ remainingFiles(job) }}
                                 </div>
                                 <div data-test="job-status" class="w-1/3 text-right">
-                                    <span v-show="job.status === 'pending'" class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Pending</span>
-                                    <span v-show="job.status === 'processing'" class="text-xs font-medium px-2.5 py-0.5 rounded bg-blue-900 text-blue-300">Processing</span>
+                                    <span v-show="job.status === 'pending'" class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-sm">Pending</span>
+                                    <span v-show="job.status === 'processing'" class="text-xs font-medium px-2.5 py-0.5 rounded-sm bg-blue-900 text-blue-300">Processing</span>
                                 </div>
                             </li>
                         </ul>
@@ -106,7 +106,7 @@
                                 {{ DateHelper.formatDate(job.updated_at) }}
                             </div>
                             <div class="w-1/3 text-right">
-                                <span class="text-xs font-medium px-2.5 py-0.5 rounded bg-red-900 text-red-300">Import failed</span>
+                                <span class="text-xs font-medium px-2.5 py-0.5 rounded-sm bg-red-900 text-red-300">Import failed</span>
                             </div>
                         </li>
                     </ul>

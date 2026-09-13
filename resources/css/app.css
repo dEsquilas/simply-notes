@@ -1,0 +1,71 @@
+@import 'tailwindcss';
+
+@plugin '@tailwindcss/forms';
+
+@theme {
+    --font-sans: Figtree, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-main1: #032a33;
+    --color-main2: #255965;
+    --color-main3: #4c6f7b;
+    --color-main4: #f1d18a;
+
+    --color-cblack: #262727;
+    --color-cgray: #374151;
+    --color-clgray: #BDBDBD;
+    --color-cwhite: #ffffff;
+}
+
+/* Tailwind 3 defaults this app was designed with: gray borders, gray placeholders and pointer buttons */
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentcolor);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: var(--color-gray-400);
+    }
+
+    button:not(:disabled),
+    [role='button']:not(:disabled) {
+        cursor: pointer;
+    }
+}
+
+:root{
+    --main1: #032a33;
+    --main2: #255965;
+    --main3: #4c6f7b;
+    --main4: #f1d18a;
+
+    --cblack: #262727;
+    --cgray: #374151;
+    --clgray: #BDBDBD;
+    --cwhite: #ffffff;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #1a1a1a;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #2d2d2d;
+    border-radius: 10px;
+}
+
+
+.vue-notification.neutral{
+    background-color: var(--cgray);
+    color: var(--cwhite);
+    border-left: 1px solid var(--clgray);
+}

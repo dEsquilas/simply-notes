@@ -85,3 +85,16 @@ it('does not truncate large notes', function () {
 it('keeps null content as null', function () {
     expect($this->sanitizer->sanitize(null))->toBeNull();
 });
+
+// BUG-38: elements it does not know are dropped with their children, deleting text of imported notes
+it('keeps the text of Evernote elements it does not allow', function (string $html, string $text) {
+    expect(html_entity_decode($this->sanitizer->sanitize($html)))->toContain($text);
+})->with([
+    'code block' => ['<div><en-codeblock><div>SELECT * FROM notes;</div></en-codeblock></div>', 'SELECT * FROM notes;'],
+    'unknown wrapper' => ['<en-note><div>Body text</div></en-note>', 'Body text'],
+])->todo();
+
+// BUG-38: imported to-do lists lose their checkboxes when saved
+it('keeps imported to-do checkboxes', function () {
+    expect($this->sanitizer->sanitize('<div><input type="checkbox" checked />Buy milk</div>'))->toContain('type="checkbox"');
+})->todo();

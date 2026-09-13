@@ -16,10 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Same PHP version as production
+      # Same PHP minor version as production
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.4'
           extensions: mbstring, zip, gd, fileinfo, pdo_sqlite
           coverage: pcov
 
@@ -37,7 +37,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.4'
           extensions: mbstring, zip, gd, fileinfo, pdo_sqlite
           coverage: none
 

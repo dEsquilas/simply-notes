@@ -6,7 +6,9 @@ use Laravel\Socialite\Two\GoogleProvider;
 use Laravel\Socialite\Two\User as GoogleUser;
 use Tests\TestCase;
 
-uses(TestCase::class, RefreshDatabase::class)->in('Feature');
+uses(TestCase::class, RefreshDatabase::class)
+    ->beforeEach(fn () => $this->withoutVite())
+    ->in('Feature');
 
 /**
  * Makes the Google callback return this account without calling Google.

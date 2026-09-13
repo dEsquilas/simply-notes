@@ -35,6 +35,47 @@ it('removes scripts, event handlers and dangerous URLs', function () {
     }
 });
 
+it('allows https iframes regardless of case and surrounding spaces', function (string $src) {
+    expect($this->sanitizer->sanitize('<iframe src="'.$src.'"></iframe>'))->toContain('src=');
+})->with([
+    'lowercase' => 'https://www.youtube.com/embed/abc',
+    'uppercase scheme' => 'HTTPS://www.youtube.com/embed/abc',
+]);
+
+it('keeps an iframe without a source', function () {
+    expect($this->sanitizer->sanitize('<iframe class="ql-video"></iframe>'))->toBe('<iframe class="ql-video"></iframe>');
+});
+
+it('allows http images while iframes need https', function () {
+    expect($this->sanitizer->sanitize('<img src="http://example.com/a.png" />'))->toBe('<img src="http://example.com/a.png" />')
+        ->and($this->sanitizer->sanitize('<iframe src="http://example.com"></iframe>'))->toBe('<iframe></iframe>');
+});
+
+it('allows mailto links', function () {
+    // "@" comes back as the equivalent entity &#64;, which browsers decode
+    expect($this->sanitizer->sanitize('<a href="mailto:jane@example.com">mail</a>'))->toBe('<a href="mailto:jane&#64;example.com">mail</a>');
+});
+
+it('drops Quill attributes on elements where Quill never puts them', function (string $html, string $expected) {
+    expect($this->sanitizer->sanitize($html))->toBe($expected);
+})->with([
+    'data-list on a paragraph' => ['<p data-list="bullet">x</p>', '<p>x</p>'],
+    'contenteditable on a div' => ['<div contenteditable="true">x</div>', '<div>x</div>'],
+    'data-row on a div' => ['<div data-row="row-1">x</div>', '<div>x</div>'],
+]);
+
+it('removes dangerous elements', function (string $html) {
+    $clean = $this->sanitizer->sanitize('<p>keep</p>'.$html);
+
+    expect($clean)->toBe('<p>keep</p>');
+})->with([
+    'script' => '<script>alert(1)</script>',
+    'style' => '<style>body{display:none}</style>',
+    'object' => '<object data="evil.swf"></object>',
+    'embed' => '<embed src="evil.swf">',
+    'form' => '<form action="https://evil.example"><input name="password"></form>',
+]);
+
 it('does not truncate large notes', function () {
     $html = '<p><img src="data:image/png;base64,'.str_repeat('A', 3_000_000).'" /></p>';
 

@@ -48,11 +48,11 @@ const openMenu = (e, notebook) => {
                 onClick: () => {
 
                     const notebookId = notebook.id
-                    emit('delete', notebookId)
 
                     axios
                         .post('/notebooks/trash/' + notebookId)
                         .then(() => {
+                            emit('delete', notebookId)
 
                             notify({
                                 type: 'success',
@@ -63,7 +63,7 @@ const openMenu = (e, notebook) => {
                         .catch((error) => {
                             notify({
                                 type: 'error',
-                                text: error.message,
+                                text: 'The notebook could not be sent to the trash',
                             })
                         })
                 },

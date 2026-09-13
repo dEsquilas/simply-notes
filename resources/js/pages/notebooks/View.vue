@@ -9,6 +9,7 @@ import { ref, computed, onMounted } from 'vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import Note from '@/components/notes/Note.vue'
 import NoteList from '@/components/notes/NoteList.vue'
+import { notify } from '@kyvg/vue3-notification'
 
 
 const props = defineProps({
@@ -64,9 +65,12 @@ const newNote = () => {
             currentNote.value = response.data.note
             isCreating.value = false
         })
-        .catch((error) => {
-            console.log(error)
-            isCreating.value = true
+        .catch(() => {
+            isCreating.value = false
+            notify({
+                type: 'error',
+                text: 'The note could not be created',
+            })
         })
 }
 

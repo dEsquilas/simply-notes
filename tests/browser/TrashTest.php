@@ -120,7 +120,7 @@ it('tells the user when deleting fails and keeps the notebook listed', function 
             ->waitForText('Failed to delete notebook')
             ->assertVisible('@trashed-notebook-'.$notebook->id);
     });
-})->todo();
+});
 
 // BUG-11
 it('tells the user when restoring fails and keeps the notebook listed', function () {
@@ -136,4 +136,4 @@ it('tells the user when restoring fails and keeps the notebook listed', function
             ->waitForText('Failed to restore notebook')
             ->assertVisible('@trashed-notebook-'.$notebook->id);
     });
-})->todo();
+});

@@ -85,7 +85,7 @@ it('creates one notebook on a double click', function () {
     );
 
     expect(Notebook::where('name', 'Once')->count())->toBe(1);
-})->todo();
+});
 
 // BUG-23
 it('shows a new notebook first, as after reloading', function () {
@@ -100,7 +100,7 @@ it('shows a new notebook first, as after reloading', function () {
         ->waitForTextIn('@notebooks', 'Brand new')
         ->assertScript('document.querySelector(\'[dusk="notebook-name"]\').textContent.trim()', 'Brand new')
     );
-})->todo();
+});
 
 // BUG-19
 it('confirms visibly that the notebook was created', function () {
@@ -114,7 +114,7 @@ it('confirms visibly that the notebook was created', function () {
         ->pause(1500)
         ->assertSee('Created')
     );
-})->todo();
+});
 
 it('opens a notebook from its card', function () {
     $notebook = Notebook::factory()->ownedBy($this->user)->create(['name' => 'Work']);
@@ -158,4 +158,4 @@ it('keeps the notebook on screen when sending it to the trash fails', function (
             ->pause(1000)
             ->assertVisible('@notebook-'.$notebook->id);
     });
-})->todo();
+});

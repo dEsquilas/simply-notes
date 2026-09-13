@@ -76,7 +76,7 @@ it('does not open a trashed note from its URL', function () {
         ->visit("/notebook/{$this->notebook->id}/note/{$note->id}")
         ->waitForLocation("/notebook/{$this->notebook->id}")
     );
-})->todo();
+});
 
 // BUG-03
 it('does not open notes of a trashed notebook from their URL', function () {
@@ -88,4 +88,4 @@ it('does not open notes of a trashed notebook from their URL', function () {
         ->visit("/notebook/{$this->notebook->id}/note/{$note->id}")
         ->waitForLocation('/notebooks')
     );
-})->todo();
+});

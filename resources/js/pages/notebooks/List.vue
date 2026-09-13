@@ -40,17 +40,20 @@ const props = defineProps({
 })
 
 const newNotebookName = ref("")
+const isCreating = ref(false)
 const notebooksIn = ref(props.notebooks)
 const notebooks = computed(() => notebooksIn.value)
 
 const createNotebook = () => {
-    if (newNotebookName.value.length > 0) {
+    if (newNotebookName.value.length > 0 && !isCreating.value) {
+        isCreating.value = true
         axios
             .post('/notebooks/create', {
                 name: newNotebookName.value,
             })
             .then((response) => {
-                notebooks.value.push(response.data.notebook)
+                // Newest first, as the list comes from the server
+                notebooks.value.unshift(response.data.notebook)
                 newNotebookName.value = ""
                 notify({
                     type: 'success',
@@ -60,8 +63,11 @@ const createNotebook = () => {
             .catch((error) => {
                 notify({
                     type: 'error',
-                    text: error.message,
+                    text: error.response?.data?.message ?? error.message,
                 })
+            })
+            .finally(() => {
+                isCreating.value = false
             })
     }
 }

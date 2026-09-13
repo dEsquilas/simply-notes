@@ -98,8 +98,14 @@ it('reaches the trash and import from the mobile menu', function () {
         ->waitFor('@mobile-menu')
         ->assertSeeIn('@mobile-menu', 'Trash')
         ->assertSeeIn('@mobile-menu', 'Import')
+        ->click('@mobile-nav-trash')
+        ->waitForLocation('/notebooks/trash')
+        ->click('@mobile-menu-button')
+        ->waitFor('@mobile-nav-import')
+        ->click('@mobile-nav-import')
+        ->waitForLocation('/import')
     );
-})->todo();
+});
 
 afterEach(function () {
     $this->browse(fn (Browser $browser) => $browser->resize(1920, 1080));

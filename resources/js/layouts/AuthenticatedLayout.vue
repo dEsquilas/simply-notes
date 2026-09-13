@@ -129,6 +129,12 @@ const showingNavigationDropdown = ref(false)
                         <ResponsiveNavLink dusk="mobile-nav-notebooks" :href="route('notebooks.index')" :active="route().current('notebooks.index')">
                             Notebooks
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink dusk="mobile-nav-trash" :href="route('notebooks.trash.view')" :active="route().current('notebooks.trash.view')">
+                            Trash
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink dusk="mobile-nav-import" :href="route('import')" :active="route().current('import')">
+                            Import
+                        </ResponsiveNavLink>
                     </div>
 
                     <!-- Responsive Settings Options -->
@@ -163,6 +169,6 @@ const showingNavigationDropdown = ref(false)
                 </div>
             </main>
         </div>
-        <notifications position="bottom right" :duration="1" />
+        <notifications position="bottom right" :duration="3000" />
     </div>
 </template>

@@ -2,7 +2,7 @@
 import ContextMenu from '@imengyu/vue3-context-menu'
 import NoteExtract from '@/components/notes/NoteExtract.vue'
 import { notify } from "@kyvg/vue3-notification"
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const emit = defineEmits(['change-note', 'delete-note'])
 
@@ -40,14 +40,10 @@ const openMenu = (e, note) => {
             {
                 label: 'Eliminar',
                 onClick: () => {
-                    emit('delete-note', {note: note})
                     axios
                         .post('/notes/trash/' + note.id)
-                        .then((response) => {
-
-                            if(response.status !== 200)
-                                throw new Error(response.data.message)
-
+                        .then(() => {
+                            emit('delete-note', {note: note})
                             notify({
                                 type: 'success',
                                 text: 'Eliminado',
@@ -57,7 +53,7 @@ const openMenu = (e, note) => {
                         .catch((error) => {
                             notify({
                                 type: 'error',
-                                text: error.message,
+                                text: 'The note could not be sent to the trash',
                             })
                         })
                 },
@@ -67,11 +63,17 @@ const openMenu = (e, note) => {
 
 }
 
+// Search the visible text of each note, not its HTML markup
+const searchableText = computed(() => new Map(props.notes.map((note) => [
+    note.id,
+    ((note.title ?? '') + ' ' + (note.content ?? '').replace(/<[^>]*>/g, ' ')).toLowerCase(),
+])))
+
 const applyFilter = (filter, note) => {
     if (filter === "")
         return true
     else
-        return note.title?.toLowerCase().includes(filter.toLowerCase()) || note.content?.toLowerCase().includes(filter.toLowerCase())
+        return searchableText.value.get(note.id).includes(filter.toLowerCase())
 }
 
 </script>

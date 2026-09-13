@@ -71,7 +71,7 @@ it('lets the user try again when creating a note fails', function () {
             ->assertVisible('.dusk-new-note')
             ->assertMissing('.dusk-creating-note');
     });
-})->todo();
+});
 
 it('autosaves the title', function () {
     $note = Note::factory()->for($this->notebook)->create(['title' => 'Draft']);
@@ -156,7 +156,7 @@ it('saves immediately with Ctrl+S in the title', function () {
 
         waitForDatabase($browser, fn () => $note->fresh()->title === 'Quick', seconds: 1);
     });
-})->todo();
+});
 
 it('switches between notes and updates the URL', function () {
     $first = Note::factory()->for($this->notebook)->create(['title' => 'First', 'updated_at' => now()]);
@@ -199,7 +199,7 @@ it('keeps the edits of a note when switching to another before autosave', functi
 
         waitForDatabase($browser, fn () => $first->fresh()->title === 'First edited');
     });
-})->todo();
+});
 
 // BUG-07
 it('tells the user when a note could not be saved', function () {
@@ -212,7 +212,7 @@ it('tells the user when a note could not be saved', function () {
         $browser->type('@note-title', 'Lost change')
             ->waitForText('could not be saved', 6);
     });
-})->todo();
+});
 
 // BUG-07
 it('warns the user when the session expired before saving', function () {
@@ -225,7 +225,7 @@ it('warns the user when the session expired before saving', function () {
         $browser->type('@note-title', 'After expiry')
             ->waitForText('session', 6);
     });
-})->todo();
+});
 
 it('filters notes by title and by content, and clears the search', function () {
     $groceries = Note::factory()->for($this->notebook)->create(['title' => 'Groceries', 'content' => '<p>milk</p>']);
@@ -259,7 +259,7 @@ it('does not match HTML markup when searching', function () {
         ->type('@note-search', 'strong')
         ->waitUntilMissing('@note-'.$note->id)
     );
-})->todo();
+});
 
 it('sends the open note to the trash and opens the next one', function () {
     $open = Note::factory()->for($this->notebook)->create(['title' => 'Open', 'updated_at' => now()]);
@@ -315,15 +315,37 @@ it('keeps the note listed when sending it to the trash fails', function () {
             ->pause(1000)
             ->assertVisible('@note-'.$note->id);
     });
-})->todo();
+});
 
 // BUG-14
 it('lets the user restore a trashed note', function () {
     $note = Note::factory()->for($this->notebook)->trashed()->create(['title' => 'Recover me']);
 
-    $this->browse(fn (Browser $browser) => $browser
-        ->loginAs($this->user)
-        ->visit('/notebooks/trash')
-        ->waitForText('Recover me')
-    );
-})->todo();
+    $this->browse(function (Browser $browser) use ($note) {
+        $browser->loginAs($this->user)
+            ->visit('/notebooks/trash')
+            ->waitFor('@trashed-note-'.$note->id)
+            ->assertSeeIn('@trashed-note-'.$note->id, 'Recover me')
+            ->assertSeeIn('@trashed-note-'.$note->id, 'Work')
+            ->assertMissing('@trash-empty')
+            ->click('@trashed-note-'.$note->id.' .dusk-restore-note')
+            ->waitUntilMissing('@trashed-note-'.$note->id);
+
+        waitForDatabase($browser, fn () => $note->fresh()->status === 0);
+
+        openNotebookAs($browser, $this->user, $this->notebook)->waitFor('@note-'.$note->id);
+    });
+});
+
+it('keeps the note in the trash when restoring it fails', function () {
+    $note = Note::factory()->for($this->notebook)->trashed()->create(['title' => 'Stuck']);
+
+    $this->browse(function (Browser $browser) use ($note) {
+        $browser->loginAs($this->user)->visit('/notebooks/trash')->waitFor('@trashed-note-'.$note->id);
+        $note->delete();
+
+        $browser->click('@trashed-note-'.$note->id.' .dusk-restore-note')
+            ->waitForText('Failed to restore note')
+            ->assertVisible('@trashed-note-'.$note->id);
+    });
+});

@@ -200,7 +200,7 @@ it('never runs scripts pasted into a note', function () {
     expect($this->note->fresh()->content)->not->toContain('onerror');
 });
 
-// BUG-35: notes stored before the sanitizer run their scripts when opened (the editor uses innerHTML)
+// BUG-35 regression: notes stored before the sanitizer must not run their scripts when opened
 it('never runs scripts stored in notes saved before sanitizing existed', function () {
     // Written straight to the database, the way notes saved before the hotfix may still be
     $this->note->forceFill(['content' => '<p>legacy</p><img src="x" onerror="window.__legacyScriptRan = true">'])->save();
@@ -209,4 +209,4 @@ it('never runs scripts stored in notes saved before sanitizing existed', functio
         ->pause(500)
         ->assertScript('window.__legacyScriptRan === true', false)
     );
-})->todo();
+});

@@ -12,6 +12,8 @@ const emit = defineEmits([
     'updated-content'
 ])
 
+const Delta = Quill.import('delta')
+
 const editorRef = ref(null)
 
 let editor = null
@@ -49,8 +51,11 @@ onMounted(() => {
     const toolbar = editor.getModule('toolbar')
     toolbar.addHandler('image', imageUploadHandler)
 
+    // Evernote exports to-dos as <div><input type="checkbox">text</div>: load them as Quill checklist items
+    editor.clipboard.addMatcher('DIV', checkboxToChecklist)
+
     // set the default content and manage the changes
-    editor.root.innerHTML = model.value
+    loadHtml(model.value)
     editor.on('text-change', () => {
         model.value = editor.root.innerHTML
         emit('updated-content')
@@ -70,9 +75,42 @@ onUnmounted(() => {
 watch(() => model, (value) => {
 
     if (editor && value.value !== editor.root.innerHTML) {
-        editor.root.innerHTML = value.value
+        loadHtml(value.value)
     }
 }, { deep: true })
+
+/**
+ * Loads stored HTML through Quill's clipboard instead of innerHTML: content Quill cannot render
+ * (legacy imported <div> markup) becomes visible editor content, and scripts or event handlers
+ * are never inserted into the page. The model is updated silently so opening a note never saves it.
+ */
+const loadHtml = (html) => {
+    editor.setContents(editor.clipboard.convert({ html: html ?? '' }), 'silent')
+    model.value = editor.root.innerHTML
+}
+
+const checkboxToChecklist = (node, delta) => {
+    const checkbox = node.querySelector(':scope > input[type="checkbox"]')
+    if (!checkbox) {
+        return delta
+    }
+
+    const list = checkbox.hasAttribute('checked') ? 'checked' : 'unchecked'
+    const ops = []
+    delta.ops.forEach((op) => {
+        if (typeof op.insert !== 'string') {
+            ops.push(op)
+            return
+        }
+        op.insert.split(/(\n)/).filter((part) => part !== '').forEach((part) => {
+            ops.push(part === '\n'
+                ? { insert: '\n', attributes: { ...op.attributes, list } }
+                : { insert: part, ...(op.attributes ? { attributes: op.attributes } : {}) })
+        })
+    })
+
+    return new Delta(ops)
+}
 
 const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {

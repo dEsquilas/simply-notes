@@ -71,7 +71,9 @@ function selectAllInEditor(Browser $browser): Browser
  */
 function openNotebookAs(Browser $browser, \App\Models\User $user, \App\Models\Notebook $notebook): Browser
 {
-    return $browser->loginAs($user)
+    // Browsers are reused between tests: always start from a desktop-sized window
+    return $browser->resize(1920, 1080)
+        ->loginAs($user)
         ->visit("/notebook/{$notebook->id}")
         ->waitFor('@notes-sidebar');
 }

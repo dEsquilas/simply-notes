@@ -22,7 +22,6 @@ if (noteContent.value == null || noteContent.value.length === 0) {
 
 
 let autosaveInterval = null
-let recentNoteSwap = Date.now()
 let lastModified = -1
 const autosaveTime = 1500
 
@@ -33,7 +32,6 @@ watch(() => props.note, (newNote, oldNote) => {
         save(oldNote, noteTitle.value, noteContent.value)
     }
 
-    recentNoteSwap = Date.now()
     noteTitle.value = newNote.title
     noteContent.value = newNote.content
     if(newNote.content == null || newNote.content.length === 0){
@@ -42,9 +40,6 @@ watch(() => props.note, (newNote, oldNote) => {
 },{ deep: true })
 
 const dispatchAutosave = () => {
-
-    if(recentNoteSwap !== -1 && Date.now() - recentNoteSwap < 1000)
-        return
 
     lastModified = Date.now()
     if(!autosaveInterval)
@@ -105,7 +100,7 @@ const onTitleKeydown = (event) => {
 </script>
 <template>
     <div class="h-full">
-        <input dusk="note-title" tabindex="1"
+        <input data-test="note-title" tabindex="1"
                @keydown="onTitleKeydown"
                v-model="noteTitle"
                placeholder="Nueva nota"

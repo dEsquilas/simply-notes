@@ -1,97 +1,73 @@
 <?php
 
 use App\Models\User;
-use Laravel\Dusk\Browser;
 
 it('shows guests the Google login', function () {
-    $this->browse(fn (Browser $browser) => $browser
-        ->logout()
-        ->visit('/')
-        ->waitForLocation('/login')
+    visit('/')
+        ->assertPathIs('/login')
         ->assertSee('Welcome to SimplyNotes')
         ->assertSee('You can login via Google account')
-        ->assertAttributeContains('@google-login', 'href', '/google/redirect')
-    );
+        ->assertAttributeContains('@google-login', 'href', '/google/redirect');
 });
 
 it('sends guests to the login screen from any page', function (string $path) {
-    $this->browse(fn (Browser $browser) => $browser
-        ->logout()
-        ->visit($path)
-        ->waitForLocation('/login')
-        ->assertVisible('@google-login')
-    );
+    visit($path)
+        ->assertPathIs('/login')
+        ->assertVisible('@google-login');
 })->with(['/notebooks', '/notebooks/trash', '/import', '/notebook/1', '/notebook/1/note/1']);
 
 it('returns to the login screen when Google login is cancelled', function () {
-    $this->browse(fn (Browser $browser) => $browser
-        ->logout()
-        ->visit('/google/callback?error=access_denied')
-        ->waitForLocation('/login')
-        ->assertVisible('@google-login')
-    );
+    visit('/google/callback?error=access_denied')
+        ->assertPathIs('/login')
+        ->assertVisible('@google-login');
 });
 
 it('shows the user name in the menu', function () {
-    $user = User::factory()->create(['name' => 'Jane Doe']);
+    $this->actingAs(User::factory()->create(['name' => 'Jane Doe']));
 
-    $this->browse(fn (Browser $browser) => $browser
-        ->loginAs($user)
-        ->visit('/notebooks')
-        ->waitFor('@user-menu')
-        ->assertSeeIn('@user-menu', 'Jane Doe')
-    );
+    visit('/notebooks')->assertSeeIn('@user-menu', 'Jane Doe');
 });
 
 it('logs out from the user menu', function () {
-    $this->browse(fn (Browser $browser) => $browser
-        ->loginAs(User::factory()->create())
-        ->visit('/notebooks')
-        ->waitFor('@user-menu')
+    $this->actingAs(User::factory()->create());
+
+    visit('/notebooks')
         ->click('@user-menu')
-        ->waitFor('@logout')
         ->click('@logout')
-        ->waitForLocation('/login')
-        ->visit('/notebooks')
-        ->waitForLocation('/login')
-    );
+        ->assertPathIs('/login')
+        ->navigate('/notebooks')
+        ->assertPathIs('/login');
 });
 
 it('closes the user menu with Escape', function () {
-    $this->browse(fn (Browser $browser) => $browser
-        ->loginAs(User::factory()->create())
-        ->visit('/notebooks')
-        ->waitFor('@user-menu')
+    $this->actingAs(User::factory()->create());
+
+    visit('/notebooks')
         ->click('@user-menu')
-        ->waitFor('@logout')
-        ->keys('@user-menu', '{escape}')
-        ->waitUntilMissing('@logout')
-    );
+        ->assertVisible('@logout')
+        ->keys('@user-menu', 'Escape')
+        ->assertMissing('@logout');
 });
 
 it('moves between sections with the top menu', function () {
-    $this->browse(fn (Browser $browser) => $browser
-        ->loginAs(User::factory()->create())
-        ->visit('/notebooks')
-        ->waitFor('@nav-trash')
+    $this->actingAs(User::factory()->create());
+
+    visit('/notebooks')
         ->click('@nav-trash')
-        ->waitForLocation('/notebooks/trash')
+        ->assertPathIs('/notebooks/trash')
         ->assertSee('Trash')
         ->click('@nav-import')
-        ->waitForLocation('/import')
+        ->assertPathIs('/import')
         ->assertSee('Import Evernote Content')
         ->click('@nav-notebooks')
-        ->waitForLocation('/notebooks')
-        ->assertVisible('@create-notebook')
-    );
+        ->assertPathIs('/notebooks')
+        ->assertVisible('@create-notebook');
 });
 
 it('takes the user home from the logo', function () {
-    $this->browse(fn (Browser $browser) => $browser
-        ->loginAs(User::factory()->create())
-        ->visit('/import')
-        ->waitForText('Simple Notes')
-        ->clickLink('Simple Notes')
-        ->waitForLocation('/notebooks')
-    );
+    $this->actingAs(User::factory()->create());
+
+    visit('/import')
+        ->click('Simple Notes')
+        ->assertPathIs('/notebooks');
 });

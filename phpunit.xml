@@ -14,6 +14,10 @@
         <testsuite name="Arch">
             <directory>tests/arch</directory>
         </testsuite>
+        <!-- Real browser (Playwright): needs `pnpm run build` first; excluded from the coverage run -->
+        <testsuite name="Browser">
+            <directory>tests/browser</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

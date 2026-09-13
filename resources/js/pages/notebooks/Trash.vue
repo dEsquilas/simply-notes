@@ -78,20 +78,20 @@ const restoreNote = (noteId) => {
             <h2 class="pt-8 px-4 text-4xl font-extrabold text-white mb-2">Trash</h2>
 
             <div class="max-w-[1200px] w-full m-auto grid lg:grid-cols-3 sm:grid-cols-2 gap-4 p-4 mt-0">
-                <article v-for="notebook in currentNotebooks" :key="notebook.id" :dusk="'trashed-notebook-' + notebook.id" class="w-full mx-auto gap-4">
+                <article v-for="notebook in currentNotebooks" :key="notebook.id" :data-test="'trashed-notebook-' + notebook.id" class="w-full mx-auto gap-4">
                     <div class="bg-main1 overflow-hidden shadow-sm rounded-lg hover:bg-main2 transition-colors">
                         <div class="p-6 text-white flex justify-between">
-                            <h3 dusk="trashed-notebook-name" class="text-lg font-semibold">{{ notebook.name }}</h3>
+                            <h3 data-test="trashed-notebook-name" class="text-lg font-semibold">{{ notebook.name }}</h3>
                             <p class="text-sm">{{ notebook.description }}</p>
                             <div class="flex">
-                                <!-- Icon components only pass class through, so their test hook is a dusk-* class -->
-                                <ArrowUturnUpIcon @click=restoreNotebook(notebook.id) class="dusk-restore-notebook w-6 h-6 bg-blue mr-4 cursor-pointer" />
-                                <TrashIcon @click=deleteNotebook(notebook.id) class="dusk-delete-notebook w-6 h-6 text-red-500 cursor-pointer" />
+                                <!-- Icon components only pass class through, so their test hook is a test-* class -->
+                                <ArrowUturnUpIcon @click=restoreNotebook(notebook.id) class="test-restore-notebook w-6 h-6 bg-blue mr-4 cursor-pointer" />
+                                <TrashIcon @click=deleteNotebook(notebook.id) class="test-delete-notebook w-6 h-6 text-red-500 cursor-pointer" />
                             </div>
                         </div>
                     </div>
                 </article>
-                <div dusk="trash-empty" class="text-white" v-show="currentNotebooks.length == 0 && currentNotes.length == 0">
+                <div data-test="trash-empty" class="text-white" v-show="currentNotebooks.length == 0 && currentNotes.length == 0">
                     Nothing to show here
                 </div>
             </div>
@@ -99,13 +99,13 @@ const restoreNote = (noteId) => {
             <section v-show="currentNotes.length > 0" class="p-4">
                 <h3 class="text-2xl font-bold text-white mb-4">Notes</h3>
                 <ul class="grid lg:grid-cols-3 sm:grid-cols-2 gap-4">
-                    <li v-for="note in currentNotes" :key="note.id" :dusk="'trashed-note-' + note.id" class="bg-main1 rounded-lg p-6 text-white flex justify-between gap-4">
+                    <li v-for="note in currentNotes" :key="note.id" :data-test="'trashed-note-' + note.id" class="bg-main1 rounded-lg p-6 text-white flex justify-between gap-4">
                         <div class="overflow-hidden">
-                            <h4 dusk="trashed-note-title" class="font-semibold truncate">{{ note.title || 'Nueva nota' }}</h4>
+                            <h4 data-test="trashed-note-title" class="font-semibold truncate">{{ note.title || 'Nueva nota' }}</h4>
                             <p class="text-sm italic truncate">{{ note.notebook.name }}</p>
                         </div>
-                        <!-- Icon components only pass class through, so their test hook is a dusk-* class -->
-                        <ArrowUturnUpIcon @click="restoreNote(note.id)" class="dusk-restore-note w-6 h-6 shrink-0 cursor-pointer" />
+                        <!-- Icon components only pass class through, so their test hook is a test-* class -->
+                        <ArrowUturnUpIcon @click="restoreNote(note.id)" class="test-restore-note w-6 h-6 shrink-0 cursor-pointer" />
                     </li>
                 </ul>
             </section>

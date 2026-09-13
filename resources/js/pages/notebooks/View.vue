@@ -111,7 +111,7 @@ const deleteNote = (data) => {
         <div class="w-full">
             <section class="flex flex-row w-full h-full">
                 <aside
-                    dusk="notes-sidebar"
+                    data-test="notes-sidebar"
                     class="overflow-hidden border-r border-1 border-cgray
                             w-full
                             md:w-[350px]
@@ -128,29 +128,29 @@ const deleteNote = (data) => {
                         </h3>
                         <div class="flex flex-row relative">
                             <input
-                                dusk="note-search"
+                                data-test="note-search"
                                 v-model="filter"
                                 type="text"
                                 class="w-[250px] bg-transparent border-1 rounded-xl text-white focus:outline-none"
                                 placeholder="Buscar...">
-                            <!-- Icon components only pass class through, so their test hooks are dusk-* classes -->
+                            <!-- Icon components only pass class through, so their test hooks are test-* classes -->
                             <XCircleIcon
                                 v-show="filter.length !== 0"
                                 @click="filter = ''"
-                                class="dusk-clear-search w-6 ml-4 text-main2 cursor-pointer hover:opacity-80 absolute right-[80px] top-[9px]"
+                                class="test-clear-search w-6 ml-4 text-main2 cursor-pointer hover:opacity-80 absolute right-[80px] top-[9px]"
                                 />
                             <PlusCircleIcon
                                 v-show="!isCreating"
                                 @click="newNote()"
-                                class="dusk-new-note w-10 ml-4 text-main4 cursor-pointer hover:opacity-80"
+                                class="test-new-note w-10 ml-4 text-main4 cursor-pointer hover:opacity-80"
                             />
                             <ArrowPathIcon
                                 v-show="isCreating"
-                                class="dusk-creating-note animate-spin w-10 ml-4 text-main4 "
+                                class="test-creating-note animate-spin w-10 ml-4 text-main4 "
                             />
                         </div>
                     </header>
-                    <div dusk="no-notes" v-if="!notes || notes.length === 0" class="text-white p-4">No hay notas</div>
+                    <div data-test="no-notes" v-if="!notes || notes.length === 0" class="text-white p-4">No hay notas</div>
                     <note-list
                         v-if="notes && notes.length > 0"
                         @delete-note="deleteNote"
@@ -158,7 +158,7 @@ const deleteNote = (data) => {
                         :current-note-id="currentNote.id"
                         :notes="notes" :filter="filter" />
                 </aside>
-                <article dusk="editor-pane" class="
+                <article data-test="editor-pane" class="
                                 flex-grow
                                 md:max-w-[calc(100%-350px)]
                                 md:block
@@ -175,7 +175,7 @@ const deleteNote = (data) => {
                 </article>
             </section>
             <button
-                dusk="show-note-list"
+                data-test="show-note-list"
                 @click="isSidebarVisible = !isSidebarVisible"
                 v-show="isMobile && !isSidebarVisible"
                 class="

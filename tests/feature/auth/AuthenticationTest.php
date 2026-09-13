@@ -62,3 +62,11 @@ it('regenerates the CSRF token when logging out', function () {
 
     expect(session()->token())->not->toBe($tokenBefore);
 });
+
+it('signs a user in through the testing-only login route', function () {
+    $user = User::factory()->create();
+
+    $this->get("/testing/login/{$user->id}")->assertRedirect(route('notebooks.index'));
+
+    $this->assertAuthenticatedAs($user);
+});

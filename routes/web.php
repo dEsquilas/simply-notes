@@ -66,4 +66,13 @@ Route::middleware('auth')->group(function () {
 
 });
 
+// Browser tests sign in with a real session through this route; it does not exist outside the testing environment
+if (app()->environment('testing')) {
+    Route::get('/testing/login/{user}', function (\App\Models\User $user) {
+        auth()->login($user);
+
+        return redirect()->route('notebooks.index');
+    })->name('testing.login');
+}
+
 require __DIR__.'/auth.php';

@@ -155,7 +155,7 @@ const imageUploadHandler = () => {
 </script>
 
 <template>
-    <div dusk="note-body" class="quill-editor-container">
+    <div data-test="note-body" class="quill-editor-container">
         <div ref="editorRef" class="quill-editor"></div>
     </div>
 </template>

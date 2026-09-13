@@ -20,3 +20,7 @@ yarn-error.log
 /.idea
 /.vscode
 .pd
+
+# Pest Browser failure screenshots (the plugin hardcodes this capitalized path)
+/tests/Browser/
+/tests/browser/Screenshots/

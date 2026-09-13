@@ -1,24 +1,34 @@
 <?php
 
+use App\Models\Note;
+use App\Models\Notebook;
 use App\Models\User;
-use Laravel\Dusk\Browser;
 
 it('shows the Google login to guests', function () {
-    $this->browse(fn (Browser $browser) => $browser
-        ->visit('/')
+    visit('/')
         ->assertPathIs('/login')
         ->assertVisible('@google-login')
         ->assertSeeIn('@google-login', 'Sign up with Google')
-    );
+        ->assertNoJavaScriptErrors();
 });
 
 it('opens the notebooks list for a logged in user', function () {
-    $user = User::factory()->create();
+    $this->actingAs(User::factory()->create());
 
-    $this->browse(fn (Browser $browser) => $browser
-        ->loginAs($user)
-        ->visit('/notebooks')
-        ->waitFor('@create-notebook')
+    visit('/notebooks')
+        ->assertVisible('@create-notebook')
         ->assertSee('Create a new notebook')
-    );
+        ->assertNoJavaScriptErrors();
+});
+
+it('opens a notebook with its notes and editor', function () {
+    $user = User::factory()->create();
+    $notebook = Notebook::factory()->ownedBy($user)->create();
+    Note::factory()->for($notebook)->create(['title' => 'Hello', 'content' => '<p>World</p>']);
+    $this->actingAs($user);
+
+    visit("/notebook/{$notebook->id}")
+        ->assertValue('@note-title', 'Hello')
+        ->assertSeeIn('@note-body', 'World')
+        ->assertNoJavaScriptErrors();
 });

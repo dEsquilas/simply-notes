@@ -1,9 +1,9 @@
 <template>
-    <div :dusk="'notebook-' + notebook.id" @contextmenu="openMenu($event, notebook)" class="lg:w-1/5 md:w-1/3 sm: w-1/2">
+    <div :data-test="'notebook-' + notebook.id" @contextmenu="openMenu($event, notebook)" class="lg:w-1/5 md:w-1/3 sm: w-1/2">
         <Link :href="'/notebook/' + notebook.id">
             <article class="border border-main2 overflow-hidden transition shadow-lg rounded lg:hover:scale-110 lg:hover:shadow-main1">
                 <header class="bg-main2 p-2">
-                    <h3 dusk="notebook-name" class="text-sm font-semibold text-white flex items-center overflow-auto text-ellipsis whitespace-nowrap">
+                    <h3 data-test="notebook-name" class="text-sm font-semibold text-white flex items-center overflow-auto text-ellipsis whitespace-nowrap">
                         <DocumentDuplicateIcon class="w-6 inline-block mr-2" />
                         {{ notebook.name }}
                     </h3>
@@ -11,10 +11,10 @@
                 <div class="px-4 py-2 text-white h-[150px] flex flex-col w-full">
                     <p class="text-sm h-full items-center flex text-center w-full justify-center">
                         <div>
-                            <span dusk="notes-count" class="text-4xl mr-2 text-main4">{{ notebook.notes_count }}</span>  notes
+                            <span data-test="notes-count" class="text-4xl mr-2 text-main4">{{ notebook.notes_count }}</span>  notes
                         </div>
                     </p>
-                    <p dusk="notebook-date" class="text-sm text-right italic">{{ DateHelper.formatDate(notebook.created_at) }}</p>
+                    <p data-test="notebook-date" class="text-sm text-right italic">{{ DateHelper.formatDate(notebook.created_at) }}</p>
                 </div>
             </article>
         </Link>

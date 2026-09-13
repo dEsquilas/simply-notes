@@ -29,6 +29,8 @@ dataset('legacy markup', [
     'code block' => ['<div><en-codeblock><div>SELECT * FROM notes;</div><div>WHERE id = 1</div></en-codeblock></div>', 'SELECT * FROM notes;'],
     'to-do checkbox' => ['<div><input type="checkbox" checked>Buy milk</div>', 'Buy milk'],
     'svg icon next to text' => ['<div><svg width="10" height="10"><circle r="4"></circle></svg>Visible text</div>', 'Visible text'],
+    // a table created by the quill-table-ui plugin this editor used before switching to quill-table-better
+    'table from the previous table plugin' => ['<table><tbody><tr><td data-row="row-1">Cell text</td></tr></tbody></table>', 'Cell text'],
 ]);
 
 it('shows legacy content in the editor', function (string $html, string $text) {
@@ -88,4 +90,24 @@ it('saves imported to-dos as Quill checklist items', function () {
         ->toContain('<li data-list="unchecked">')
         ->toContain('Buy milk')
         ->toContain('Buy eggs');
+});
+
+// BUG-39 regression: a table built by the retired quill-table-ui plugin must upgrade into a live,
+// editable quill-table-better table instead of showing as inert/unrecognised markup
+it('upgrades a legacy table into an editable one, keeping its content', function () {
+    [$note, $url] = legacyNote('<table><tbody><tr><td data-row="row-1">Cell one</td><td data-row="row-1">Cell two</td></tr></tbody></table>');
+
+    $page = visit($url);
+    readyToEdit($page->assertSeeIn('@note-body', 'Cell one'));
+
+    // clicking inside a migrated cell opens the same floating row/column menu a new table gets
+    $page->click(LEGACY_EDITOR.' table tr:first-child td:first-child')
+        ->click('.ql-table-menus-container [data-category="column"] .ql-table-tooltip-hover')
+        ->click('.ql-table-menus-container [data-category="column"] .ql-table-dropdown-list li:nth-child(2)'); // insert column right
+
+    waitForDatabase($page, fn () => substr_count((string) $note->fresh()->content, '<td') === 3);
+
+    expect((string) $note->fresh()->content)
+        ->toContain('Cell one')
+        ->toContain('Cell two');
 });

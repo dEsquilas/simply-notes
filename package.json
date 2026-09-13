@@ -14,17 +14,17 @@
         "axios": "^1.20.0",
         "laravel-vite-plugin": "^3.2.0",
         "playwright": "^1.63.0",
-        "quill-image-resize": "^3.0.9",
         "tailwindcss": "^4.3.3",
         "vite": "^8.3.0",
         "vue": "^3.5.42"
     },
     "dependencies": {
+        "@enzedonline/quill-blot-formatter2": "^3.2.0",
         "@heroicons/vue": "^2.2.0",
         "@imengyu/vue3-context-menu": "^1.5.6",
         "@kyvg/vue3-notification": "^3.4.2",
         "quill": "2.0.3",
-        "quill-table-ui": "^1.0.7",
+        "quill-table-better": "^1.2.3",
         "sass": "^1.104.1"
     }
 }

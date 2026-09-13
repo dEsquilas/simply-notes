@@ -128,11 +128,126 @@ it('saves insecure http videos without a source', function () {
     expect($this->note->fresh()->content)->not->toContain('http://example.com/video.mp4');
 });
 
+/** Clicks the toolbar table button and picks a 2x2 grid from the size picker it opens. */
+function insertTable($page)
+{
+    return $page->click(toolbar('.ql-table-better'))
+        ->click(toolbar('.ql-table-select-container span[row="2"][column="2"]'));
+}
+
 it('inserts a table', function () {
     $page = visit($this->url);
-    openEditor($page)->click(EDITOR)->click(toolbar('.ql-table'));
+    insertTable(openEditor($page)->click(EDITOR));
 
     waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<table'));
+});
+
+it('adds and removes a table column', function () {
+    $page = visit($this->url);
+    insertTable(openEditor($page)->click(EDITOR));
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<table'));
+
+    // clicking inside a cell opens the floating row/column menu
+    $page->click(EDITOR.' table tr:first-child td:first-child p')
+        ->click('.ql-table-menus-container [data-category="column"] .ql-table-tooltip-hover')
+        ->click('.ql-table-menus-container [data-category="column"] .ql-table-dropdown-list li:nth-child(2)');
+
+    // 2 rows x 3 columns after inserting a column
+    waitForDatabase($page, fn () => substr_count((string) $this->note->fresh()->content, '<td') === 6);
+
+    $page->click(EDITOR.' table tr:first-child td:first-child p')
+        ->click('.ql-table-menus-container [data-category="column"] .ql-table-tooltip-hover')
+        ->click('.ql-table-menus-container [data-category="column"] .ql-table-dropdown-list li:nth-child(3)');
+
+    // back to 2 rows x 2 columns after deleting it
+    waitForDatabase($page, fn () => substr_count((string) $this->note->fresh()->content, '<td') === 4);
+
+    // Adding a column crashed once table-better's measuring elements were removed from the live editor
+    $page->assertNoJavaScriptErrors();
+    expect($this->note->fresh()->content)->not->toContain('<temporary');
+});
+
+it('shows the next note after switching away from a note with a table, without JavaScript errors', function () {
+    // Real content saved by the editor after inserting a table, adding a column and an image
+    $this->note->forceFill(['content' => file_get_contents(base_path('tests/Support/fixtures/table-better-note.html'))])->save();
+    $other = Note::factory()->for($this->notebook)->create([
+        'title' => 'Other',
+        'content' => '<p>Other body text</p>',
+        'updated_at' => now()->subHour(),
+    ]);
+
+    $page = visit($this->url);
+    openEditor($page)->assertVisible(EDITOR.' table');
+
+    // Switching away from a note with a table used to leave the editor empty
+    $page->click('@note-'.$other->id)
+        ->assertValue('@note-title', 'Other')
+        ->assertSeeIn(EDITOR, 'Other body text')
+        ->click('@note-'.$this->note->id)
+        ->assertValue('@note-title', 'Formatting')
+        ->assertVisible(EDITOR.' table')
+        // Also catches Quill errors reported through console.error, like "[Parchment] Maximum optimize iterations reached"
+        ->assertNoSmoke();
+});
+
+it('adds and removes a table row', function () {
+    $page = visit($this->url);
+    insertTable(openEditor($page)->click(EDITOR));
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<table'));
+
+    $page->click(EDITOR.' table tr:first-child td:first-child p')
+        ->click('.ql-table-menus-container [data-category="row"] .ql-table-tooltip-hover')
+        ->click('.ql-table-menus-container [data-category="row"] .ql-table-dropdown-list li:nth-child(4)'); // insert row below
+
+    waitForDatabase($page, fn () => substr_count((string) $this->note->fresh()->content, '<tr') === 3);
+
+    $page->click(EDITOR.' table tr:first-child td:first-child p')
+        ->click('.ql-table-menus-container [data-category="row"] .ql-table-tooltip-hover')
+        ->click('.ql-table-menus-container [data-category="row"] .ql-table-dropdown-list li:nth-child(5)'); // delete row
+
+    waitForDatabase($page, fn () => substr_count((string) $this->note->fresh()->content, '<tr') === 2);
+});
+
+it('resizes an image and keeps the size after reload', function () {
+    // A 100x100 red square: unlike the 1x1 pixel fixture used elsewhere, it gives the resize
+    // handles distinct corners to drag from instead of collapsing onto a single point.
+    $png = 'iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAAAtUlEQVR4nO3QUQkAIBTAQDO9/gGMZQV/ZAgHCzBu7RldtvKDj4IFC1YeLFiw8mDBgpUHCxasPFiwYOXBggUrDxYsWHmwYMHKgwULVh4sWLDyYMGClQcLFqw8WLBg5cGCBSsPFixYebBgwcqDBQtWHixYsPJgwYKVBwsWrDxYsGDlwYIFKw8WLFh5sGDByoMFC1YeLFiw8mDBgpUHCxasPFiwYOXBggUrDxYsWHmwYMHKgwXrTQdmSclkRV9qUAAAAABJRU5ErkJggg==';
+
+    $page = visit($this->url);
+    openEditor($page)->click(EDITOR);
+
+    $page->script(<<<JS
+        () => {
+            const originalClick = HTMLInputElement.prototype.click;
+            HTMLInputElement.prototype.click = function () {
+                if (this.type !== 'file') { return originalClick.call(this); }
+                const bytes = Uint8Array.from(atob('{$png}'), c => c.charCodeAt(0));
+                const transfer = new DataTransfer();
+                transfer.items.add(new File([bytes], 'photo.png', { type: 'image/png' }));
+                this.files = transfer.files;
+                setTimeout(() => this.dispatchEvent(new Event('change')), 50);
+            };
+        }
+    JS);
+    $page->click(toolbar('.ql-image'));
+    waitForDatabase($page, fn () => str_contains(html_entity_decode((string) $this->note->fresh()->content), 'data:image/png;base64,'.$png));
+
+    // the resize overlay needs a moment to position its handles over the image
+    $page->click(EDITOR.' img')->wait(0.3)
+        ->drag('.blot-formatter__resize-handle[data-position="bottom-right"]', '[data-test="note-body"]');
+
+    waitForDatabase($page, fn () => (bool) preg_match('/width="\d+px"/', (string) $this->note->fresh()->content));
+    $width = null;
+    waitForDatabase($page, function () use (&$width) {
+        preg_match('/width="(\d+)px"/', (string) $this->note->fresh()->content, $matches);
+        $width = $matches[1] ?? null;
+
+        return $width !== null;
+    });
+
+    $page->refresh()->assertVisible(EDITOR)->wait(0.3);
+
+    expect($page->script("() => document.querySelector('".EDITOR." img')?.getAttribute('width')"))->toBe($width.'px');
 });
 
 it('uploads an image from the toolbar', function () {
@@ -214,4 +329,17 @@ it('never runs scripts stored in notes saved before sanitizing existed', functio
     openEditor($page)
         ->wait(0.3)
         ->assertScript('window.__legacyScriptRan === true', false);
+});
+
+it('keeps the spaces typed inside a table cell', function () {
+    $page = visit($this->url);
+    insertTable(openEditor($page)->click(EDITOR));
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<table'));
+
+    // A mismatch between the saved and the live HTML used to reload the note on every keystroke,
+    // dropping the caret and the trailing spaces
+    $page->click(EDITOR.' table tr:first-child td:first-child p')
+        ->typeSlowly(EDITOR, 'uno dos tres', 20);
+
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, 'uno dos tres'));
 });

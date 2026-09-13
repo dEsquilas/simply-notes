@@ -100,3 +100,31 @@ it('keeps Quill checklists, which is how imported to-dos are saved', function ()
 
     expect($this->sanitizer->sanitize($html))->toBe($html);
 });
+
+it('keeps the markup quill-table-better produces for a resized, bordered table', function () {
+    $html = '<table style="width: 100%" class="ql-table-better">'
+        .'<colgroup><col width="72" /></colgroup>'
+        .'<tbody><tr><td data-row="row-t51p" width="72" height="24" style="border-style: solid; border-color: #ff0000; background-color: #eeeeee; text-align: center; vertical-align: middle">'
+        .'<p class="ql-table-block" data-cell="cell-4ev6">cell</p></td>'
+        .'<th data-row="row-t51p" colspan="2" rowspan="1"><p data-cell="cell-pvwg">head</p></th>'
+        .'</tr></tbody></table>';
+
+    expect($this->sanitizer->sanitize($html))->toBe($html);
+});
+
+it('strips anything but the known-safe CSS properties and characters from table styles', function (string $style, string $expected) {
+    $clean = $this->sanitizer->sanitize('<table style="'.$style.'"></table>');
+
+    expect($clean)->toBe($expected === '' ? '<table></table>' : '<table style="'.$expected.'"></table>');
+})->with([
+    'unknown property dropped, known one kept' => ['position: fixed; width: 50%', 'width: 50%'],
+    'url() rejected even under an allowed property' => ['background-color: url(javascript:alert(1))', ''],
+    'expression() rejected' => ['width: expression(alert(1))', ''],
+    'javascript scheme rejected' => ['background-color: javascript:alert(1)', ''],
+    'attempt to break out into a new rule keeps only the safe declaration before it' => ['width: 1px;}body{background:red', 'width: 1px'],
+    'declaration without a colon (e.g. a trailing semicolon) is skipped' => ['width: 100px;;', 'width: 100px'],
+]);
+
+it('drops style on elements quill-table-better never puts it on', function () {
+    expect($this->sanitizer->sanitize('<p style="width: 100%">x</p>'))->toBe('<p>x</p>');
+});

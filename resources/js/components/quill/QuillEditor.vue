@@ -1,11 +1,12 @@
 <script setup>
 import { defineModel, defineEmits, ref, onMounted, onUnmounted, watch } from 'vue'
 import Quill from 'quill'
-import ImageResize from 'quill-image-resize'
-import * as QuillTableUI from 'quill-table-ui'
+import QuillTableBetter from 'quill-table-better'
+import BlotFormatter, { ImageSpec } from '@enzedonline/quill-blot-formatter2'
 
 import './quill.snow.scss'
-import './quill-table-ui.scss'
+import 'quill-table-better/dist/quill-table-better.css'
+import './quill-table-better.scss'
 
 const model = defineModel()
 const emit = defineEmits([
@@ -41,20 +42,36 @@ let editorOptions = {
             ['bold', 'italic', 'underline', 'strike', 'blockquote'],
             [{'list': 'ordered'}, {'list': 'bullet'},
                 {'indent': '-1'}, {'indent': '+1'}],
-            ['link', 'image', 'video', 'clean', 'table']
+            ['link', 'image', 'video', 'clean', 'table-better']
         ],
-        imageResize: {},
-        table: true,
-        tableUI: true
+        // Only images get the resize/format overlay: videos are plain embeds, and alignment is
+        // left off because it relies on a "style" attribute the sanitizer never allowed anyway.
+        blotFormatter2: {
+            specs: [ImageSpec],
+            align: {allowAligning: false},
+            image: {allowAltTitleEdit: false}
+        },
+        table: false,
+        'table-better': {
+            language: 'en_US',
+            menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'copy', 'delete'],
+            toolbarTable: true
+        },
+        keyboard: {
+            bindings: QuillTableBetter.keyboardBindings
+        }
     }
 }
 
 let editorModules = {
-    'modules/imageResize': ImageResize,
-    'modules/tableUI': QuillTableUI.default
+    'modules/blotFormatter2': BlotFormatter,
+    'modules/table-better': QuillTableBetter
 }
 
 onMounted(() => {
+
+    // register the table formats (headers, cells...) before the module itself
+    QuillTableBetter.register()
 
     // set the modules
     Quill.register(editorModules, true)
@@ -72,7 +89,7 @@ onMounted(() => {
     // set the default content and manage the changes
     loadHtml(model.value)
     editor.on('text-change', () => {
-        model.value = editor.root.innerHTML
+        model.value = contentHtml()
         emit('updated-content')
     })
 
@@ -89,7 +106,10 @@ onUnmounted(() => {
 
 watch(() => model, (value) => {
 
-    if (editor && value.value !== editor.root.innerHTML) {
+    // Compared with the same cleaned HTML the model holds: the live editor also contains table-better's
+    // measuring elements, and treating that difference as an external change reloaded the note on
+    // every keystroke (losing the caret and trailing spaces)
+    if (editor && value.value !== contentHtml()) {
         loadHtml(value.value)
     }
 }, { deep: true })
@@ -98,10 +118,36 @@ watch(() => model, (value) => {
  * Loads stored HTML through Quill's clipboard instead of innerHTML: content Quill cannot render
  * (legacy imported <div> markup) becomes visible editor content, and scripts or event handlers
  * are never inserted into the page. The model is updated silently so opening a note never saves it.
+ *
+ * table-better needs the replacement fed through updateContents (a full delete of the previous
+ * content plus the new one) rather than setContents, or tables it did not just render itself
+ * (a freshly opened note, an external model change) come up without their column handles/menu.
  */
 const loadHtml = (html) => {
-    editor.setContents(editor.clipboard.convert({ html: html ?? '' }), 'silent')
-    model.value = editor.root.innerHTML
+    const delta = editor.clipboard.convert({ html: html ?? '' })
+    // Emptying first and inserting separately: deleting a table-better table and inserting the next
+    // note in the same change left the editor empty when switching away from a note with a table
+    editor.setContents(new Delta(), 'silent')
+    editor.updateContents(delta, 'silent')
+    model.value = contentHtml()
+}
+
+/**
+ * The editor's HTML, with table-better's internal "temporary" measuring elements stripped out:
+ * left in, they would pollute both the autosave and the note-switch comparison above.
+ * They are removed from a copy only: table-better reads them from the live editor to size
+ * tables (adding a column crashed once they had been deleted there).
+ */
+const contentHtml = () => {
+    const html = editor.root.innerHTML
+    if (!html.includes('<temporary')) {
+        return html
+    }
+
+    const copy = editor.root.cloneNode(true)
+    copy.querySelectorAll('temporary').forEach((node) => node.remove())
+
+    return copy.innerHTML
 }
 
 const checkboxToChecklist = (node, delta) => {

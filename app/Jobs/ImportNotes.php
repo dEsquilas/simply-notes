@@ -17,10 +17,6 @@ class ImportNotes implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
 
-    // Zip bomb guards
-    private const MAX_FILES = 20000;
-    private const MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024;
-
     private const EMBEDDABLE_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
 
     public $importJob;
@@ -103,7 +99,8 @@ class ImportNotes implements ShouldQueue
 
     private function assertWithinLimits(\ZipArchive $zip): void
     {
-        if ($zip->numFiles > self::MAX_FILES) {
+        // Zip bomb guards, see config/import.php
+        if ($zip->numFiles > config('import.max_files')) {
             throw new \RuntimeException('The import zip has too many files');
         }
 
@@ -112,7 +109,7 @@ class ImportNotes implements ShouldQueue
             $uncompressedBytes += $zip->statIndex($i)['size'];
         }
 
-        if ($uncompressedBytes > self::MAX_UNCOMPRESSED_BYTES) {
+        if ($uncompressedBytes > config('import.max_uncompressed_bytes')) {
             throw new \RuntimeException('The import zip is too large once extracted');
         }
     }

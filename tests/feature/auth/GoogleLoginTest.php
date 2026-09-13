@@ -74,7 +74,7 @@ it('sends the user back to login when Google fails', function () {
     $this->get('/google/callback')->assertRedirect('/login');
 
     $this->assertGuest();
-})->todo();
+});
 
 // BUG-30
 it('logs in a Google account that has no name', function () {
@@ -83,4 +83,5 @@ it('logs in a Google account that has no name', function () {
     $this->get('/google/callback')->assertRedirect(RouteServiceProvider::HOME);
 
     $this->assertAuthenticated();
-})->todo();
+    expect(User::sole()->name)->toBe('noname@example.com');
+});

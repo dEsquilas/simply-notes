@@ -25,12 +25,20 @@ class GoogleLoginController extends Controller
             return redirect(RouteServiceProvider::HOME);
         }
 
-        $googleUser = Socialite::driver('google')->stateless()->user();
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+        } catch (\Throwable $e) {
+            // Expired or reused codes and Google outages: let the user try again
+            report($e);
+
+            return redirect()->route('login');
+        }
+
         $user = User::where('email', $googleUser->email)->first();
         if(!$user)
         {
             // Unusable random password: accounts only log in through Google
-            $user = User::create(['name' => $googleUser->name, 'email' => $googleUser->email, 'password' => Str::random(64)]);
+            $user = User::create(['name' => $googleUser->name ?: $googleUser->email, 'email' => $googleUser->email, 'password' => Str::random(64)]);
         }
 
         Auth::login($user);

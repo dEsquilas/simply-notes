@@ -108,3 +108,22 @@ it('snapshots a session_end version when switching to another note', function ()
     $version = $first->versions()->where('reason', 'session_end')->first();
     expect($version->title)->toBe('First');
 });
+
+it('snapshots a single session_end version when the page is left', function () {
+    $note = Note::factory()->for($this->notebook)->create(['title' => 'Leaving', 'updated_at' => now()]);
+
+    $page = visit("/notebook/{$this->notebook->id}");
+    readyToEdit($page)->assertValue('@note-title', 'Leaving');
+
+    // Leaving a page fires both events one after the other: they must not create two versions
+    $page->script('() => {
+        Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
+        document.dispatchEvent(new Event("visibilitychange"));
+        window.dispatchEvent(new Event("pagehide"));
+    }');
+
+    waitForDatabase($page, fn () => $note->versions()->where('reason', 'session_end')->count() >= 1);
+    $page->wait(1);
+
+    expect($note->versions()->where('reason', 'session_end')->count())->toBe(1);
+});

@@ -195,3 +195,37 @@ it('does not restore a version onto a note owned by another user', function () {
 
     $this->postJson("/notes/{$foreign->id}/versions/{$version->id}/restore")->assertForbidden();
 });
+
+it('keeps an existing label and saves the new one as its own version when nothing changed', function () {
+    $existing = NoteVersion::factory()->for($this->note)->reason('manual')->create([
+        'title' => $this->note->title,
+        'content' => $this->note->content,
+        'content_hash' => \App\Services\NoteVersionService::hash($this->note->title, $this->note->content),
+        'pinned' => true,
+        'label' => 'First label',
+    ]);
+
+    $this->postJson("/notes/{$this->note->id}/versions", ['reason' => 'manual', 'label' => 'Second label'])
+        ->assertCreated()
+        ->assertJsonPath('version.label', 'Second label')
+        ->assertJsonPath('version.pinned', true);
+
+    expect($existing->fresh()->label)->toBe('First label')
+        ->and($this->note->versions()->count())->toBe(2);
+});
+
+it('does not duplicate a version when the same label is saved again', function () {
+    $existing = NoteVersion::factory()->for($this->note)->reason('manual')->create([
+        'title' => $this->note->title,
+        'content' => $this->note->content,
+        'content_hash' => \App\Services\NoteVersionService::hash($this->note->title, $this->note->content),
+        'pinned' => true,
+        'label' => 'Same',
+    ]);
+
+    $this->postJson("/notes/{$this->note->id}/versions", ['reason' => 'manual', 'label' => 'Same'])
+        ->assertOk()
+        ->assertJsonPath('version.id', $existing->id);
+
+    expect($this->note->versions()->count())->toBe(1);
+});

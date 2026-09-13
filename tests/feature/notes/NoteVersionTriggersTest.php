@@ -115,3 +115,13 @@ it('never creates a version whose content hash matches the note\'s latest versio
 
     expect($this->note->versions()->count())->toBe(1);
 });
+
+it('pins the already stored state when a pinning snapshot finds it duplicated', function () {
+    $service = app(\App\Services\NoteVersionService::class);
+    $unpinned = $service->snapshot($this->note, 'session_end');
+
+    // e.g. a substantial change or a restore right after a session_end of the same state
+    expect($service->snapshot($this->note, 'substantial_change', pinned: true))->toBeNull()
+        ->and($unpinned->fresh()->pinned)->toBeTrue()
+        ->and($this->note->versions()->count())->toBe(1);
+});

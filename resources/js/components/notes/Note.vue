@@ -173,7 +173,15 @@ const KEEPALIVE_BODY_LIMIT = 60_000
  * Runs when the note editor is about to disappear from the screen (tab hidden or page unloading):
  * flushes any pending edit first, then snapshots the now-saved state as a session_end version.
  */
+// visibilitychange (hidden) and pagehide both fire when the page is left: flush only once per hide
+let leaveFlushed = false
+
 const flushOnLeave = () => {
+    if (leaveFlushed) {
+        return
+    }
+    leaveFlushed = true
+
     const note = props.note
     const snapshot = () => beaconSafePost(`/notes/${note.id}/versions`, { reason: 'session_end' })
 
@@ -207,6 +215,8 @@ const flushOnLeave = () => {
 const onVisibilityChange = () => {
     if (document.visibilityState === 'hidden')
         flushOnLeave()
+    else
+        leaveFlushed = false
 }
 
 onMounted(() => {

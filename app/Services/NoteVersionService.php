@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Note;
 use App\Models\NoteVersion;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Snapshots the state of a note BEFORE it changes, so past states can be listed and restored.
@@ -26,23 +27,35 @@ class NoteVersionService
      * Snapshots the note's current stored title/content, unless it is identical to the
      * note's latest version (never create back-to-back duplicate versions).
      */
-    public function snapshot(Note $note, string $reason, ?string $label = null, bool $pinned = false): ?NoteVersion
+    public function snapshot(Note $note, string $reason, ?string $label = null, bool $pinned = false, bool $allowDuplicate = false): ?NoteVersion
     {
         $hash = self::hash($note->title, $note->content);
 
-        $latest = $note->versions()->latest('id')->first();
-        if ($latest && $latest->content_hash === $hash) {
-            return null;
-        }
+        // Locking the note row serialises concurrent snapshots of the same note (e.g. two leave
+        // events fired together), so both cannot pass the duplicate check before either inserts
+        return DB::transaction(function () use ($note, $hash, $reason, $label, $pinned, $allowDuplicate) {
+            Note::withTrashed()->whereKey($note->getKey())->lockForUpdate()->first();
 
-        return $note->versions()->create([
-            'title' => $note->title,
-            'content' => $note->content,
-            'content_hash' => $hash,
-            'reason' => $reason,
-            'label' => $label,
-            'pinned' => $pinned,
-        ]);
+            $latest = $note->versions()->latest('id')->first();
+            if (! $allowDuplicate && $latest && $latest->content_hash === $hash) {
+                // The state is already stored: a reason that must never be pruned still pins it
+                if ($pinned && ! $latest->pinned) {
+                    $latest->pinned = true;
+                    $latest->save();
+                }
+
+                return null;
+            }
+
+            return $note->versions()->create([
+                'title' => $note->title,
+                'content' => $note->content,
+                'content_hash' => $hash,
+                'reason' => $reason,
+                'label' => $label,
+                'pinned' => $pinned,
+            ]);
+        });
     }
 
     /**

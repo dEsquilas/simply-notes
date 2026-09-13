@@ -50,18 +50,19 @@ class NoteVersionController extends Controller
 
         $version = $versions->snapshot($note, $data['reason'], $label, pinned: $isManual);
 
-        // Manual save with nothing changed since the latest version: rather than doing nothing,
-        // pin that existing version (and apply the label, if any) so the user's intent to keep
-        // this state is still honored.
+        // Manual save with nothing changed since the latest version: that version is kept (the
+        // snapshot already pinned it). A label is applied to it only if it has none; a different
+        // existing label is never overwritten - the new one gets its own version instead.
         if (! $version && $isManual) {
             $version = $note->versions()->latest('id')->first();
 
-            if ($version) {
-                $version->pinned = true;
-                if ($label) {
+            if ($version && $label && $version->label !== $label) {
+                if (blank($version->label)) {
                     $version->label = $label;
+                    $version->save();
+                } else {
+                    $version = $versions->snapshot($note, 'manual', $label, pinned: true, allowDuplicate: true);
                 }
-                $version->save();
             }
         }
 

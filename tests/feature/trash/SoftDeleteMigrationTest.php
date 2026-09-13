@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 it('converts status=1 rows to deleted_at set to the migration run time, and status=0 rows to null', function () {
-    // Roll back just the soft-deletes migration to get the old `status` column back
-    Artisan::call('migrate:rollback', ['--step' => 1]);
+    // Roll back the note versions migration and the soft-deletes migration to get the old `status` column back
+    Artisan::call('migrate:rollback', ['--step' => 2]);
 
     // Old, so a wrong implementation that copied updated_at into deleted_at would be easy to spot
     $oldTimestamp = now()->subYears(2)->startOfSecond();
@@ -59,7 +59,7 @@ it('restores the status column when rolling back, deriving it from deleted_at', 
         'created_at' => now(), 'updated_at' => now(),
     ]);
 
-    Artisan::call('migrate:rollback', ['--step' => 1]);
+    Artisan::call('migrate:rollback', ['--step' => 2]);
 
     $trashed = DB::table('notes')->where('id', $trashedId)->first();
     $active = DB::table('notes')->where('id', $activeId)->first();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\{Note, Notebook};
 use App\Services\NoteHtmlSanitizer;
+use App\Services\NoteVersionService;
 use Inertia\Inertia;
 
 class NoteController extends Controller
@@ -53,7 +54,7 @@ class NoteController extends Controller
 
     }
 
-    public function update(Request $request, $noteId, NoteHtmlSanitizer $sanitizer){
+    public function update(Request $request, $noteId, NoteHtmlSanitizer $sanitizer, NoteVersionService $versions){
 
         $request->validate([
             'title' => 'nullable|string',
@@ -61,9 +62,17 @@ class NoteController extends Controller
         ]);
 
         $note = Note::withTrashed()->find($noteId);
+        $newContent = $sanitizer->sanitize($request->get('content'));
+
+        // At most one version per request: a substantial change wins over a plain session start
+        if ($versions->isSubstantialChange($note->content, $newContent)) {
+            $versions->snapshot($note, 'substantial_change', pinned: true);
+        } elseif ($note->updated_at && $note->updated_at->lt(now()->subMinutes(config('versions.inactivity_minutes')))) {
+            $versions->snapshot($note, 'session_start');
+        }
 
         $note->title = $request->get('title');
-        $note->content = $sanitizer->sanitize($request->get('content'));
+        $note->content = $newContent;
         $note->save();
 
         return response()->json([

@@ -20,3 +20,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('trash:purge')->daily();
+Schedule::command('versions:prune')->daily();

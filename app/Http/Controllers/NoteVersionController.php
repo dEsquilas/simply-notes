@@ -1,0 +1,98 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Note;
+use App\Models\NoteVersion;
+use App\Services\NoteHtmlSanitizer;
+use App\Services\NoteVersionService;
+use Illuminate\Http\Request;
+
+class NoteVersionController extends Controller
+{
+
+    public function index($noteId){
+
+        $versions = NoteVersion::where('note_id', $noteId)
+            ->orderByDesc('created_at')
+            ->get(['id', 'reason', 'label', 'pinned', 'created_at']);
+
+        return response()->json([
+            'versions' => $versions,
+        ]);
+
+    }
+
+    public function show($noteId, $versionId, NoteHtmlSanitizer $sanitizer){
+
+        $version = $this->findVersion($noteId, $versionId);
+
+        return response()->json([
+            'version' => [
+                'id' => $version->id,
+                'title' => $version->title,
+                'content' => $sanitizer->sanitize($version->content),
+            ],
+        ]);
+
+    }
+
+    public function store(Request $request, $noteId, NoteVersionService $versions){
+
+        $data = $request->validate([
+            'reason' => 'required|in:manual,session_end',
+            'label' => 'nullable|string|max:255',
+        ]);
+
+        $note = Note::withTrashed()->findOrFail($noteId);
+        $label = $data['label'] ?? null;
+        $isManual = $data['reason'] === 'manual';
+
+        $version = $versions->snapshot($note, $data['reason'], $label, pinned: $isManual);
+
+        // Manual save with nothing changed since the latest version: rather than doing nothing,
+        // pin that existing version (and apply the label, if any) so the user's intent to keep
+        // this state is still honored.
+        if (! $version && $isManual) {
+            $version = $note->versions()->latest('id')->first();
+
+            if ($version) {
+                $version->pinned = true;
+                if ($label) {
+                    $version->label = $label;
+                }
+                $version->save();
+            }
+        }
+
+        return response()->json([
+            'version' => $version,
+        ], $version && $version->wasRecentlyCreated ? 201 : 200);
+
+    }
+
+    public function restore($noteId, $versionId, NoteVersionService $versions, NoteHtmlSanitizer $sanitizer){
+
+        $version = $this->findVersion($noteId, $versionId);
+        $note = $version->note()->withTrashed()->first();
+
+        // The state about to be overwritten precedes a destructive change: never let it be pruned
+        $versions->snapshot($note, 'restore', pinned: true);
+
+        $note->title = $version->title;
+        $note->content = $sanitizer->sanitize($version->content);
+        $note->save();
+
+        return response()->json([
+            'note' => $note,
+        ]);
+
+    }
+
+    private function findVersion($noteId, $versionId): NoteVersion{
+
+        return NoteVersion::where('note_id', $noteId)->findOrFail($versionId);
+
+    }
+
+}

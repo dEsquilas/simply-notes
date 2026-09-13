@@ -4,6 +4,7 @@ use App\Http\Controllers\{
     GoogleLoginController,
     ImportController,
     NoteController,
+    NoteVersionController,
     NotebookController
 };
 
@@ -57,6 +58,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/notes/trash/{noteId}', [NoteController::class, 'trash'])->name('note.trash');
         Route::post('/notes/trash/restore/{noteId}', [NoteController::class, 'restore'])->name('note.trash.restore');
         Route::post('/notes/trash/delete/{noteId}', [NoteController::class, 'delete'])->name('note.trash.delete');
+
+        Route::get('/notes/{noteId}/versions', [NoteVersionController::class, 'index'])->name('note.versions.index');
+        Route::get('/notes/{noteId}/versions/{versionId}', [NoteVersionController::class, 'show'])->name('note.versions.show');
+        Route::post('/notes/{noteId}/versions', [NoteVersionController::class, 'store'])->name('note.versions.store');
+        Route::post('/notes/{noteId}/versions/{versionId}/restore', [NoteVersionController::class, 'restore'])->name('note.versions.restore');
     });
 
     Route::group(['middleware' => [

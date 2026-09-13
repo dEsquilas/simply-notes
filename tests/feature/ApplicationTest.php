@@ -22,8 +22,8 @@ it('rolls back the notes index migration', function () {
     expect(config('database.default'))->toBe('sqlite')
         ->and(config('database.connections.sqlite.database'))->toBe(':memory:');
 
-    // Step 2 also rolls back the later soft-deletes migration, since it is the last one applied
-    Artisan::call('migrate:rollback', ['--step' => 2]);
+    // --step covers every migration that has landed after the index migration itself (soft deletes, note versions)
+    Artisan::call('migrate:rollback', ['--step' => 3]);
     expect(collect(Schema::getIndexes('notes'))->pluck('columns')->flatten()->all())->not->toContain('notebook_id');
 
     Artisan::call('migrate');

@@ -18,4 +18,8 @@ class Note extends Model
         return $this->belongsTo(Notebook::class);
     }
 
+    public function versions(){
+        return $this->hasMany(NoteVersion::class);
+    }
+
 }

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { notify } from "@kyvg/vue3-notification"
-import QuillEditor from '@/Components/Quill/QuillEditor.vue'
+import QuillEditor from '@/components/quill/QuillEditor.vue'
 
 const emit = defineEmits(['update-note'])
 

@@ -10,10 +10,10 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class)
     ->beforeEach(fn () => $this->withoutVite())
-    ->in('Feature');
+    ->in('feature');
 
 // Browser tests run with `php artisan dusk` (phpunit.dusk.xml), never with the normal suite
-uses(DuskTestCase::class)->in('Browser');
+uses(DuskTestCase::class)->in('browser');
 
 /**
  * Makes the Google callback return this account without calling Google.

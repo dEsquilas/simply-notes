@@ -1,6 +1,6 @@
 <script setup>
 import ContextMenu from '@imengyu/vue3-context-menu'
-import NoteExtract from '@/Components/Notes/NoteExtract.vue'
+import NoteExtract from '@/components/notes/NoteExtract.vue'
 import { notify } from "@kyvg/vue3-notification"
 import { onMounted, ref } from 'vue'
 

@@ -6,9 +6,9 @@ import {
     XCircleIcon
 } from '@heroicons/vue/24/outline'
 import { ref, computed, onMounted } from 'vue'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import Note from '@/Components/Notes/Note.vue'
-import NoteList from '@/Components/Notes/NoteList.vue'
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import Note from '@/components/notes/Note.vue'
+import NoteList from '@/components/notes/NoteList.vue'
 
 
 const props = defineProps({

@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { notify } from "@kyvg/vue3-notification"
 import { defineProps, ref } from 'vue'
 import { TrashIcon, ArrowUturnUpIcon } from '@heroicons/vue/24/outline'

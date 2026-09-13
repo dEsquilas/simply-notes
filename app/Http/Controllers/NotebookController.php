@@ -16,7 +16,7 @@ class NotebookController extends Controller
             ->orderBy('created_at', 'DESC')
             ->get();
 
-        return Inertia::render('Notebooks/List', [
+        return Inertia::render('notebooks/List', [
             'notebooks' => $notebooks
         ]);
     }
@@ -31,7 +31,7 @@ class NotebookController extends Controller
 
         $notes = $notebook->notes()->where('status', 0)->orderBy('updated_at', 'DESC')->get();
 
-        return Inertia::render('Notebooks/View', [
+        return Inertia::render('notebooks/View', [
             'inNotebook' => $notebook,
             'inNotes' => $notes
         ]);
@@ -73,7 +73,7 @@ class NotebookController extends Controller
 
         $notebooks = Notebook::where('owner', auth()->id())->where('status', 1)->get();
 
-        return Inertia::render('Notebooks/Trash', [
+        return Inertia::render('notebooks/Trash', [
             'notebooks' => $notebooks
         ]);
 

@@ -68,7 +68,7 @@ jobs:
         with:
           name: dusk-failures
           path: |
-            tests/Browser/screenshots
-            tests/Browser/console
+            tests/browser/screenshots
+            tests/browser/console
             storage/logs
           if-no-files-found: ignore

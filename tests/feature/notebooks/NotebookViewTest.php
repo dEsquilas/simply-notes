@@ -20,7 +20,7 @@ it('shows the notebook with its active notes, last updated first', function () {
         ->get("/notebook/{$this->notebook->id}")
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Notebooks/View')
+            ->component('notebooks/View')
             ->where('inNotebook.id', $this->notebook->id)
             ->has('inNotes', 2)
             ->where('inNotes.0.id', $newer->id)

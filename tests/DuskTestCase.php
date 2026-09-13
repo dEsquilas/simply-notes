@@ -7,6 +7,7 @@ use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Support\Collection;
+use Laravel\Dusk\Browser;
 use Laravel\Dusk\TestCase as BaseTestCase;
 use PHPUnit\Framework\Attributes\BeforeClass;
 use RuntimeException;
@@ -60,6 +61,18 @@ abstract class DuskTestCase extends BaseTestCase
         }
 
         throw new RuntimeException("The app server did not start on {$host}:{$port}");
+    }
+
+    /**
+     * Dusk hardcodes tests/Browser for its debugging output; our test directories are lowercase.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Browser::$storeScreenshotsAt = base_path('tests/browser/screenshots');
+        Browser::$storeConsoleLogAt = base_path('tests/browser/console');
+        Browser::$storeSourceAt = base_path('tests/browser/source');
     }
 
     /**

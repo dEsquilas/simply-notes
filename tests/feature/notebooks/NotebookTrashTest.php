@@ -45,7 +45,7 @@ it('lists only the user\'s trashed notebooks on the trash page', function () {
     $this->get('/notebooks/trash')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Notebooks/Trash')
+            ->component('notebooks/Trash')
             ->has('notebooks', 1)
             ->where('notebooks.0.id', $trashed->id)
         );
@@ -53,7 +53,7 @@ it('lists only the user\'s trashed notebooks on the trash page', function () {
 
 it('shows an empty trash page', function () {
     $this->get('/notebooks/trash')
-        ->assertInertia(fn (Assert $page) => $page->component('Notebooks/Trash')->has('notebooks', 0));
+        ->assertInertia(fn (Assert $page) => $page->component('notebooks/Trash')->has('notebooks', 0));
 });
 
 it('restores a trashed notebook', function () {

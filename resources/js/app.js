@@ -6,7 +6,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m'
 import ContextMenu from '@imengyu/vue3-context-menu'
 import Notifications from '@kyvg/vue3-notification'
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import AuthenticatedLayout from "@/layouts/AuthenticatedLayout.vue";
 import { Head, Link } from '@inertiajs/vue3'
 
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
@@ -16,7 +16,7 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 const app = createInertiaApp({
     title: (title) => `${title} - ${appName}`,
-    resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
+    resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob('./pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
         return createApp({ render: () => h(App, props) })
             .use(plugin)

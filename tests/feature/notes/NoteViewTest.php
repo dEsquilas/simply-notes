@@ -19,7 +19,7 @@ it('opens a note inside its notebook', function () {
         ->get("/notebook/{$this->notebook->id}/note/{$this->note->id}")
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Notebooks/View')
+            ->component('notebooks/View')
             ->where('inNotebook.id', $this->notebook->id)
             ->where('currentNote.id', $this->note->id)
             ->where('currentNote.title', 'Selected')

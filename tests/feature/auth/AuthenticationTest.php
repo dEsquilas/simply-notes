@@ -8,7 +8,7 @@ it('renders the login screen for guests', function () {
     $this->get('/login')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Auth/Login')
+            ->component('auth/Login')
             ->where('canResetPassword', false)
         );
 });
@@ -37,7 +37,7 @@ it('sends guests from the root URL to the login screen', function () {
     $this->followingRedirects()
         ->get('/')
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component('Auth/Login'));
+        ->assertInertia(fn (Assert $page) => $page->component('auth/Login'));
 });
 
 it('logs users out', function () {

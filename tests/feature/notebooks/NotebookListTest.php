@@ -18,7 +18,7 @@ it('lists the user\'s active notebooks, newest first', function () {
         ->get('/notebooks')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Notebooks/List')
+            ->component('notebooks/List')
             ->has('notebooks', 2)
             ->where('notebooks.0.id', $newer->id)
             ->where('notebooks.1.id', $older->id)
@@ -28,7 +28,7 @@ it('lists the user\'s active notebooks, newest first', function () {
 it('shows an empty list when the user has no notebooks', function () {
     $this->actingAs($this->user)
         ->get('/notebooks')
-        ->assertInertia(fn (Assert $page) => $page->component('Notebooks/List')->has('notebooks', 0));
+        ->assertInertia(fn (Assert $page) => $page->component('notebooks/List')->has('notebooks', 0));
 });
 
 it('shows how many notes each notebook has', function () {

@@ -48,10 +48,13 @@ class NoteHtmlSanitizer
                 }
 
                 // Media schemes allow data: for images, but an iframe must only load https pages.
-                // Returns '' instead of null: the URL sanitizer runs next and fails on null, then drops ''.
+                // The scheme is lowercased because the URL sanitizer that runs next only accepts it that way.
+                // Returns '' instead of null: that URL sanitizer fails on null, then drops ''.
                 public function sanitizeAttribute(string $element, string $attribute, string $value, HtmlSanitizerConfig $config): ?string
                 {
-                    return str_starts_with(strtolower(trim($value)), 'https://') ? $value : '';
+                    $value = trim($value);
+
+                    return str_starts_with(strtolower($value), 'https://') ? 'https://'.substr($value, 8) : '';
                 }
             })
             // Base64 images make notes large: never truncate them

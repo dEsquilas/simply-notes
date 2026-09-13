@@ -2,12 +2,14 @@ name: tests
 
 on:
   push:
-    branches: [main]
+    # develop runs the CI only; the deploy job below is limited to main
+    branches: [main, develop]
   pull_request:
 
 concurrency:
   group: tests-${{ github.ref }}
-  cancel-in-progress: true
+  # Only pull requests cancel older runs: a push to main must never cancel a deploy halfway
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   backend:
@@ -92,3 +94,39 @@ jobs:
             tests/Browser/Screenshots
             storage/logs
           if-no-files-found: ignore
+
+  # Same deploy as train-with, adapted to funky: php84 (plain `php` is 8.2) and maintenance mode while deploying
+  deploy:
+    name: Deploy
+    needs: [backend, browser]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -e
+            cd ${{ secrets.DEPLOY_PATH }}
+            php84 artisan down --retry=60
+            # The server rewrites pnpm-lock.yaml on install: discard that before pulling
+            git checkout -- pnpm-lock.yaml
+            git pull origin main
+            # Stale cached providers/classes from older Laravel versions break the boot
+            find bootstrap/cache -maxdepth 1 -name '*.php' -delete
+            php84 $(command -v composer) install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+            php84 artisan migrate --force
+            php84 artisan storage:link 2>/dev/null || true
+            php84 artisan config:cache
+            php84 artisan route:cache
+            php84 artisan view:cache
+            pnpm install --frozen-lockfile
+            pnpm run build
+            php84 artisan queue:restart
+            php84 artisan up
+            echo "Deployed at $(date)"

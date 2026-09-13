@@ -76,9 +76,9 @@ const applyFilter = (filter, note) => {
 
 </script>
 <template>
-    <div class="overflow-auto note-list" ref="scrollbar">
+    <div dusk="note-list" class="overflow-auto note-list" ref="scrollbar">
         <ul>
-            <li v-for="note in notes" :key="note.id" v-show="applyFilter(filter, note)" @click="$emit('change-note', note)" @contextmenu="openMenu($event, note)">
+            <li v-for="note in notes" :key="note.id" :dusk="'note-' + note.id" v-show="applyFilter(filter, note)" @click="$emit('change-note', note)" @contextmenu="openMenu($event, note)">
                 <note-extract :current="note.id === currentNoteId" :note="note"></note-extract>
             </li>
         </ul>

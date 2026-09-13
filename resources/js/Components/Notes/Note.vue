@@ -89,7 +89,7 @@ let forceSave = (event) => {
 </script>
 <template>
     <div class="h-full">
-        <input tabindex="1"
+        <input dusk="note-title" tabindex="1"
                @keydown="dispatchAutosave()"
                v-model="noteTitle"
                placeholder="Nueva nota"

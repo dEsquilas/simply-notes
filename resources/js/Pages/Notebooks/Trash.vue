@@ -65,19 +65,19 @@ let confirmRestore = confirm('Are you sure you want to restore this notebook?')
             <h2 class="pt-8 px-4 text-4xl font-extrabold text-white mb-2">Trash</h2>
 
             <div class="max-w-[1200px] w-full m-auto grid lg:grid-cols-3 sm:grid-cols-2 gap-4 p-4 mt-0">
-                <article v-for="notebook in currentNotebooks" :key="notebook.id" class="w-full mx-auto gap-4">
+                <article v-for="notebook in currentNotebooks" :key="notebook.id" :dusk="'trashed-notebook-' + notebook.id" class="w-full mx-auto gap-4">
                     <div class="bg-main1 overflow-hidden shadow-sm rounded-lg hover:bg-main2 transition-colors">
                         <div class="p-6 text-white flex justify-between">
-                            <h3 class="text-lg font-semibold">{{ notebook.name }}</h3>
+                            <h3 dusk="trashed-notebook-name" class="text-lg font-semibold">{{ notebook.name }}</h3>
                             <p class="text-sm">{{ notebook.description }}</p>
                             <div class="flex">
-                                <ArrowUturnUpIcon @click=restoreNotebook(notebook.id) class="w-6 h-6 bg-blue mr-4 cursor-pointer" />
-                                <TrashIcon @click=deleteNotebook(notebook.id) class="w-6 h-6 text-red-500 cursor-pointer" />
+                                <ArrowUturnUpIcon dusk="restore-notebook" @click=restoreNotebook(notebook.id) class="w-6 h-6 bg-blue mr-4 cursor-pointer" />
+                                <TrashIcon dusk="delete-notebook" @click=deleteNotebook(notebook.id) class="w-6 h-6 text-red-500 cursor-pointer" />
                             </div>
                         </div>
                     </div>
                 </article>
-                <div class="text-white" v-show="currentNotebooks.length == 0">
+                <div dusk="trash-empty" class="text-white" v-show="currentNotebooks.length == 0">
                     Nothing to show here
                 </div>
             </div>

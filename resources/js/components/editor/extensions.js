@@ -6,6 +6,7 @@ import { TableKit } from '@tiptap/extension-table'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Video } from './video-node.js'
 import { ImageDropPaste } from './image-paste-drop.js'
+import { ListIndent } from './list-indent.js'
 
 /**
  * The extensions used by the note editor, shared between the live editor component and the
@@ -19,6 +20,7 @@ export function buildExtensions({ placeholder = 'Start typing...' } = {}) {
         }),
         TaskList,
         TaskItem.configure({ nested: true }),
+        ListIndent,
         Image.configure({
             inline: false,
             allowBase64: true,

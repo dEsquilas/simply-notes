@@ -218,6 +218,33 @@
     margin-bottom: 5px;
 }
 
+// Items indented with nothing above them to nest under (Tab on a list's first item, or Quill's
+// ql-indent-N on legacy notes): pushed in by a margin, one list level per step (list-indent.js)
+@for $level from 1 through 8 {
+    .tiptap-content li[data-indent="#{$level}"] {
+        margin-left: #{$level * 1.5}em;
+    }
+}
+
+// Numbers come from the browser's own markers (Tailwind's preflight resets list-style),
+// cycling decimal, letters and roman numerals as lists nest; the room is for two-digit numbers
+.tiptap-content ol {
+    list-style: decimal outside;
+    padding-left: 2em;
+}
+
+.tiptap-content ol ol {
+    list-style-type: lower-alpha;
+}
+
+.tiptap-content ol ol ol {
+    list-style-type: lower-roman;
+}
+
+.tiptap-content ol ol ol ol {
+    list-style-type: decimal;
+}
+
 // Bullets drawn with CSS so every level has the same size and vertical centre,
 // cycling filled circle, hollow circle and square as lists nest
 .tiptap-content ul:not([data-type="taskList"]) {

@@ -64,6 +64,66 @@ it('indents and outdents list items', function () {
     waitForDatabase($page, fn () => ! str_contains((string) $this->note->fresh()->content, '<ul><li><p>One</p><ul>'));
 });
 
+it('indents and outdents several items whose selection runs past the end of the list', function () {
+    $this->note->forceFill(['content' => '<ul><li><p>One</p></li><li><p>Two</p></li><li><p>Three</p></li></ul>'])->save();
+
+    $page = visit($this->url);
+    // The caret needs a moment to reach the editor's state after a click, or the key presses act on the previous selection
+    openEditor($page)->click(EDITOR.' > ul > li:nth-of-type(2) > p')->wait(0.3);
+    // From the second item down to the empty paragraph after the list, like a drag past the last line
+    $page->keys(EDITOR, ['Home', 'Shift+ArrowDown', 'Shift+ArrowDown'])->wait(0.3);
+
+    $page->keys(EDITOR, 'Tab');
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<li><p>One</p><ul><li><p>Two</p></li><li><p>Three</p></li></ul></li>'));
+
+    $page->keys(EDITOR, 'Shift+Tab');
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<ul><li><p>One</p></li><li><p>Two</p></li><li><p>Three</p></li></ul>'));
+});
+
+it('indents the first item of a list with a margin, like Quill did', function () {
+    $this->note->forceFill(['content' => '<ul><li><p>One</p></li><li><p>Two</p></li></ul>'])->save();
+
+    $page = visit($this->url);
+    openEditor($page)->click(EDITOR.' > ul > li:nth-of-type(1) > p')->wait(0.3)->keys(EDITOR, 'Tab');
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<ul><li data-indent="1"><p>One</p></li><li><p>Two</p></li></ul>'));
+
+    $page->keys(EDITOR, 'Tab');
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<li data-indent="2"><p>One</p></li>'));
+
+    // Shift+Tab first takes the margin back, then lifts the item out of the list as usual
+    $page->keys(EDITOR, ['Shift+Tab', 'Shift+Tab']);
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<ul><li><p>One</p></li><li><p>Two</p></li></ul>'));
+
+    $page->keys(EDITOR, 'Shift+Tab');
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, '<p>One</p><ul><li><p>Two</p></li></ul>'));
+});
+
+it('indents the first item of numbered and task lists too', function (string $html, string $item, string $expected) {
+    $this->note->forceFill(['content' => $html])->save();
+
+    $page = visit($this->url);
+    openEditor($page)->click(EDITOR.' '.$item)->wait(0.3)->keys(EDITOR, 'Tab');
+
+    waitForDatabase($page, fn () => str_contains((string) $this->note->fresh()->content, $expected));
+})->with([
+    'numbered' => ['<ol><li><p>One</p></li><li><p>Two</p></li></ol>', 'ol > li:nth-of-type(1) > p', '<ol><li data-indent="1"><p>One</p></li>'],
+    'task' => [
+        '<ul data-type="taskList"><li data-type="taskItem" data-checked="false"><label><input type="checkbox"><span></span></label><div><p>One</p></div></li><li data-type="taskItem" data-checked="false"><label><input type="checkbox"><span></span></label><div><p>Two</p></div></li></ul>',
+        'ul > li:nth-of-type(1) p',
+        'data-indent="1"',
+    ],
+]);
+
+it('shows numbers on numbered lists, nested and indented items included', function () {
+    $this->note->forceFill(['content' => '<ol><li data-indent="1"><p>Indented first</p></li><li><p>Second</p><ol><li><p>Nested</p></li></ol></li><li><p>Third</p></li></ol>'])->save();
+
+    $page = visit($this->url);
+    openEditor($page)->assertSeeIn(EDITOR, 'Nested');
+
+    expect($page->script('() => Array.from(document.querySelectorAll('.json_encode(EDITOR.' li').')).map((li) => getComputedStyle(li).listStyleType).join()'))
+        ->toBe('decimal,decimal,lower-alpha,decimal');
+});
+
 it('changes the paragraph to a heading', function () {
     $page = visit($this->url);
     openEditor($page)->click(EDITOR)->select(toolbar('toolbar-heading'), '1');

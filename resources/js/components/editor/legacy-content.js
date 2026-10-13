@@ -6,7 +6,10 @@
  * <li> elements carry a `data-list` attribute ("bullet" | "ordered" | "checked" | "unchecked")
  * and a `ql-indent-N` class for visual indentation. Tiptap/ProseMirror's list model is a real
  * tree of <ul>/<ol> elements. `rebuildQuillList` replays the flat list as a tree using a
- * depth stack, matching Quill's own indent/outdent behaviour.
+ * depth stack, matching Quill's own indent/outdent behaviour. Indentation that has no item
+ * above it to nest under (a list whose first item is already indented, or an item two levels
+ * deeper than the previous one) is kept as the editor's own `data-indent` margin (list-indent.js)
+ * instead of being flattened away.
  *
  * Evernote exports to-dos as `<div><input type="checkbox">text</div>`; `convertCheckboxDivs`
  * turns runs of these into a Tiptap task list, the same way the old editor's clipboard matcher
@@ -96,41 +99,51 @@ function rebuildQuillList(doc, ol) {
     }
 
     const root = doc.createDocumentFragment();
+    // Each entry is one real list: `base` is the Quill depth its un-indented items sit at and
+    // `lastDepth` the depth of the item last added to it
     const stack = [];
+
+    const addItem = (listEntry, newLi, depth) => {
+        if (depth > listEntry.base) {
+            newLi.setAttribute('data-indent', String(depth - listEntry.base));
+        }
+        listEntry.listEl.appendChild(newLi);
+        listEntry.lastLi = newLi;
+        listEntry.lastDepth = depth;
+    };
 
     items.forEach((li) => {
         const kind = listKind(li.getAttribute('data-list'));
         const depth = indentDepth(li);
         const newLi = makeListItem(doc, li, kind);
 
-        while (stack.length && (stack[stack.length - 1].depth > depth
-            || (stack[stack.length - 1].depth === depth && stack[stack.length - 1].kind !== kind))) {
+        while (stack.length && (stack[stack.length - 1].base > depth
+            || (stack[stack.length - 1].lastDepth >= depth && stack[stack.length - 1].kind !== kind))) {
             stack.pop();
         }
 
         if (stack.length === 0) {
-            const listEl = makeListContainer(doc, kind);
-            listEl.appendChild(newLi);
-            root.appendChild(listEl);
-            stack.push({ depth, kind, listEl, lastLi: newLi });
+            const entry = { base: 0, kind, listEl: makeListContainer(doc, kind) };
+            root.appendChild(entry.listEl);
+            stack.push(entry);
+            addItem(entry, newLi, depth);
 
             return;
         }
 
         const top = stack[stack.length - 1];
 
-        if (top.depth === depth) {
-            top.listEl.appendChild(newLi);
-            top.lastLi = newLi;
+        if (depth <= top.lastDepth) {
+            addItem(top, newLi, depth);
 
             return;
         }
 
-        // depth > top.depth: nest one level inside the last item added to the current list
-        const listEl = makeListContainer(doc, kind);
-        listEl.appendChild(newLi);
-        top.lastLi.appendChild(listEl);
-        stack.push({ depth, kind, listEl, lastLi: newLi });
+        // depth > top.lastDepth: nest one level inside the last item added to the current list
+        const entry = { base: top.lastDepth + 1, kind, listEl: makeListContainer(doc, kind) };
+        top.lastLi.appendChild(entry.listEl);
+        stack.push(entry);
+        addItem(entry, newLi, depth);
     });
 
     ol.replaceWith(root);

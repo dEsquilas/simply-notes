@@ -121,13 +121,13 @@ const insertTable = () => {
     editor.value.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: false }).run()
 }
 
-/** A single chained command fails as a whole if any step is inapplicable, so the list type must be picked first. */
+// Same commands as Tab / Shift+Tab (list-indent.js), so both ways behave identically
 const outdent = () => {
-    editor.value.chain().focus().liftListItem(editor.value.isActive('taskItem') ? 'taskItem' : 'listItem').run()
+    editor.value.chain().focus().outdentListItem().run()
 }
 
 const indent = () => {
-    editor.value.chain().focus().sinkListItem(editor.value.isActive('taskItem') ? 'taskItem' : 'listItem').run()
+    editor.value.chain().focus().indentListItem().run()
 }
 
 const clearFormatting = () => {

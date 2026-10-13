@@ -89,6 +89,10 @@ To add a webpage as an app on Google Chrome, follow these steps:
 
 The webpage will now appear as an app in your Chrome Apps page and can also be found in your computer's start menu.
 
+## Project Status, CI/CD and Pending Work
+
+Branches, the CI and automatic deploy, production server notes, recent features and the pending work are documented in [docs/project-status.md](docs/project-status.md).
+
 ## ToDo List
 
 You can follow the development of the project in the [Trello board](https://trello.com/invite/b/1ET7BIm6/ATTI97a767d72a2d96090bc246ab77f04d28CD058C57/simplenotes). Feel free to contribute to the project by picking up a task from the board or suggesting new features.

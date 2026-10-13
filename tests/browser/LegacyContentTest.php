@@ -91,3 +91,25 @@ it('saves imported to-dos as Tiptap task list items', function () {
         ->toContain('Buy milk')
         ->toContain('Buy eggs');
 });
+
+it('keeps the indentation of Quill list items that have no item above to nest under', function () {
+    [$note, $url] = legacyNote(
+        '<ol><li data-list="bullet" class="ql-indent-1">First, already indented</li>'
+        .'<li data-list="bullet" class="ql-indent-1">Second</li>'
+        .'<li data-list="bullet">Third</li>'
+        .'<li data-list="bullet" class="ql-indent-2">Two levels deeper</li></ol>'
+    );
+
+    $page = visit($url);
+    typeLikeAUser(readyToEdit($page->assertSeeIn(LEGACY_TEXT, 'Two levels deeper')), '@note-title', 'Lists');
+
+    waitForDatabase($page, fn () => $note->fresh()->title === 'Lists');
+
+    expect((string) $note->fresh()->content)->toBe(
+        '<ul><li data-indent="1"><p>First, already indented</p></li>'
+        .'<li data-indent="1"><p>Second</p></li>'
+        .'<li><p>Third</p><ul><li data-indent="1"><p>Two levels deeper</p></li></ul></li></ul>'
+        // The editor always keeps an empty paragraph after a trailing list
+        .'<p></p>'
+    );
+});

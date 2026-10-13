@@ -39,9 +39,10 @@ class NoteHtmlSanitizer
             // quill-table-better cell/column/table sizing and borders/colors (width, height,
             // colspan and rowspan are already allowed globally by allowSafeElements())
             ->allowAttribute('style', ['table', 'td', 'th', 'col', 'colgroup'])
-            // Tiptap markup: task lists/items and resizable table columns
+            // Tiptap markup: task lists/items, visually indented items and resizable table columns
             ->allowAttribute('data-type', ['ul', 'li'])
             ->allowAttribute('data-checked', 'li')
+            ->allowAttribute('data-indent', 'li')
             ->allowAttribute('colwidth', ['td', 'th'])
             ->allowLinkSchemes(['http', 'https', 'mailto'])
             // Images are embedded as base64 data URIs
